@@ -30,3 +30,10 @@
 *.exe
 *.out
 *.app
+
+# CLion tmp dirs
+.idea
+cmake-build-debug
+node_modules
+package-lock.json
+package.json
