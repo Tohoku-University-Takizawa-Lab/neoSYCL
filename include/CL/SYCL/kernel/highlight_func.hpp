@@ -3,7 +3,7 @@
 
 namespace cl::sycl::detail {
 
-template<typename KernelName, int Dimensions, typename Kernel>
+template<typename KernelName, typename Kernel, int Dimensions>
 void HIGHLIGHT_KERNEL_PARALLEL(Kernel k, const range<Dimensions> &num_work_items) {}
 
 template<typename KernelName, typename Kernel>
