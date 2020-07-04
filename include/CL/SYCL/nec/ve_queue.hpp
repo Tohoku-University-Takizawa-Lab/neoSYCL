@@ -12,12 +12,12 @@ class ve_queue : public queue {
   nec::VEProc proc;
 
  public:
-  ve_queue() : dev(nec::DEFAULT_VE_NODE), queue() {
-    proc = nec::proc_create(nec::DEFAULT_VE_LIB, nec::DEFAULT_VE_NODE);
+  ve_queue(const string_class &path = nec::DEFAULT_VE_LIB) : dev(nec::DEFAULT_VE_NODE), queue() {
+    proc = nec::proc_create(path, nec::DEFAULT_VE_NODE);
   }
 
-  ve_queue(const ve_device &dev) : dev(dev), queue(dev) {
-    proc = nec::proc_create(nec::DEFAULT_VE_LIB, dev.get_node_id());
+  ve_queue(const ve_device &dev, const string_class &path = nec::DEFAULT_VE_LIB) : dev(dev), queue() {
+    proc = nec::proc_create(path, dev.get_node_id());
   }
 
   detail::Task *build_task() override {

@@ -100,7 +100,7 @@ class handler {
 
   template<typename KernelName, typename ParallelForFunctor>
   void parallel_for(range<1> global_size, ParallelForFunctor f) {
-    detail::HIGHLIGHT_KERNEL_PARALLEL<KernelName>(f, global_size);
+    detail::HIGHLIGHT_KERNEL_PARALLEL<KernelName, 1>(f, global_size);
 
     auto func = [task = task, f = f, r = global_size]() {
       if (task->is_cpu()) {
@@ -117,7 +117,7 @@ class handler {
 
   template<typename KernelName, typename ParallelForFunctor>
   void parallel_for(range<2> global_size, ParallelForFunctor f) {
-    detail::HIGHLIGHT_KERNEL_PARALLEL<KernelName>(f, global_size);
+    detail::HIGHLIGHT_KERNEL_PARALLEL<KernelName, 2>(f, global_size);
 
     auto func = [task = task, f = f, r = global_size]() {
       if (task->is_cpu()) {
@@ -136,7 +136,7 @@ class handler {
 
   template<typename KernelName, typename ParallelForFunctor>
   void parallel_for(range<3> global_size, ParallelForFunctor f) {
-    detail::HIGHLIGHT_KERNEL_PARALLEL<KernelName>(f, global_size);
+    detail::HIGHLIGHT_KERNEL_PARALLEL<KernelName, 3>(f, global_size);
 
     auto func = [task = task, f = f, r = global_size]() {
       if (task->is_cpu()) {

@@ -17,7 +17,7 @@ int main() {
     // all SYCL tasks must complete before exiting the block
 
     // Create a queue to work on
-    ve_queue myQueue;
+    queue myQueue;
 
     // Create buffers from a & b vectors with 2 different syntax
     buffer<float> A(a, range<1>(N));

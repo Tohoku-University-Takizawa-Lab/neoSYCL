@@ -1,21 +1,20 @@
 cmake_minimum_required(VERSION 3.4)
-project(sycl C CXX)
+project(neoSYCL C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 
-
-include_directories(
-        include
-)
-
 option(BUILD_VE "Enable SX-Aurora support" ON)
+option(BUILD_TESTING "Enable build tests" ON)
+
+include_directories(include)
 
 if (BUILD_VE)
     # find VEOS headers and libs
     set(VEO_HEADER_PATH "/opt/nec/ve/veos/include" CACHE PATH "veo headers path")
     set(VEO_LIB_PATH "/opt/nec/ve/veos/lib64" CACHE PATH "veo libs path")
     message(STATUS "Enable SX-Aurora support")
-    message(STATUS "Use veo headers path: ${VEO_HEADER_PATH}, use veo libs path: ${VEO_LIB_PATH}")
+    message(STATUS "Use veo headers path: ${VEO_HEADER_PATH}")
+    message(STATUS "Use veo libs path: ${VEO_LIB_PATH}")
 
     include_directories(${VEO_HEADER_PATH})
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L${VEO_LIB_PATH} -Wl,-rpath=${VEO_LIB_PATH} -lveo")

@@ -19,9 +19,6 @@ namespace cl::sycl {
 class queue : detail::SharedPtrImplementation<detail::TaskQueue> {
   using base_class = typename detail::SharedPtrImplementation<detail::TaskQueue>;
 
- private:
-  device dev;
-
  public:
 
   explicit queue(const property_list &propList = {}) : base_class(new detail::TaskQueue()) {}
@@ -31,14 +28,13 @@ class queue : detail::SharedPtrImplementation<detail::TaskQueue> {
 
   explicit queue(const device_selector &deviceSelector, const property_list &propList = {})
       : base_class(new detail::TaskQueue()) {
-    dev = deviceSelector.select_device();
   }
 
   explicit queue(device dev, const property_list &propList = {})
-      : dev(std::move(dev)), base_class(new detail::TaskQueue()) {}
+      : base_class(new detail::TaskQueue()) {}
 
   device get_device() {
-    return dev;
+    return device();
   }
 
   bool is_host() {
