@@ -32,6 +32,7 @@
 *.app
 
 # CLion tmp dirs
+build
 .idea
 cmake-build-debug
 node_modules
