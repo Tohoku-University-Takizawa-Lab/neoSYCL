@@ -20,7 +20,9 @@ link_directories("${DEPS_ROOT}/lib64")
 # set common include folder for module
 #-------------------
 set(COMMON_INCLUDES ${PROJECT_SOURCE_DIR}/include)
-set(COMMON_LIBS fmt)
+if (CMAKE_BUILD_TYPE STREQUAL Debug)
+    set(COMMON_LIBS fmt)
+endif ()
 
 #-------------------
 # Test
