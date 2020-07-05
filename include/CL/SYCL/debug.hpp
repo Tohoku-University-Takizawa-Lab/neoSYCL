@@ -9,4 +9,7 @@
 #define DEBUG_INFO(format, ...)
 #endif
 
+#define PRINT_INFO(...) std::cout<< "[INFO] "<< __VA_ARGS__ <<std::endl
+#define PRINT_ERR(...) std::cout<< "[ERROR] "<< __VA_ARGS__ <<std::endl
+
 #endif //SYCL_INCLUDE_CL_SYCL_DETAIL_DEBUG_HPP_

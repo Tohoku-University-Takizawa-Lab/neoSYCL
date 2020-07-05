@@ -27,12 +27,14 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lpthread")
 
 # debug info
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
+    message(STATUS "Enable debug mode")
     ADD_DEFINITIONS(-DDEBUG)
     include_directories(third_party/fmt/include)
     add_subdirectory(third_party/fmt)
 endif ()
 
 if (SYNC_MODE)
+    message(STATUS "Enable sync mode")
     ADD_DEFINITIONS(-DSYNC)
 endif ()
 

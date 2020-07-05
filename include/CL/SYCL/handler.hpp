@@ -91,8 +91,7 @@ class handler {
       if (task->is_cpu()) {
         f();
       } else {
-        string_class kernel_name = detail::get_kernel_name_from_class<KernelName>();
-        task->get_kernel()->single_task(kernel_name);
+        task->get_kernel()->single_task();
       }
     };
     schedule(func);
@@ -108,8 +107,7 @@ class handler {
           f(id<1>(x));
         }
       } else {
-        string_class kernel_name = detail::get_kernel_name_from_class<KernelName>();
-        task->get_kernel()->parallel_for(r, kernel_name);
+        task->get_kernel()->parallel_for(r);
       }
     };
     schedule(func);
@@ -127,8 +125,7 @@ class handler {
           }
         }
       } else {
-        string_class kernel_name = detail::get_kernel_name_from_class<KernelName>();
-        task->get_kernel()->parallel_for(r, kernel_name);
+        task->get_kernel()->parallel_for(r);
       }
     };
     schedule(func);
@@ -148,8 +145,7 @@ class handler {
           }
         }
       } else {
-        string_class kernel_name = detail::get_kernel_name_from_class<KernelName>();
-        task->get_kernel()->parallel_for(r, kernel_name);
+        task->get_kernel()->parallel_for(r);
       }
     };
     schedule(func);

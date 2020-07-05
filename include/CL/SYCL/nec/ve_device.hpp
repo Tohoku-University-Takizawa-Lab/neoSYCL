@@ -1,8 +1,8 @@
 #ifndef SYCL_INCLUDE_CL_SYCL_NEC_VE_DEVICE_HPP_
 #define SYCL_INCLUDE_CL_SYCL_NEC_VE_DEVICE_HPP_
 
-#include "CL/SYCL/device.hpp"
 #include "ve_offload.h"
+#include "CL/SYCL/device.hpp"
 
 namespace cl::sycl {
 

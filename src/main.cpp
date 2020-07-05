@@ -17,7 +17,7 @@ int main() {
     // all SYCL tasks must complete before exiting the block
 
     // Create a queue to work on
-    queue myQueue;
+    ve_queue myQueue;
 
     // Create buffers from a & b vectors with 2 different syntax
     buffer<float> A(a, range<1>(N));
@@ -28,7 +28,7 @@ int main() {
 
     /* The command group describing all operations needed for the kernel
        execution */
-    myQueue.submit([&](handler &cgh) {
+    myQueue.submit("sequential_vector", [&](handler &cgh) {
       // In the kernel A and B are read, but C is written
       auto ka = A.get_access<access::mode::read>(cgh);
       auto kb = B.get_access<access::mode::read>(cgh);

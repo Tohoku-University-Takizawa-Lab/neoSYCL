@@ -1,12 +1,12 @@
 #ifndef CUSTOM_SYCL_INCLUDE_SYCL_QUEUE_HPP_
 #define CUSTOM_SYCL_INCLUDE_SYCL_QUEUE_HPP_
 
+#include <utility>
+
 #include "CL/SYCL/exception.hpp"
 #include "CL/SYCL/types.hpp"
 #include "CL/SYCL/device_selector.hpp"
 #include "CL/SYCL/info/queue.hpp"
-
-#include <utility>
 #include "CL/SYCL/property_list.hpp"
 #include "CL/SYCL/handler.hpp"
 #include "CL/SYCL/handler_event.hpp"
@@ -54,8 +54,18 @@ class queue : detail::SharedPtrImplementation<detail::TaskQueue> {
     return new detail::Task;
   }
 
-  handler_event submit(const std::function<void(handler &)> &cgf) {
+  virtual detail::Task *build_task(string_class kernel_name) {
+    return new detail::Task(std::move(kernel_name));
+  }
+
+  virtual handler_event submit(const std::function<void(handler &)> &cgf) {
     handler command_group_handler(implementation, build_task());
+    cgf(command_group_handler);
+    return handler_event();
+  }
+
+  virtual handler_event submit(string_class kernel_name, const std::function<void(handler &)> &cgf) {
+    handler command_group_handler(implementation, build_task(std::move(kernel_name)));
     cgf(command_group_handler);
     return handler_event();
   }

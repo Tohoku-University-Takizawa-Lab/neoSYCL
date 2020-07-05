@@ -10,22 +10,24 @@ class Task;
 struct Kernel {
 
   vector_class<detail::KernelArg> args;
+  string_class kernel_name;
 
-  Kernel(vector_class<cl::sycl::detail::KernelArg> args) : args(std::move(args)) {}
+  Kernel(vector_class<cl::sycl::detail::KernelArg> args, string_class name) :
+      args(std::move(args)), kernel_name(std::move(name)) {}
 
-  virtual void single_task(string_class kernel_name) {
-
-  }
-
-  virtual void parallel_for(const range<1> &r, string_class kernel_name) {
+  virtual void single_task() {
 
   }
 
-  virtual void parallel_for(const range<2> &r, string_class kernel_name) {
+  virtual void parallel_for(const range<1> &r) {
 
   }
 
-  virtual void parallel_for(const range<3> &r, string_class kernel_name) {
+  virtual void parallel_for(const range<2> &r) {
+
+  }
+
+  virtual void parallel_for(const range<3> &r) {
 
   }
 
