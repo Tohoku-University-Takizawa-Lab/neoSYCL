@@ -13,6 +13,12 @@ struct VEKernel : public Kernel {
     ctx = nec::ctx_create(proc);
   }
 
+  void set_arg_for_range(struct veo_args *argp, const range<1> &r) {
+    int index = args.size();
+    veo_args_set_i64(argp, index, r.size());
+    veo_args_set_i64(argp, index + 1, 1);
+  }
+
   vector_class<uint64_t> copy_in(struct veo_args *argp) {
     vector_class<uint64_t> ve_addr_list;
 
@@ -97,7 +103,27 @@ struct VEKernel : public Kernel {
 
   }
   void parallel_for(const range<1> &r, string_class kernel_name) override {
-    DEBUG_INFO("[VEKernel] parallel_for 1d");
+    DEBUG_INFO("[VEKernel] parallel for 1d {} with range: {}", kernel_name, r.size());
+
+    veo_args *argp = nec::create_ve_args();
+    DEBUG_INFO("[VEKernel] create ve args: {:#x}", (size_t) argp);
+
+    try {
+      vector_class<uint64_t> ve_addr_list = copy_in(argp);
+      DEBUG_INFO("[VEKernel] invoke ve func: {}", kernel_name);
+      set_arg_for_range(argp, r);
+      uint64_t id = veo_call_async_by_name(ctx.ve_ctx, proc.handle, kernel_name.c_str(), argp);
+      uint64_t ret_val;
+      veo_call_wait_result(ctx.ve_ctx, id, &ret_val);
+      DEBUG_INFO("[VEKernel] ve func finished, id: {}, ret val: {:#x}", id, ret_val);
+      copy_out(ve_addr_list);
+
+    } catch (nec::VEException &e) {
+      std::cerr << "[VEKernel] kernel invoke failed, error message: " << e.what() << std::endl;
+    }
+
+    veo_args_free(argp);
+
   }
   void parallel_for(const range<2> &r, string_class kernel_name) override {
     DEBUG_INFO("[VEKernel] parallel_for 2d");
