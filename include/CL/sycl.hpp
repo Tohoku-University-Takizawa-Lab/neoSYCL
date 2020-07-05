@@ -29,10 +29,12 @@
 #include "CL/SYCL/queue.hpp"
 #include "CL/SYCL/handler.hpp"
 
+#ifdef BUILD_VE
 #include "CL/SYCL/nec/ve_device.hpp"
 #include "CL/SYCL/nec/ve_queue.hpp"
 #include "CL/SYCL/nec/ve_task.hpp"
 #include "CL/SYCL/nec/ve_kernel.hpp"
+#endif
 
 #endif //CUSTOM_SYCL_INCLUDE_SYCL_SYCL_H_
 

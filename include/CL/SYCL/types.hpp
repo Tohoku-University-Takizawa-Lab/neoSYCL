@@ -13,7 +13,6 @@
 #include <vector>
 #include <iostream>
 
-//#define parallel_for <...> parallel_for_impl(__VA_ARGS__,
 
 namespace cl::sycl {
 

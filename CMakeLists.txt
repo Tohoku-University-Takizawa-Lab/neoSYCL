@@ -9,6 +9,7 @@ option(BUILD_TESTING "Enable build tests" ON)
 include_directories(include)
 
 if (BUILD_VE)
+    ADD_DEFINITIONS(-DBUILD_VE)
     # find VEOS headers and libs
     set(VEO_HEADER_PATH "/opt/nec/ve/veos/include" CACHE PATH "veo headers path")
     set(VEO_LIB_PATH "/opt/nec/ve/veos/lib64" CACHE PATH "veo libs path")
