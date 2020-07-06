@@ -8,8 +8,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 option(BUILD_VE "Enable SX-Aurora support" OFF)
 option(BUILD_TESTING "Enable build tests" OFF)
 
-set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
-
 include_directories(include)
 
 if (BUILD_VE)
