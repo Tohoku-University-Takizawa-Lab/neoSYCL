@@ -1,6 +1,6 @@
 add_executable(
         main
-        main.cpp
+        sequential_vector.cpp
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL Debug)

@@ -38,7 +38,7 @@ if (SYNC_MODE)
     ADD_DEFINITIONS(-DSYNC)
 endif ()
 
-add_subdirectory(src)
+add_subdirectory(examples)
 
 # add tests
 if (BUILD_TESTING)
