@@ -1,5 +1,5 @@
 add_subdirectory(cpu)
 if (BUILD_VE)
     add_subdirectory(ve)
+    add_subdirectory(stream)
 endif ()
-add_subdirectory(stream)
