@@ -2,9 +2,13 @@ cmake_minimum_required(VERSION 3.4)
 project(neoSYCL C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(BUILD_VE "Enable SX-Aurora support" ON)
 option(BUILD_TESTING "Enable build tests" ON)
+
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 
 include_directories(include)
 
