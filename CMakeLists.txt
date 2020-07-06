@@ -5,8 +5,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-option(BUILD_VE "Enable SX-Aurora support" ON)
-option(BUILD_TESTING "Enable build tests" ON)
+option(BUILD_VE "Enable SX-Aurora support" OFF)
+option(BUILD_TESTING "Enable build tests" OFF)
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 
