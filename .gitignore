@@ -39,3 +39,5 @@ cmake-build-release
 node_modules
 package-lock.json
 package.json
+
+examples/sa

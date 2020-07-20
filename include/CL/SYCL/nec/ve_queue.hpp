@@ -38,8 +38,8 @@ class ve_queue : public queue {
     proc = proc_create(path, dev.get_node_id());
   }
 
-  detail::Task *build_task(string_class kernel_name) override {
-    return new detail::VETask(proc, kernel_name);
+  detail::Task *build_task() override {
+    return new detail::VETask(proc);
   }
 
   virtual ~ve_queue() {

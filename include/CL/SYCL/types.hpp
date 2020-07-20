@@ -13,6 +13,7 @@
 #include <vector>
 #include <iostream>
 
+#define REGISTER_KERNEL(KERNEL) struct KERNEL {static std::string name() {return #KERNEL;}}
 
 namespace cl::sycl {
 

@@ -1,5 +1,5 @@
 add_executable(
-        stream
+        ve-stream
         Stream.h
         SYCLStream.h
         main.cpp
@@ -7,5 +7,5 @@ add_executable(
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
-    target_link_libraries(stream fmt)
+    target_link_libraries(ve-stream fmt)
 endif ()

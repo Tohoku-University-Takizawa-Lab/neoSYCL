@@ -91,7 +91,8 @@ class handler {
       if (task->is_cpu()) {
         f();
       } else {
-        task->get_kernel()->single_task();
+        string_class name_str = KernelName::name();
+        task->get_kernel(name_str)->single_task();
       }
     };
     schedule(func);
@@ -107,7 +108,8 @@ class handler {
           f(id<1>(x));
         }
       } else {
-        task->get_kernel()->parallel_for(r);
+        string_class name_str = KernelName::name();
+        task->get_kernel(name_str)->parallel_for(r);
       }
     };
     schedule(func);
@@ -125,7 +127,8 @@ class handler {
           }
         }
       } else {
-        task->get_kernel()->parallel_for(r);
+        string_class name_str = KernelName::name();
+        task->get_kernel(name_str)->parallel_for(r);
       }
     };
     schedule(func);
@@ -145,7 +148,8 @@ class handler {
           }
         }
       } else {
-        task->get_kernel()->parallel_for(r);
+        string_class name_str = KernelName::name();
+        task->get_kernel(name_str)->parallel_for(r);
       }
     };
     schedule(func);

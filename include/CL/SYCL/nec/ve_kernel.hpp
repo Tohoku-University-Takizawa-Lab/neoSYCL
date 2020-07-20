@@ -123,7 +123,7 @@ struct VEKernel : public Kernel {
       uint64_t id = veo_call_async_by_name(ctx.ve_ctx, proc.handle, kernel_name.c_str(), argp);
       uint64_t ret_val;
       veo_call_wait_result(ctx.ve_ctx, id, &ret_val);
-      DEBUG_INFO("[VEKernel] ve func finished, id: {}, ret val: {:#x}", id, ret_val);
+      DEBUG_INFO("[VEKernel] ve func finished, id: {}, ret val: {}", id, ret_val);
       copy_out(ve_addr_list);
 
     } catch (nec::VEException &e) {
@@ -146,7 +146,7 @@ struct VEKernel : public Kernel {
       uint64_t id = veo_call_async_by_name(ctx.ve_ctx, proc.handle, kernel_name.c_str(), argp);
       uint64_t ret_val;
       veo_call_wait_result(ctx.ve_ctx, id, &ret_val);
-      DEBUG_INFO("[VEKernel] ve func finished, id: {}, ret val: {:#x}", id, ret_val);
+      DEBUG_INFO("[VEKernel] ve func finished, id: {}, ret val: {}", id, ret_val);
       copy_out(ve_addr_list);
 
     } catch (nec::VEException &e) {

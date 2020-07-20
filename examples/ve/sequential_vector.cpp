@@ -4,6 +4,11 @@
 
 using namespace cl::sycl;
 
+struct Test {
+  int val;
+};
+REGISTER_KERNEL(sequential_vector);
+
 int main() {
   const int N = 3;
   using Vector = float[N];
@@ -22,22 +27,24 @@ int main() {
     // Create buffers from a & b vectors with 2 different syntax
     buffer<float> A(a, range<1>(N));
     buffer<float> B{b, range<1>(N)};
+    buffer<Test> T{range<1>(N)};
 
     // A buffer of N float using the storage of c
     buffer<float> C(c, N);
 
     /* The command group describing all operations needed for the kernel
        execution */
-    myQueue.submit("sequential_vector", [&](handler &cgh) {
+    myQueue.submit([&](handler &cgh) {
       // In the kernel A and B are read, but C is written
       auto ka = A.get_access<access::mode::read>(cgh);
       auto kb = B.get_access<access::mode::read>(cgh);
       auto kc = C.get_access<access::mode::write>(cgh);
+      auto kt = T.get_access<access::mode::read>(cgh);
 
       // Enqueue a single, simple task
       cgh.single_task<class sequential_vector>([=]() {
         for (size_t i = 0; i != N; i++) {
-          kc[i] = ka[i] + kb[i];
+          kc[i] = ka[i] + kb[i] + kt[i].val;
         }
       });
     }); // End of our commands for this queue

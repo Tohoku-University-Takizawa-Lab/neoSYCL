@@ -8,13 +8,13 @@ namespace cl::sycl::detail {
 struct VETask : public Task {
   nec::VEProc proc;
 
-  VETask(const nec::VEProc &proc, const string_class &kernel_name) : Task(kernel_name), proc(proc) {}
+  VETask(const nec::VEProc &proc) : proc(proc) {}
 
   bool is_cpu() override {
     return false;
   }
 
-  std::shared_ptr<Kernel> get_kernel() override {
+  std::shared_ptr<Kernel> get_kernel(string_class name) override {
     return std::shared_ptr<Kernel>(new VEKernel(args, name, proc));
   }
 };

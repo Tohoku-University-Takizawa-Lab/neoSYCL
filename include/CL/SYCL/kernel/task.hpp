@@ -10,11 +10,8 @@ namespace cl::sycl::detail {
 
 struct Task {
   vector_class<detail::KernelArg> args;
-  string_class name;
 
   Task() {}
-
-  Task(string_class name) : name(std::move(name)) {}
 
   void add_arg(const detail::KernelArg &arg) {
     args.push_back(arg);
@@ -24,7 +21,7 @@ struct Task {
     return true;
   }
 
-  virtual std::shared_ptr<Kernel> get_kernel() {
+  virtual std::shared_ptr<Kernel> get_kernel(string_class name) {
     return std::shared_ptr<Kernel>(new Kernel(args, name));
   };
 };

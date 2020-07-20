@@ -4,6 +4,8 @@
 
 using namespace cl::sycl;
 
+REGISTER_KERNEL(sequential_vector);
+
 int main() {
   const int N = 3;
   using Vector = float[N];

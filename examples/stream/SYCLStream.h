@@ -39,15 +39,6 @@ class SYCLStream : public Stream<T>
     cl::sycl::buffer<T> *d_c;
     cl::sycl::buffer<T> *d_sum;
 
-    // SYCL kernel names
-    typedef sycl_kernels::init<T> init_kernel;
-    typedef sycl_kernels::copy<T> copy_kernel;
-    typedef sycl_kernels::mul<T> mul_kernel;
-    typedef sycl_kernels::add<T> add_kernel;
-    typedef sycl_kernels::triad<T> triad_kernel;
-    typedef sycl_kernels::dot<T> dot_kernel;
-
-
   public:
 
     SYCLStream(const unsigned int, const int);

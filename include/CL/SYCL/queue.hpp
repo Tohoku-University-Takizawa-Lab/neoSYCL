@@ -54,21 +54,12 @@ class queue : detail::SharedPtrImplementation<detail::TaskQueue> {
     return new detail::Task;
   }
 
-  virtual detail::Task *build_task(string_class kernel_name) {
-    return new detail::Task(std::move(kernel_name));
-  }
-
   virtual handler_event submit(const std::function<void(handler &)> &cgf) {
     handler command_group_handler(implementation, build_task());
     cgf(command_group_handler);
     return handler_event();
   }
 
-  virtual handler_event submit(string_class kernel_name, const std::function<void(handler &)> &cgf) {
-    handler command_group_handler(implementation, build_task(std::move(kernel_name)));
-    cgf(command_group_handler);
-    return handler_event();
-  }
 
   virtual ~queue() {
     implementation->wait();
