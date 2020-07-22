@@ -3,6 +3,7 @@
 
 #include <utility>
 #include <shared_mutex>
+#include "omp.h"
 
 #include "CL/SYCL/types.hpp"
 #include "CL/SYCL/event.hpp"
@@ -58,17 +59,21 @@ class handler {
   void schedule(const std::function<void(void)> &f) {
     tq->thread_start();
     auto func = [tq = tq, args = task->args, f = f] {
+#ifndef SYNC
       for (detail::KernelArg arg:args) {
         arg.lock();
         DEBUG_INFO("[handler] lock arg: {:#x}, mode: {}", (size_t) arg.container.get(), arg.mode);
       }
+#endif
 
       f();
 
+#ifndef SYNC
       for (detail::KernelArg arg:args) {
         arg.unlock();
         DEBUG_INFO("[handler] release arg: {:#x}, mode: {}", (size_t) arg.container.get(), arg.mode);
       }
+#endif
       tq->thread_end();
     };
 
@@ -104,6 +109,7 @@ class handler {
 
     auto func = [task = task, f = f, r = global_size]() {
       if (task->is_cpu()) {
+#pragma omp parallel for
         for (size_t x = 0; x < r.get(1); x++) {
           f(id<1>(x));
         }

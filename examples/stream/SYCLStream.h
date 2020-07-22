@@ -7,51 +7,40 @@
 
 #pragma once
 
-#include <sstream>
-
-#include "Stream.h"
+#include <iostream>
+#include <stdexcept>
 
 #include "CL/sycl.hpp"
+#include "Stream.h"
 
 #define IMPLEMENTATION_STRING "SYCL"
 
-namespace sycl_kernels
-{
-  template <class T> class init;
-  template <class T> class copy;
-  template <class T> class mul;
-  template <class T> class add;
-  template <class T> class triad;
-  template <class T> class dot;
-}
+using namespace cl::sycl;
 
-template <class T>
-class SYCLStream : public Stream<T>
-{
-  protected:
-    // Size of arrays
-    unsigned int array_size;
+template<class T>
+class SYCLStream : public Stream<T> {
+ protected:
+  // Size of arrays
+  unsigned int array_size;
 
-    // SYCL objects
-    cl::sycl::queue *queue;
-    cl::sycl::buffer<T> *d_a;
-    cl::sycl::buffer<T> *d_b;
-    cl::sycl::buffer<T> *d_c;
-    cl::sycl::buffer<T> *d_sum;
+  // Device side pointers
+  T *a;
+  T *b;
+  T *c;
 
-  public:
+  cl::sycl::queue queue;
 
-    SYCLStream(const unsigned int, const int);
-    ~SYCLStream();
+ public:
+  SYCLStream(const unsigned int, int);
+  ~SYCLStream();
 
-    virtual void copy() override;
-    virtual void add() override;
-    virtual void mul() override;
-    virtual void triad() override;
-    virtual T    dot() override;
+  virtual void copy() override;
+  virtual void add() override;
+  virtual void mul() override;
+  virtual void triad() override;
+  virtual T dot() override;
 
-    virtual void init_arrays(T initA, T initB, T initC) override;
-    virtual void read_arrays(std::vector<T>& a, std::vector<T>& b, std::vector<T>& c) override;
+  virtual void init_arrays(T initA, T initB, T initC) override;
+  virtual void read_arrays(std::vector<T> &a, std::vector<T> &b, std::vector<T> &c) override;
 
 };
-

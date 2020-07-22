@@ -1,51 +1,34 @@
 #include <math.h>
 #include <stdio.h>
-#include <stdint.h>
 
-int copy_kernel(double *ka, double *kc, int N, int STEP) {
-  for (size_t idx = 0; idx != N; idx += STEP) {
-    kc[idx] = ka[idx];
+int add_kernel(double *ka, double *kb, double *kc, int N, int STEP) {
+  for (int i = 0; i < N; i++) {
+    kc[i] = ka[i] + kb[i];
   }
-  return 233;
+  return 0;
+}
+int copy_kernel(double *ka, double *kc, int N, int STEP) {
+  for (int i = 0; i < N; i++) {
+    kc[i] = ka[i];
+  }
+  return 0;
+}
+int dot_kernel(double *ka, double *kb, double *k_ret, int N, int STEP) {
+  for (int i = 0; i < N; i++) {
+    k_ret[0] += ka[i] * kb[i];
+  }
+  return 0;
 }
 
 int mul_kernel(double *kb, double *kc, int N, int STEP) {
-  for (size_t idx = 0; idx != N; idx += STEP) {
-    kb[idx] = 0.4 * kc[idx];
+  for (int i = 0; i < N; i++) {
+    kb[i] = 0.4 * kc[i];
   }
-  return 233;
+  return 0;
 }
-
-int add_kernel(double *ka, double *kb, double *kc, int N, int STEP) {
-  for (size_t idx = 0; idx != N; idx += STEP) {
-    kc[idx] = ka[idx] + kb[idx];
-  }
-  return 233;
-}
-
 int triad_kernel(double *ka, double *kb, double *kc, int N, int STEP) {
-  for (size_t idx = 0; idx != N; idx += STEP) {
-    ka[idx] = kb[idx] + 0.4 * kc[idx];
+  for (int i = 0; i < N; i++) {
+    ka[i] = kb[i] + 0.4 * kc[i];
   }
-  return 233;
+  return 0;
 }
-
-int init_kernel(double *ka,
-                 double *kb,
-                 double *kc,
-                 double *init_a_val,
-                 double *init_b_val,
-                 double *init_c_val,
-                 int N,
-                 int STEP) {
-  for (size_t idx = 0; idx != N; idx += STEP) {
-    ka[idx] = init_a_val[0];
-    kb[idx] = init_b_val[0];
-    kc[idx] = init_c_val[0];
-  }
-  return 233;
-}
-
-
-
-

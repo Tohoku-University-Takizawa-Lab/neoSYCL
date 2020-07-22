@@ -14,7 +14,6 @@
 #include "CL/SYCL/buffer/data_container_1d.hpp"
 #include "CL/SYCL/buffer/data_container_2d.hpp"
 #include "CL/SYCL/buffer/data_container_3d.hpp"
-#include "CL/SYCL/buffer/access_certificate.hpp"
 #include "CL/SYCL/detail/shared_ptr_implementation.hpp"
 
 namespace cl::sycl {
