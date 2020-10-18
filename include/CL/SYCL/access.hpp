@@ -11,6 +11,7 @@ enum mode {
   read = 42,
   write,
   read_write,
+  discard_write,
 };
 
 enum target {

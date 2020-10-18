@@ -4,7 +4,8 @@
 namespace cl::sycl::detail {
 
 template<typename KernelName, typename Kernel, int Dimensions>
-void HIGHLIGHT_KERNEL_PARALLEL(Kernel k, const range<Dimensions> &num_work_items) {}
+void HIGHLIGHT_KERNEL_PARALLEL(Kernel k, const range<Dimensions> &num_work_items) {
+}
 
 template<typename KernelName, typename Kernel>
 void HIGHLIGHT_KERNEL_SINGLE_TASK(Kernel k) {}

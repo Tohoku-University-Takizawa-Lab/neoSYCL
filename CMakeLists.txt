@@ -26,7 +26,7 @@ endif ()
 # use pthread
 find_package(Threads REQUIRED)
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lpthread")
-find_package(OpenMP REQUIRED)
+#find_package(OpenMP REQUIRED)
 
 # debug info
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
