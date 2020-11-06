@@ -18,6 +18,8 @@ namespace cl::sycl {
 
 class queue : detail::SharedPtrImplementation<detail::TaskQueue> {
   using base_class = typename detail::SharedPtrImplementation<detail::TaskQueue>;
+ private:
+  device bind_device;
 
  public:
 
@@ -31,14 +33,15 @@ class queue : detail::SharedPtrImplementation<detail::TaskQueue> {
   }
 
   explicit queue(device dev, const property_list &propList = {})
-      : base_class(new detail::TaskQueue()) {}
+      : base_class(new detail::TaskQueue()), bind_device(std::move(dev)) {
+  }
 
   device get_device() {
-    return device();
+    return bind_device;
   }
 
   bool is_host() {
-    return true;
+    return bind_device.is_host();
   }
 
   void wait() {
@@ -50,16 +53,11 @@ class queue : detail::SharedPtrImplementation<detail::TaskQueue> {
     throw UnimplementedException();
   }
 
-  virtual detail::Task *build_task() {
-    return new detail::Task;
-  }
-
   virtual handler_event submit(const std::function<void(handler &)> &cgf) {
-    handler command_group_handler(implementation, build_task());
+    handler command_group_handler(implementation);
     cgf(command_group_handler);
     return handler_event();
   }
-
 
   virtual ~queue() {
     implementation->wait();

@@ -6,6 +6,7 @@ namespace cl::sycl::detail {
 // Data container interface
 class DataContainer {
  private:
+  // use shared_lock to ensure the thread-safety
   mutable std::shared_mutex mtx;
 
  public:

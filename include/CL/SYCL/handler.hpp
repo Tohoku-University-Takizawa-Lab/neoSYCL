@@ -42,7 +42,7 @@ class handler {
 
   template<access::mode mode>
   void add_arg(std::shared_ptr<detail::DataContainer> arg) {
-    detail::KernelArg kernel_arg(arg, mode);
+    detail::KernelArg kernel_arg(std::move(arg), mode);
     task->add_arg(kernel_arg);
   }
 
@@ -50,7 +50,7 @@ class handler {
     tq->thread_start();
     auto func = [tq = tq, args = task->args, f = f] {
 #ifndef SYNC
-      for (detail::KernelArg arg:args) {
+      for (const detail::KernelArg &arg:args) {
         arg.lock();
         DEBUG_INFO("[handler] lock arg: {:#x}, mode: {}", (size_t) arg.container.get(), arg.mode);
       }
@@ -59,7 +59,7 @@ class handler {
       f();
 
 #ifndef SYNC
-      for (detail::KernelArg arg:args) {
+      for (const detail::KernelArg &arg:args) {
         arg.unlock();
         DEBUG_INFO("[handler] release arg: {:#x}, mode: {}", (size_t) arg.container.get(), arg.mode);
       }
@@ -76,7 +76,8 @@ class handler {
 
   }
 
-  handler(std::shared_ptr<detail::TaskQueue> tq, detail::Task *task) : tq(std::move(tq)), task(task) {}
+  explicit handler(std::shared_ptr<detail::TaskQueue> tq)
+      : tq(std::move(tq)), task(std::shared_ptr<detail::Task>(new detail::Task)) {}
 
   template<typename KernelName, typename ParallelForFunctor>
   void single_task(ParallelForFunctor f) {

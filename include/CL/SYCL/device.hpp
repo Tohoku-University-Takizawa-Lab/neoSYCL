@@ -1,7 +1,3 @@
-//
-// Created by WhiteBlue on 2020/5/25.
-//
-
 #ifndef CUSTOM_SYCL_INCLUDE_SYCL_DEVICE_HPP_
 #define CUSTOM_SYCL_INCLUDE_SYCL_DEVICE_HPP_
 
@@ -14,12 +10,7 @@ namespace cl::sycl {
 class device_selector;
 
 class device {
-
  public:
-
-  device() {
-
-  }
 
   virtual bool is_host() const {
     return true;

@@ -1,7 +1,3 @@
-//
-// Created by WhiteBlue on 2020/5/25.
-//
-
 #ifndef CUSTOM_SYCL_INCLUDE_SYCL_EXCEPTION_HPP_
 #define CUSTOM_SYCL_INCLUDE_SYCL_EXCEPTION_HPP_
 

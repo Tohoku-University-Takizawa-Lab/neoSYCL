@@ -8,7 +8,7 @@
 
 namespace cl::sycl::detail {
 
-struct Task {
+struct  Task {
   vector_class<detail::KernelArg> args;
 
   Task() {}

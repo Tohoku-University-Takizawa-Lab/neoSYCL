@@ -1,7 +1,3 @@
-//
-// Created by WhiteBlue on 2020/5/26.
-//
-
 #ifndef SYCL_INCLUDE_CL_SYCL_ITEM_HPP_
 #define SYCL_INCLUDE_CL_SYCL_ITEM_HPP_
 
