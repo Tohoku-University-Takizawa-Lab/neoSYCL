@@ -168,17 +168,17 @@ struct BenchmarkArgs
   std::shared_ptr<ResultConsumer> result_consumer;
 };
 
-class CUDASelector : public cl::sycl::device_selector {
-public:
-  int operator()(const cl::sycl::device& device) const override {
-    using namespace cl::sycl::info;
-    const std::string driverVersion = device.get_info<device::driver_version>();
-    if(device.is_gpu() && (driverVersion.find("CUDA") != std::string::npos)) {
-      return 1;
-    };
-    return -1;
-  }
-};
+//class CUDASelector : public cl::sycl::device_selector {
+//public:
+//  int operator()(const cl::sycl::device& device) const override {
+//    using namespace cl::sycl::info;
+//    const std::string driverVersion = device.get_info<device::driver_version>();
+//    if(device.is_gpu() && (driverVersion.find("CUDA") != std::string::npos)) {
+//      return 1;
+//    };
+//    return -1;
+//  }
+//};
 
 class BenchmarkCommandLine
 {
@@ -233,29 +233,7 @@ private:
   }
 
   cl::sycl::queue getQueue(const std::string& device_type) const {
-    const auto getQueueProperties = [&]() -> cl::sycl::property_list {
-#if defined(SYCL_BENCH_ENABLE_QUEUE_PROFILING)
-      return cl::sycl::property::queue::enable_profiling{};
-#endif
-      return {};
-    };
-
-#if defined(__LLVM_SYCL_CUDA__)
-    if(device_selector != "gpu") {
-      throw std::invalid_argument{"Only the 'gpu' device is supported on LLVM CUDA"};
-    }
-    return cl::sycl::queue{CUDASelector{}, getQueueProperties()};
-#endif
-
-    if(device_type == "cpu") {
-      return cl::sycl::queue{cl::sycl::cpu_selector{}, getQueueProperties()};
-    } else if(device_type == "gpu") {
-      return cl::sycl::queue{cl::sycl::gpu_selector{}, getQueueProperties()};
-    } else if(device_type == "default") {
-      return cl::sycl::queue{getQueueProperties()};
-    } else {
-      throw std::invalid_argument{"unknown device type: " + device_type};
-    }
+    return cl::sycl::queue();
   }
 
   CommandLine cli_parser;

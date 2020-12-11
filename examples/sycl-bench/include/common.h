@@ -43,15 +43,15 @@ public:
   {
     args.result_consumer->proceedToBenchmark(Benchmark{args, additionalArgs...}.getBenchmarkName());
 
-    args.result_consumer->consumeResult(
-      "problem-size", std::to_string(args.problem_size));
-    args.result_consumer->consumeResult(
-      "local-size", std::to_string(args.local_size));
-    args.result_consumer->consumeResult(
-      "device-name", args.device_queue.get_device()
-                           .template get_info<cl::sycl::info::device::name>());
-    args.result_consumer->consumeResult(
-      "sycl-implementation", this->getSyclImplementation());
+//    args.result_consumer->consumeResult(
+//      "problem-size", std::to_string(args.problem_size));
+//    args.result_consumer->consumeResult(
+//      "local-size", std::to_string(args.local_size));
+//    args.result_consumer->consumeResult(
+//      "device-name", args.device_queue.get_device()
+//                           .template get_info<cl::sycl::info::device::name>());
+//    args.result_consumer->consumeResult(
+//      "sycl-implementation", this->getSyclImplementation());
 
     TimeMetricsProcessor<Benchmark> time_metrics(args);
 
