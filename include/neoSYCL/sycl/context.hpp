@@ -3,58 +3,35 @@
 
 #include "exception.hpp"
 #include "neoSYCL/sycl/info/context.hpp"
+#include "property_list.hpp"
 
 namespace neosycl::sycl {
 
 class context {
 
  public:
-  context() = default;
+  explicit context(const property_list &propList = {});
 
-  explicit context(async_handler errHandler) {
-    throw UnimplementedException();
-  }
+  context(async_handler asyncHandler,
+          const property_list &propList = {});
 
-  context(const device_selector &deviceSelector,
-          info::gl_context_interop interopFlag,
-          async_handler errHandler = nullptr) {
-    throw UnimplementedException();
-  }
+  context(const device &dev, const property_list &propList = {});
 
-  context(const device &dev,
-          info::gl_context_interop interopFlag,
-          async_handler errHandler = nullptr) {
-    throw UnimplementedException();
-  }
+  context(const device &dev, async_handler asyncHandler, const property_list &propList = {});
 
-  context(const platform &plt,
-          info::gl_context_interop interopFlag,
-          async_handler errHandler = nullptr) {
-    throw UnimplementedException();
-  }
+  context(const platform &plt, const property_list &propList = {});
+
+  context(const platform &plt, async_handler asyncHandler, const property_list &propList = {});
+
+  context(const vector_class<device> &deviceList, const property_list &propList = {});
 
   context(const vector_class<device> &deviceList,
-          info::gl_context_interop interopFlag,
-          async_handler errHandler = nullptr) {
-    throw UnimplementedException();
-  }
+          async_handler asyncHandler, const property_list &propList = {});
 
-  bool is_host() const {
-    return true;
-  }
+//  context(cl_context clContext, async_handler asyncHandler = {});
 
-  platform get_platform() {
-    throw UnimplementedException();
-  }
-
-  vector_class<device> get_devices() const {
-    throw UnimplementedException();
-  }
-
-  template<info::context Param>
-  typename info::param_traits<info::context, Param>::type get_info() const {
-    throw UnimplementedException();
-  }
+  template<info::context param>
+  typename info::param_traits<info::context, param>::return_type get_info() const;
 
 };
 

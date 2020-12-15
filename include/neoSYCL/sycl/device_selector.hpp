@@ -2,16 +2,25 @@
 #define CUSTOM_SYCL_INCLUDE_SYCL_DEVICE_SELECTOR_HPP_
 
 #include "device.hpp"
-#include "exception.hpp"
 
 namespace neosycl::sycl {
+
+class device;
 
 class device_selector {
  public:
 
-  virtual device select_device() const = 0;
+  device_selector();
 
-  virtual int operator()(const device &dev) const = 0;
+  device_selector(const device_selector &rhs);
+
+  device_selector &operator=(const device_selector &rhs);
+
+  virtual ~device_selector();
+
+  device select_device() const;
+
+  virtual int operator()(const device &device) const = 0;
 
 };
 

@@ -8,22 +8,18 @@
 
 namespace neosycl::sycl::detail {
 
-struct  Task {
+struct Task {
   vector_class<detail::KernelArg> args;
 
   Task() {}
 
-  void add_arg(const detail::KernelArg &arg) {
-    args.push_back(arg);
+  void add_arg(const int &index, const detail::KernelArg &arg) {
+    if (args.size() <= index) {
+      args.resize(index + 1);
+    }
+    args[index] = arg;
   }
 
-  virtual bool is_cpu() {
-    return true;
-  }
-
-  virtual std::shared_ptr<Kernel> get_kernel(string_class name) {
-    return std::shared_ptr<Kernel>(new Kernel(args, name));
-  };
 };
 
 }

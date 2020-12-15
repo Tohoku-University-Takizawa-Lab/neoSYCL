@@ -7,16 +7,6 @@ class cpu_selector : public device_selector {
 
  public:
 
-  int operator()(const device &dev) const override {
-    if (dev.is_cpu()) {
-      return 1;
-    }
-    return -1;
-  }
-
-  device select_device() const override {
-    return device();
-  }
 
 };
 
