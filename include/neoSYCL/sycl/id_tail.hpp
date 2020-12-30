@@ -6,14 +6,6 @@
 
 namespace neosycl::sycl {
 
-id<1>::id() : data{0} {}
-
-id<1>::id(size_t dim0) : data{dim0} {}
-
-id<1>::id(const range<1> &range) : data{range.get(1)} {}
-
-id<1>::id(const item<1> &ite) : data{ite.(1)} {}
-
 double id<1>::weight() const {
   return (double) data[0];
 }

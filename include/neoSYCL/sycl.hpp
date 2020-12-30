@@ -7,7 +7,6 @@
 // include device headers
 #include "sycl/device.hpp"
 #include "sycl/id.hpp"
-#include "sycl/id_tail.hpp"
 
 // include device selector headers
 #include "sycl/device_selector.hpp"

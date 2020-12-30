@@ -11,8 +11,6 @@
 
 namespace neosycl::sycl {
 
-template<typename T, std::size_t Dimensions>
-class buffer;
 
 template<typename T,
     int Dimensions,

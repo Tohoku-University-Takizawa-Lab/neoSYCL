@@ -123,7 +123,7 @@ class DataContainerND<T, 2> : public DataContainer {
   }
 
   T &get(const id<2> &index) const {
-    return access_ptr[index.get(1)][index.get(2)];
+    return access_ptr[index][index.get(2)];
   }
 
   T *get(size_t i) {

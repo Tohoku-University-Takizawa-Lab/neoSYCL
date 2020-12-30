@@ -80,6 +80,13 @@ enum class device : int {
   reference_count
 };
 
+enum class partition_property : int {
+  no_partition,
+  partition_equally,
+  partition_by_counts,
+  partition_by_affinity_domain
+};
+
 }
 
 #endif //NEOSYCL_INCLUDE_CL_SYCL_INFO_DEVICE_HPP_

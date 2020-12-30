@@ -34,10 +34,6 @@ class platform {
 
 };
 
-platform::platform(const device_selector &deviceSelector) {
-
-}
-
 }
 
 #endif //CUSTOM_SYCL_INCLUDE_SYCL_PLATFORM_HPP_

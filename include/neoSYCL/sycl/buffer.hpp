@@ -10,71 +10,86 @@
 #include "allocator.hpp"
 #include "handler.hpp"
 #include "property_list.hpp"
-#include "buffer/data_container.hpp"
-#include "buffer/data_container_1d.hpp"
-#include "buffer/data_container_2d.hpp"
-#include "buffer/data_container_3d.hpp"
 #include "detail/shared_ptr_implementation.hpp"
 
 namespace neosycl::sycl {
 
-template<typename T, std::size_t Dimensions = 1>
-class buffer : public detail::SharedPtrImplementation<detail::DataContainerND<T, Dimensions>> {
+template<typename T, int dimensions = 1, typename AllocatorT = buffer_allocator<T>>
+class buffer {
+ public:
   using value_type = T;
   using reference = value_type &;
   using const_reference = const value_type &;
+  using allocator_type = AllocatorT;
 
-  using base_class = typename detail::SharedPtrImplementation<detail::DataContainerND<T, Dimensions>>;
+  buffer(const range<dimensions> &bufferRange, const property_list &propList = {});
 
-  friend accessor<T, Dimensions, access::mode::read, access::target::global_buffer>;
-  friend accessor<T, Dimensions, access::mode::write, access::target::global_buffer>;
-  friend accessor<T, Dimensions, access::mode::read_write, access::target::global_buffer>;
+  buffer(const range<dimensions> &bufferRange, AllocatorT allocator, const property_list &propList = {});
 
- public:
+  buffer(T *hostData, const range<dimensions> &bufferRange, const property_list &propList = {});
 
-  // Construct a SYCL buffer instance with uninitialized memory.
-  buffer(const range<Dimensions> &bufferRange, const property_list &propList = {}) :
-      base_class(new detail::DataContainerND<T, Dimensions>(bufferRange)) {}
+  buffer(T *hostData, const range<dimensions> &bufferRange, AllocatorT allocator, const property_list &propList = {});
 
-  template<typename Iterator>
-  buffer(Iterator first, Iterator last, const property_list &propList = {}):
-      base_class(new detail::DataContainerND<T, Dimensions>(first, last)) {}
+  buffer(const T *hostData, const range<dimensions> &bufferRange, const property_list &propList = {});
 
-  // Construct a SYCL buffer instance with the hostData parameter provided.
-  buffer(T *hostData, const range<Dimensions> &bufferRange, const property_list &propList = {}) :
-      base_class(new detail::DataContainerND<T, Dimensions>(hostData, bufferRange)) {}
+  buffer(const T *hostData,
+         const range<dimensions> &bufferRange,
+         AllocatorT allocator,
+         const property_list &propList = {});
 
-  // Construct a SYCL buffer instance with the hostData parameter provided. The ownership of this memory is given to
-  // the constructed SYCL buffer for the duration of its lifetime.
-  buffer(const T *hostData, const range<Dimensions> &bufferRange, const property_list &propList = {}) :
-      base_class(new detail::DataContainerND<T, Dimensions>(hostData, bufferRange)) {}
+  buffer(const shared_ptr_class<T> &hostData,
+         const range<dimensions> &bufferRange, AllocatorT allocator, const property_list &propList = {});
 
-  // Return a range object representing the size of the buffer in terms of number of elements
-  // in each dimension as passed to the constructor.
-  range<Dimensions> get_range() {
-    return this->implementation->get_range();
-  }
+  buffer(const shared_ptr_class<T> &hostData, const range<dimensions> &bufferRange, const property_list &propList = {});
 
-  // Returns the total number of elements in the buffer.
-  size_t get_count() {
-    return this->implementation->get_range().size();
-  }
+  template<class InputIterator>
+  buffer<T, 1>(InputIterator first, InputIterator last, AllocatorT allocator,
+               const property_list &propList = {});
 
-  // Returns the size of the buffer storage in bytes.
-  // Equal to get_count()*sizeof(T).
-  size_t get_size() {
-    return this->implementation->get_size();
-  }
+  template<class InputIterator>
+  buffer<T, 1>(InputIterator first, InputIterator last,
+               const property_list &propList = {});
 
-  template<access::mode mode, access::target target = access::target::global_buffer>
-  accessor<T, Dimensions, mode, target> get_access(handler &commandGroupHandler) {
-    return accessor<T, Dimensions, mode, target>(*this, commandGroupHandler);
-  }
+  buffer(buffer<T, dimensions, AllocatorT> b, const id<dimensions> &baseIndex,
+         const range<dimensions> &subRange);
+
+/* Available only when: dimensions == 1. */
+//  buffer(cl_mem clMemObject, const context &syclContext, event availableEvent = {});
+
+/* -- common interface members -- */
+/* -- property interface members -- */
+  range<dimensions> get_range() const;
+
+  size_t get_count() const;
+
+  size_t get_size() const;
+
+  AllocatorT get_allocator() const;
 
   template<access::mode mode, access::target target = access::target::global_buffer>
-  accessor<T, Dimensions, mode, target> get_access() {
-    return accessor<T, Dimensions, mode, target>(*this);
-  }
+  accessor<T, dimensions, mode, target> get_access(
+      handler &commandGroupHandler);
+  template<access::mode mode>
+  accessor<T, dimensions, mode, access::target::host_buffer> get_access();
+
+  template<access::mode mode, access::target target = access::target::global_buffer>
+  accessor<T, dimensions, mode, target> get_access(
+      handler &commandGroupHandler, range<dimensions> accessRange, id<dimensions> accessOffset = {});
+
+  template<access::mode mode>
+  accessor<T, dimensions, mode, access::target::host_buffer> get_access(
+      range<dimensions> accessRange, id<dimensions> accessOffset = {});
+
+  template<typename Destination = std::nullptr_t>
+  void set_final_data(Destination finalData = nullptr);
+
+  void set_write_back(bool flag = true);
+
+  bool is_sub_buffer() const;
+
+  template<typename ReinterpretT, int ReinterpretDim>
+  buffer<ReinterpretT, ReinterpretDim, AllocatorT> reinterpret(range<ReinterpretDim> reinterpretRange) const;
+
 };
 
 }

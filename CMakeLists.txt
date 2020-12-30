@@ -11,6 +11,8 @@ option(BUILD_TESTING "Enable build tests" OFF)
 
 include_directories(include)
 
+include_directories(third_party/eigen)
+
 if (BUILD_VE)
     ADD_DEFINITIONS(-DBUILD_VE)
     # find VEOS headers and libs

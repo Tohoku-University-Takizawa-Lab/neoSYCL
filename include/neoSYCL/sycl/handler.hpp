@@ -121,23 +121,23 @@ class handler {
 
   template<typename KernelName, typename ParallelForFunctor>
   void parallel_for(range<3> global_size, ParallelForFunctor f) {
-    detail::HIGHLIGHT_KERNEL_PARALLEL<KernelName, ParallelForFunctor, 3>(f, global_size);
-
-    auto func = [task = task, f = f, r = global_size]() {
-      if (task->is_cpu()) {
-        for (size_t x = 0; x < r.get(1); x++) {
-          for (size_t y = 0; y < r.get(2); y++) {
-            for (size_t z = 0; z < r.get(3); z++) {
-              f(id<3>(x, y, z));
-            }
-          }
-        }
-      } else {
-        string_class name_str = detail::get_kernel_name_from_class<KernelName>();
-        task->get_kernel(name_str)->parallel_for(r);
-      }
-    };
-    schedule(func);
+//    detail::HIGHLIGHT_KERNEL_PARALLEL<KernelName, ParallelForFunctor, 3>(f, global_size);
+//
+//    auto func = [task = task, f = f, r = global_size]() {
+//      if (task->is_cpu()) {
+//        for (size_t x = 0; x < r.get(1); x++) {
+//          for (size_t y = 0; y < r.get(2); y++) {
+//            for (size_t z = 0; z < r.get(3); z++) {
+//              f(id<3>(x, y, z));
+//            }
+//          }
+//        }
+//      } else {
+//        string_class name_str = detail::get_kernel_name_from_class<KernelName>();
+//        task->get_kernel(name_str)->parallel_for(r);
+//      }
+//    };
+//    schedule(func);
   }
 };
 

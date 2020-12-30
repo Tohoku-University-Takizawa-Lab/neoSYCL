@@ -1,8 +1,6 @@
 #ifndef SYCL_INCLUDE_CL_SYCL_ITEM_HPP_
 #define SYCL_INCLUDE_CL_SYCL_ITEM_HPP_
 
-#include "id.hpp"
-
 namespace neosycl::sycl {
 
 template<std::size_t dimensions>
@@ -26,16 +24,10 @@ struct item<1, with_offset> {
   size_t get_range(int dimension) const;
 
   size_t get_linear_id() const;
-};
 
-template<>
-struct item<1, true> {
-  id<1> get_offset() const;
-};
-
-template<>
-struct item<1, false> {
   operator item<1, true>() const;
+
+  id<1> get_offset() const;
 };
 
 template<bool with_offset>
@@ -53,16 +45,10 @@ struct item<2, with_offset> {
   size_t get_range(int dimension) const;
 
   size_t get_linear_id() const;
-};
 
-template<>
-struct item<2, true> {
-  id<2> get_offset() const;
-};
-
-template<>
-struct item<2, false> {
   operator item<2, true>() const;
+
+  id<2> get_offset() const;
 };
 
 template<bool with_offset>
@@ -80,16 +66,10 @@ struct item<3, with_offset> {
   size_t get_range(int dimension) const;
 
   size_t get_linear_id() const;
-};
 
-template<>
-struct item<3, true> {
-  id<3> get_offset() const;
-};
-
-template<>
-struct item<3, false> {
   operator item<3, true>() const;
+
+  id<3> get_offset() const;
 };
 
 }

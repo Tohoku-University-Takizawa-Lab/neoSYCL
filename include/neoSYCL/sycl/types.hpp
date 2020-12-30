@@ -35,6 +35,9 @@ using hash_class = std::hash<T>;
 
 using exception_ptr_class = std::exception_ptr;
 
+template<class T>
+using buffer_allocator = std::allocator<T>;
+
 }
 
 #endif //CUSTOM_SYCL_INCLUDE_SYCL_TYPES_HPP_
