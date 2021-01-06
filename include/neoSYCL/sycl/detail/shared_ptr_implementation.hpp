@@ -10,7 +10,7 @@ class SharedPtrImplementation {
 
   SharedPtrImplementation(std::shared_ptr<Implementation> i) : implementation{i} {}
 
-  SharedPtrImplementation(Implementation *i) : implementation{i} {}
+  SharedPtrImplementation(Implementation *i) : implementation(i) {}
 
   SharedPtrImplementation() = default;
 

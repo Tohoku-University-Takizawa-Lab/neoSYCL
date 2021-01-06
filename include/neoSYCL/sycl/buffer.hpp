@@ -1,8 +1,6 @@
 #ifndef CUSTOM_SYCL_INCLUDE_SYCL_BUFFER_HPP_
 #define CUSTOM_SYCL_INCLUDE_SYCL_BUFFER_HPP_
 
-#include <shared_mutex>
-
 #include "types.hpp"
 #include "range.hpp"
 #include "access.hpp"
@@ -10,32 +8,40 @@
 #include "allocator.hpp"
 #include "handler.hpp"
 #include "property_list.hpp"
+
+#include "container/containers.hpp"
 #include "detail/shared_ptr_implementation.hpp"
 
 namespace neosycl::sycl {
 
 template<typename T, int dimensions = 1, typename AllocatorT = buffer_allocator<T>>
-class buffer {
+class buffer : public detail::SharedPtrImplementation<detail::DataContainerND<T, 1>> {
  public:
   using value_type = T;
   using reference = value_type &;
   using const_reference = const value_type &;
   using allocator_type = AllocatorT;
 
-  buffer(const range<dimensions> &bufferRange, const property_list &propList = {});
+  buffer(const range<dimensions> &bufferRange, const property_list &propList = {})
+      : bufferRange(bufferRange), detail::SharedPtrImplementation(alloc.allocate(bufferRange.size())) {}
 
-  buffer(const range<dimensions> &bufferRange, AllocatorT allocator, const property_list &propList = {});
+  buffer(const range<dimensions> &bufferRange, AllocatorT allocator, const property_list &propList = {})
+      : bufferRange(bufferRange), detail::SharedPtrImplementation(allocator.allocate(bufferRange.size())) {}
 
-  buffer(T *hostData, const range<dimensions> &bufferRange, const property_list &propList = {});
+  buffer(T *hostData, const range<dimensions> &bufferRange, const property_list &propList = {}) :
+      bufferRange(bufferRange), detail::SharedPtrImplementation(hostData) {}
 
-  buffer(T *hostData, const range<dimensions> &bufferRange, AllocatorT allocator, const property_list &propList = {});
+  buffer(T *hostData, const range<dimensions> &bufferRange, AllocatorT allocator, const property_list &propList = {}) :
+      bufferRange(bufferRange), detail::SharedPtrImplementation(hostData) {}
 
-  buffer(const T *hostData, const range<dimensions> &bufferRange, const property_list &propList = {});
+  buffer(const T *hostData, const range<dimensions> &bufferRange, const property_list &propList = {}) :
+      bufferRange(bufferRange), detail::SharedPtrImplementation(hostData) {}
 
   buffer(const T *hostData,
          const range<dimensions> &bufferRange,
          AllocatorT allocator,
-         const property_list &propList = {});
+         const property_list &propList = {}) :
+      bufferRange(bufferRange), detail::SharedPtrImplementation(hostData) {}
 
   buffer(const shared_ptr_class<T> &hostData,
          const range<dimensions> &bufferRange, AllocatorT allocator, const property_list &propList = {});
@@ -58,11 +64,17 @@ class buffer {
 
 /* -- common interface members -- */
 /* -- property interface members -- */
-  range<dimensions> get_range() const;
+  range<dimensions> get_range() const {
+    return bufferRange;
+  }
 
-  size_t get_count() const;
+  size_t get_count() const {
+    return bufferRange.size();
+  }
 
-  size_t get_size() const;
+  size_t get_size() const {
+    return get_count() * sizeof(T);
+  }
 
   AllocatorT get_allocator() const;
 
@@ -90,6 +102,9 @@ class buffer {
   template<typename ReinterpretT, int ReinterpretDim>
   buffer<ReinterpretT, ReinterpretDim, AllocatorT> reinterpret(range<ReinterpretDim> reinterpretRange) const;
 
+ private:
+  allocator_type alloc;
+  range<dimensions> bufferRange;
 };
 
 }

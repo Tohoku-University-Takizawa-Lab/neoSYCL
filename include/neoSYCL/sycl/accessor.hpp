@@ -1,71 +1,105 @@
 #ifndef CUSTOM_SYCL_INCLUDE_SYCL_ACCESSOR_HPP_
 #define CUSTOM_SYCL_INCLUDE_SYCL_ACCESSOR_HPP_
 
+#include "buffer.hpp"
 #include "types.hpp"
 #include "handler.hpp"
 #include "id.hpp"
-#include "detail/shared_ptr_implementation.hpp"
-#include "buffer/data_container.hpp"
-#include "buffer/data_container_1d.hpp"
-#include "buffer/data_container_2d.hpp"
 
 namespace neosycl::sycl {
 
+template<typename T, int dimensions, typename AllocatorT>
+class buffer;
 
-template<typename T,
-    int Dimensions,
-    access::mode mode,
-    access::target accessTarget>
-class accessor {
-  using value_type = T;
-  using reference = value_type &;
-  using const_reference = const value_type &;
-
- public:
-  std::shared_ptr<detail::DataContainerND<T, Dimensions>> data;
+template<typename dataT, int dimensions, access::mode accessmode,
+    access::target accessTarget = access::target::global_buffer,
+    access::placeholder isPlaceholder = access::placeholder::false_t>
+class accessor {};
 
 
-  accessor(buffer<T, Dimensions> &bufferRef, handler &commandGroupHandler)
-      : data(bufferRef.implementation) {
-    commandGroupHandler.template add_arg<mode>(bufferRef.implementation);
-  }
 
-  explicit accessor(buffer<T, Dimensions> &bufferRef) : data(bufferRef.implementation) {
-    DEBUG_INFO("copy accessor");
-  }
+template<typename dataT, int dimensions>
+class accessor<dataT, dimensions, access::mode::read, access::target::global_buffer, access::placeholder::false_t> {
 
-  explicit accessor(const buffer<T, Dimensions> &bufferRef) : data(bufferRef.implementation) {
-    DEBUG_INFO("copy accessor");
-  }
+  template<typename AllocatorT>
+  accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef, const property_list &propList = {});
 
-  size_t get_size() {
-    return data->get_size();
-  }
+  template<typename AllocatorT>
+  accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
+           range<dimensions> accessRange, const property_list &propList = {});
 
-  T &operator[](size_t index) {
-    return data->get(index);
-  }
+  template<typename AllocatorT>
+  accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
+           range<dimensions> accessRange, id<dimensions> accessOffset, const property_list &propList = {});
 
-  T &operator[](size_t index) const {
-    return data->get(index);
-  }
+  template<typename AllocatorT>
+  accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
+           handler &commandGroupHandlerRef, range<dimensions> accessRange, const property_list &propList = {});
 
-  T &operator[](const id<Dimensions> &index) {
-    return data->get(index);
-  }
+  template<typename AllocatorT>
+  accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
+           handler &commandGroupHandlerRef,
+           range<dimensions> accessRange,
+           id<dimensions> accessOffset,
+           const property_list &propList = {});
 
-  T &operator[](const id<Dimensions> &index) const {
-    return data->get(index);
-  }
+  constexpr bool is_placeholder() const;
 
-  T *begin() const {
-    return data->begin();
-  }
+  size_t get_size() const;
 
-  T *end() const {
-    return data->end();
-  }
+  size_t get_count() const;
 
+  range<dimensions> get_range() const;
+
+  id<dimensions> get_offset() const;
+
+  operator dataT &() const;
+
+  dataT operator[](id<dimensions> index) const;
+
+  operator dataT() const;
+};
+
+template<typename dataT, int dimensions>
+class accessor<dataT, dimensions, access::mode::write, access::target::global_buffer, access::placeholder::false_t> {
+
+  template<typename AllocatorT>
+  accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef, const property_list &propList = {});
+
+  template<typename AllocatorT>
+  accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
+           range<dimensions> accessRange, const property_list &propList = {});
+
+  template<typename AllocatorT>
+  accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
+           range<dimensions> accessRange, id<dimensions> accessOffset, const property_list &propList = {});
+
+  template<typename AllocatorT>
+  accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
+           handler &commandGroupHandlerRef, range<dimensions> accessRange, const property_list &propList = {});
+
+  template<typename AllocatorT>
+  accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
+           handler &commandGroupHandlerRef,
+           range<dimensions> accessRange,
+           id<dimensions> accessOffset,
+           const property_list &propList = {});
+
+  constexpr bool is_placeholder() const;
+
+  size_t get_size() const;
+
+  size_t get_count() const;
+
+  range<dimensions> get_range() const;
+
+  id<dimensions> get_offset() const;
+
+  operator dataT &() const;
+
+  dataT operator[](id<dimensions> index) const;
+
+  operator dataT() const;
 };
 
 }

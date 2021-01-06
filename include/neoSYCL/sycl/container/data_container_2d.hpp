@@ -6,8 +6,8 @@
 
 namespace neosycl::sycl::detail {
 
-template<typename T>
-class DataContainerND<T, 2> : public DataContainer {
+template<typename T, typename AllocatorT>
+class DataContainerND<T, 2, AllocatorT> : public DataContainer {
  private:
   range<2> data_range;
   buffer_allocator<T> alloc;
@@ -60,6 +60,8 @@ class DataContainerND<T, 2> : public DataContainer {
   }
 
  public:
+  DataContainerND(DataContainerND &obj) = delete;
+
   explicit DataContainerND(const range<2> &r) : data_range(r), need_deallocate(true) {
     DEBUG_INFO("[DataContainer2D] create 2 container with range-1d: {}, range-2d: {}, allocate size: {}",
                data_range.get(1),

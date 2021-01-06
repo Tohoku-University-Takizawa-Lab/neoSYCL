@@ -45,8 +45,8 @@ class device {
   vector_class<device> create_sub_devices(const vector_class<size_t> &counts) const;
 
 // Available only when prop == info::partition_property::partition_by_affinity_domain
-  template<info::partition_property prop>
-  vector_class<device> create_sub_devices(info::affinity_domain affinityDomain) const;
+//  template<info::partition_property prop>
+//  vector_class<device> create_sub_devices(info::affinity_domain affinityDomain) const;
 
   static vector_class<device> get_devices(
       info::device_type deviceType = info::device_type::all);

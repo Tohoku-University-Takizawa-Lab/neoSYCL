@@ -5,7 +5,7 @@
 
 namespace neosycl::sycl::detail {
 
-template<typename T, int Dimensions>
+template<typename T, int Dimensions, typename AllocatorT = buffer_allocator<T>>
 class DataContainerND : public DataContainer {};
 
 }

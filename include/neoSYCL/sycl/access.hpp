@@ -1,35 +1,39 @@
 #ifndef CUSTOM_SYCL_INCLUDE_SYCL_ACCESS_HPP_
 #define CUSTOM_SYCL_INCLUDE_SYCL_ACCESS_HPP_
 
-#include "range.hpp"
-
 namespace neosycl::sycl {
 
 namespace access {
 
-enum mode {
-  read = 42,
-  write,
-  read_write,
-  discard_write,
-};
-
-enum target {
-  global_buffer = 2014, //< Just pick a random number...
+enum class target {
+  global_buffer = 2014,
   constant_buffer,
   local,
   image,
   host_buffer,
   host_image,
-  image_array,
-  cl_buffer,
-  cl_image
+  image_array
 };
 
-enum class fence_space : char {
-  local_space,
+enum class mode {
+  read = 1024,
+  write,
+  read_write,
+  discard_write,
+  discard_read_write,
+  atomic
+};
+
+enum placeholder {
+  false_t,
+  true_t
+};
+
+enum class address_space : int {
   global_space,
-  global_and_local
+  local_space,
+  constant_space,
+  private_space
 };
 
 }
