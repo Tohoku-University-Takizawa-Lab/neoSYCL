@@ -13,7 +13,6 @@ class SharedPtrImplementation {
   SharedPtrImplementation(Implementation *i) : implementation(i) {}
 
   SharedPtrImplementation() = default;
-
 };
 }
 

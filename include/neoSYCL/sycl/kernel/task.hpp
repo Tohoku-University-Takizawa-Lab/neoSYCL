@@ -3,7 +3,6 @@
 
 #include <utility>
 
-#include "kernel_arg.hpp"
 #include "kernel.hpp"
 
 namespace neosycl::sycl::detail {

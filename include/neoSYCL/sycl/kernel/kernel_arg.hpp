@@ -12,21 +12,6 @@ struct KernelArg {
 
   KernelArg(std::shared_ptr<detail::DataContainer> arg, access::mode mode) : container(std::move(arg)), mode(mode) {}
 
-  void lock() const {
-    if (mode == access::mode::read_write || mode == access::mode::write || mode == access::mode::discard_write) {
-      container->lock_write();
-    } else {
-      container->lock_read();
-    }
-  }
-
-  void unlock() const {
-    if (mode == access::mode::read_write || mode == access::mode::write || mode == access::mode::discard_write) {
-      container->unlock_write();
-    } else {
-      container->unlock_read();
-    }
-  }
 };
 
 }

@@ -63,38 +63,20 @@ class DataContainerND<T, 2, AllocatorT> : public DataContainer {
   DataContainerND(DataContainerND &obj) = delete;
 
   explicit DataContainerND(const range<2> &r) : data_range(r), need_deallocate(true) {
-    DEBUG_INFO("[DataContainer2D] create 2 container with range-1d: {}, range-2d: {}, allocate size: {}",
-               data_range.get(1),
-               data_range.get(2),
-               data_range.size());
-    data_ptr = alloc.allocate(data_range.size());
     access_ptr = build_access_ptr(data_ptr);
   }
 
   explicit DataContainerND(T *data, const range<2> &r) : data_range(r), need_deallocate(false) {
-    DEBUG_INFO("[DataContainer2D] create 2d container with range-1d: {}, range-2d: {}, from raw data: {}",
-               data_range.get(1),
-               data_range.get(2),
-               (size_t) data);
-
     data_ptr = data;
     access_ptr = build_access_ptr(data_ptr);
   }
 
   DataContainerND(const DataContainerND &obj) : data_range(obj.data_range), need_deallocate(obj.need_deallocate) {
-    DEBUG_INFO("[DataContainer2D] copy construct 2d container with range-1d: {}, range-2d: {}, need_allocate: {}",
-               obj.data_range.get(1),
-               obj.data_range.get(2),
-               obj.need_deallocate);
     copy_from(obj);
   }
 
   DataContainerND &operator=(const DataContainerND &obj) {
     if (&obj != this) {
-      DEBUG_INFO("[DataContainer2D] copy 2d container with range-1d: {}, range-2d: {}, need_allocate: {}",
-                 obj.data_range.get(1),
-                 obj.data_range.get(2),
-                 obj.need_deallocate);
       deallocate();
       data_range = obj.data_range;
       need_deallocate = obj.need_deallocate;
@@ -120,23 +102,15 @@ class DataContainerND<T, 2, AllocatorT> : public DataContainer {
     return this->access_ptr[x];
   }
 
-  T &get(size_t x, size_t y) const {
-    return access_ptr[x][y];
+  T &get(size_t dim0, size_t dim1) const {
+    return access_ptr[dim0][dim1];
   }
 
-  T &get(const id<2> &index) const {
-    return access_ptr[index][index.get(2)];
-  }
-
-  T *get(size_t i) {
-    return access_ptr[i];
+  T *get(size_t dim0) {
+    return access_ptr[dim0];
   }
 
   virtual ~DataContainerND() {
-    DEBUG_INFO("[DataContainer2D] deallocate 2d container with range-1d: {}, range-2d: {}, need_allocate: {}",
-               data_range.get(1),
-               data_range.get(2),
-               need_deallocate);
     deallocate();
   }
 

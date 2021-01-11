@@ -16,13 +16,13 @@ template<typename dataT, int dimensions, access::mode accessmode,
     access::placeholder isPlaceholder = access::placeholder::false_t>
 class accessor {};
 
-
-
 template<typename dataT, int dimensions>
 class accessor<dataT, dimensions, access::mode::read, access::target::global_buffer, access::placeholder::false_t> {
-
+ public:
   template<typename AllocatorT>
-  accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef, const property_list &propList = {});
+  accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef, const property_list &propList = {}) {
+
+  }
 
   template<typename AllocatorT>
   accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
@@ -58,11 +58,17 @@ class accessor<dataT, dimensions, access::mode::read, access::target::global_buf
   dataT operator[](id<dimensions> index) const;
 
   operator dataT() const;
+
+
+  /* not standard */
+
+
 };
 
 template<typename dataT, int dimensions>
 class accessor<dataT, dimensions, access::mode::write, access::target::global_buffer, access::placeholder::false_t> {
 
+ public:
   template<typename AllocatorT>
   accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef, const property_list &propList = {});
 
@@ -97,7 +103,7 @@ class accessor<dataT, dimensions, access::mode::write, access::target::global_bu
 
   operator dataT &() const;
 
-  dataT operator[](id<dimensions> index) const;
+  dataT &operator[](id<dimensions> index) const;
 
   operator dataT() const;
 };

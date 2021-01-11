@@ -12,60 +12,64 @@
 #include "handler_event.hpp"
 #include "platform.hpp"
 #include "context.hpp"
-#include "kernel/task.hpp"
 
 namespace neosycl::sycl {
 
-class queue : detail::SharedPtrImplementation<detail::TaskQueue> {
-  using base_class = typename detail::SharedPtrImplementation<detail::TaskQueue>;
- private:
-  device bind_device;
-
+class queue {
  public:
+  explicit queue(const property_list &propList = {});
 
-  explicit queue(const property_list &propList = {}) : base_class(new detail::TaskQueue()) {}
+  explicit queue(const async_handler &asyncHandler, const property_list &propList = {});
 
-  explicit queue(const async_handler &asyncHandler, const property_list &propList = {})
-      : base_class(new detail::TaskQueue()) {}
+  explicit queue(const device_selector &deviceSelector, const property_list &propList = {});
 
-  explicit queue(const device_selector &deviceSelector, const property_list &propList = {})
-      : base_class(new detail::TaskQueue()) {
-  }
+  explicit queue(const device_selector &deviceSelector,
+                 const async_handler &asyncHandler, const property_list &propList = {});
 
-  explicit queue(device dev, const property_list &propList = {})
-      : base_class(new detail::TaskQueue()), bind_device(std::move(dev)) {
-  }
+  explicit queue(const device &syclDevice, const property_list &propList = {});
 
-  device get_device() {
-    return bind_device;
-  }
+  explicit queue(const device &syclDevice, const async_handler &asyncHandler,
+                 const property_list &propList = {});
 
-  bool is_host() {
-    return bind_device.is_host();
-  }
+  explicit queue(const context &syclContext, const device_selector &deviceSelector,
+                 const property_list &propList = {});
 
-  void wait() {
-    implementation->wait();
-  }
+  explicit queue(const context &syclContext, const device_selector &deviceSelector,
+                 const async_handler &asyncHandler, const property_list &propList = {});
 
-  void wait_and_throw() {
-    implementation->wait();
-  }
+  explicit queue(const context &syclContext, const device &syclDevice,
+                 const property_list &propList = {});
+
+  explicit queue(const context &syclContext, const device &syclDevice,
+                 const async_handler &asyncHandler, const property_list &propList = {});
+
+//  explicit queue(cl_command_queue clQueue, const context &syclContext,
+//                 const async_handler &asyncHandler = {});
+
+//  cl_command_queue get() const;
+
+  context get_context() const;
+
+  device get_device() const;
+
+  bool is_host() const;
 
   template<info::queue param>
-  typename info::param_traits<info::queue, param>::type get_info() const {
-    throw UnimplementedException();
+  typename info::param_traits<info::queue, param>::return_type get_info() const;
+
+  template<typename T>
+  event submit(T cgf) {
+
   }
 
-  virtual handler_event submit(const std::function<void(handler &)> &cgf) {
-    handler command_group_handler(implementation);
-    cgf(command_group_handler);
-    return handler_event();
-  }
+  template<typename T>
+  event submit(T cgf, const queue &secondaryQueue);
 
-  virtual ~queue() {
-    implementation->wait();
-  }
+  void wait();
+
+  void wait_and_throw();
+
+  void throw_asynchronous();
 
 };
 

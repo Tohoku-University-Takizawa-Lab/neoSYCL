@@ -15,38 +15,56 @@
 namespace neosycl::sycl {
 
 template<typename T, int dimensions = 1, typename AllocatorT = buffer_allocator<T>>
-class buffer : public detail::SharedPtrImplementation<detail::DataContainerND<T, 1>> {
+class buffer;
+
+template<typename T, typename AllocatorT>
+class buffer<T, 1, AllocatorT> : public detail::SharedPtrImplementation<detail::DataContainerND<T, 1>> {
+  friend class accessor<T, 1, access::mode::read>;
+  friend class accessor<T, 1, access::mode::write>;
+
  public:
   using value_type = T;
   using reference = value_type &;
   using const_reference = const value_type &;
   using allocator_type = AllocatorT;
 
-  buffer(const range<dimensions> &bufferRange, const property_list &propList = {})
-      : bufferRange(bufferRange), detail::SharedPtrImplementation(alloc.allocate(bufferRange.size())) {}
+  buffer(const range<1> &bufferRange, const property_list &propList = {})
+      : bufferRange(bufferRange),
+        detail::SharedPtrImplementation<detail::DataContainerND<T, 1, AllocatorT>>
+            (new detail::DataContainerND<T, 1, AllocatorT>(bufferRange.size())) {}
 
-  buffer(const range<dimensions> &bufferRange, AllocatorT allocator, const property_list &propList = {})
-      : bufferRange(bufferRange), detail::SharedPtrImplementation(allocator.allocate(bufferRange.size())) {}
+  buffer(const range<1> &bufferRange, AllocatorT allocator, const property_list &propList = {})
+      : bufferRange(bufferRange),
+        detail::SharedPtrImplementation<detail::DataContainerND<T, 1, AllocatorT>>
+            (new detail::DataContainerND<T, 1, AllocatorT>(bufferRange.size())) {}
 
-  buffer(T *hostData, const range<dimensions> &bufferRange, const property_list &propList = {}) :
-      bufferRange(bufferRange), detail::SharedPtrImplementation(hostData) {}
+  buffer(T *hostData, const range<1> &bufferRange, const property_list &propList = {}) :
+      bufferRange(bufferRange),
+      detail::SharedPtrImplementation<detail::DataContainerND<T, 1, AllocatorT>>
+          (new detail::DataContainerND<T, 1, AllocatorT>(hostData, bufferRange.size())) {}
 
-  buffer(T *hostData, const range<dimensions> &bufferRange, AllocatorT allocator, const property_list &propList = {}) :
-      bufferRange(bufferRange), detail::SharedPtrImplementation(hostData) {}
+  buffer(T *hostData, const range<1> &bufferRange, AllocatorT allocator, const property_list &propList = {}) :
+      bufferRange(bufferRange),
+      detail::SharedPtrImplementation<detail::DataContainerND<T, 1, AllocatorT>>
+          (new detail::DataContainerND<T, 1, AllocatorT>(hostData, bufferRange.size())) {}
 
-  buffer(const T *hostData, const range<dimensions> &bufferRange, const property_list &propList = {}) :
-      bufferRange(bufferRange), detail::SharedPtrImplementation(hostData) {}
+  buffer(const T *hostData, const range<1> &bufferRange, const property_list &propList = {}) :
+      bufferRange(bufferRange),
+      detail::SharedPtrImplementation<detail::DataContainerND<T, 1, AllocatorT>>
+          (new detail::DataContainerND<T, 1, AllocatorT>(hostData, bufferRange.size())) {}
 
   buffer(const T *hostData,
-         const range<dimensions> &bufferRange,
+         const range<1> &bufferRange,
          AllocatorT allocator,
          const property_list &propList = {}) :
-      bufferRange(bufferRange), detail::SharedPtrImplementation(hostData) {}
+      bufferRange(bufferRange),
+      detail::SharedPtrImplementation<detail::DataContainerND<T, 1>>
+          (new detail::DataContainerND<T, 1, AllocatorT>(hostData, bufferRange.size())) {}
 
   buffer(const shared_ptr_class<T> &hostData,
-         const range<dimensions> &bufferRange, AllocatorT allocator, const property_list &propList = {});
+         const range<1> &bufferRange, AllocatorT allocator, const property_list &propList = {});
 
-  buffer(const shared_ptr_class<T> &hostData, const range<dimensions> &bufferRange, const property_list &propList = {});
+  buffer(const shared_ptr_class<T> &hostData, const range<1> &bufferRange, const property_list &propList = {});
 
   template<class InputIterator>
   buffer<T, 1>(InputIterator first, InputIterator last, AllocatorT allocator,
@@ -56,15 +74,15 @@ class buffer : public detail::SharedPtrImplementation<detail::DataContainerND<T,
   buffer<T, 1>(InputIterator first, InputIterator last,
                const property_list &propList = {});
 
-  buffer(buffer<T, dimensions, AllocatorT> b, const id<dimensions> &baseIndex,
-         const range<dimensions> &subRange);
+  buffer(buffer<T, 1, AllocatorT> b, const id<1> &baseIndex,
+         const range<1> &subRange);
 
 /* Available only when: dimensions == 1. */
 //  buffer(cl_mem clMemObject, const context &syclContext, event availableEvent = {});
 
 /* -- common interface members -- */
 /* -- property interface members -- */
-  range<dimensions> get_range() const {
+  range<1> get_range() const {
     return bufferRange;
   }
 
@@ -76,21 +94,23 @@ class buffer : public detail::SharedPtrImplementation<detail::DataContainerND<T,
     return get_count() * sizeof(T);
   }
 
-  AllocatorT get_allocator() const;
+  AllocatorT get_allocator() const {
+    return AllocatorT();
+  }
 
   template<access::mode mode, access::target target = access::target::global_buffer>
-  accessor<T, dimensions, mode, target> get_access(
+  accessor<T, 1, mode, target> get_access(
       handler &commandGroupHandler);
   template<access::mode mode>
-  accessor<T, dimensions, mode, access::target::host_buffer> get_access();
+  accessor<T, 1, mode, access::target::host_buffer> get_access();
 
   template<access::mode mode, access::target target = access::target::global_buffer>
-  accessor<T, dimensions, mode, target> get_access(
-      handler &commandGroupHandler, range<dimensions> accessRange, id<dimensions> accessOffset = {});
+  accessor<T, 1, mode, target> get_access(
+      handler &commandGroupHandler, range<1> accessRange, id<1> accessOffset = {});
 
   template<access::mode mode>
-  accessor<T, dimensions, mode, access::target::host_buffer> get_access(
-      range<dimensions> accessRange, id<dimensions> accessOffset = {});
+  accessor<T, 1, mode, access::target::host_buffer> get_access(
+      range<1> accessRange, id<1> accessOffset = {});
 
   template<typename Destination = std::nullptr_t>
   void set_final_data(Destination finalData = nullptr);
@@ -103,8 +123,7 @@ class buffer : public detail::SharedPtrImplementation<detail::DataContainerND<T,
   buffer<ReinterpretT, ReinterpretDim, AllocatorT> reinterpret(range<ReinterpretDim> reinterpretRange) const;
 
  private:
-  allocator_type alloc;
-  range<dimensions> bufferRange;
+  range<1> bufferRange;
 };
 
 }
