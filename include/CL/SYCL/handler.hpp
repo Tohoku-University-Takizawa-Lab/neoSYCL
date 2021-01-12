@@ -3,7 +3,6 @@
 
 #include <utility>
 #include <shared_mutex>
-#include "omp.h"
 
 #include "CL/SYCL/types.hpp"
 #include "CL/SYCL/event.hpp"
@@ -29,16 +28,7 @@ namespace detail {
 template<typename KernelName>
 string_class get_kernel_name_from_class() {
   KernelName *p;
-  string_class in = typeid(p).name();
-
-  int index = 0;
-  for (int i = 0; i < in.size(); i++) {
-    char curr = in[i];
-    if ('0' <= curr && curr <= '9') {
-      index = i;
-    }
-  }
-  return in.substr(index + 1, in.size() - index);
+  return typeid(p).name();
 }
 
 }
@@ -96,7 +86,7 @@ class handler {
       if (task->is_cpu()) {
         f();
       } else {
-        string_class name_str = KernelName::name();
+        string_class name_str = detail::get_kernel_name_from_class<KernelName>();
         task->get_kernel(name_str)->single_task();
       }
     };
@@ -109,12 +99,11 @@ class handler {
 
     auto func = [task = task, f = f, r = global_size]() {
       if (task->is_cpu()) {
-#pragma omp parallel for
         for (size_t x = 0; x < r.get(1); x++) {
           f(id<1>(x));
         }
       } else {
-        string_class name_str = KernelName::name();
+        string_class name_str = detail::get_kernel_name_from_class<KernelName>();
         task->get_kernel(name_str)->parallel_for(r);
       }
     };
@@ -133,7 +122,7 @@ class handler {
           }
         }
       } else {
-        string_class name_str = KernelName::name();
+        string_class name_str = detail::get_kernel_name_from_class<KernelName>();
         task->get_kernel(name_str)->parallel_for(r);
       }
     };
@@ -154,7 +143,7 @@ class handler {
           }
         }
       } else {
-        string_class name_str = KernelName::name();
+        string_class name_str = detail::get_kernel_name_from_class<KernelName>();
         task->get_kernel(name_str)->parallel_for(r);
       }
     };
