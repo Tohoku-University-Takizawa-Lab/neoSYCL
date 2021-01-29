@@ -2,6 +2,8 @@
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
+#include <sys/time.h>
+
 //#define NUM_THREAD 4
 #define OPEN
 
@@ -12,6 +14,12 @@ struct Node {
   int starting;
   int no_of_edges;
 };
+
+long get_time() {
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  return tv.tv_sec * 1000 + tv.tv_usec / 1000;
+}
 
 void BFSGraph(int argc, char **argv);
 
@@ -51,6 +59,8 @@ void BFSGraph(int argc, char **argv) {
     printf("Error Reading graph file\n");
     return;
   }
+
+  long start_time = get_time();
 
   int source = 0;
 
@@ -103,6 +113,8 @@ void BFSGraph(int argc, char **argv) {
 
   printf("Start traversing the tree\n");
 
+  long kernel_start_time = get_time();
+
   int k = 0;
 
   bool stop;
@@ -135,8 +147,14 @@ void BFSGraph(int argc, char **argv) {
     k++;
   } while (stop);
 
+  long end_time = get_time();
+
+  printf("Total cost: %ld ms\n", end_time - start_time);
+  printf("Kernel cost: %ld ms\n", end_time - kernel_start_time);
+
+
   //Store the result into a file
-  FILE *fpo = fopen("result.txt", "w");
+  FILE * fpo = fopen("result.txt", "w");
   for (int i = 0; i < no_of_nodes; i++)
     fprintf(fpo, "%d) cost:%d\n", i, h_cost[i]);
   fclose(fpo);

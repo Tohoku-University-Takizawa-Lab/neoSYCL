@@ -2,6 +2,8 @@
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
+#include <sys/time.h>
+
 #include <CL/sycl.hpp>
 
 //#define NUM_THREAD 4
@@ -16,6 +18,12 @@ struct Node {
   int starting;
   int no_of_edges;
 };
+
+long get_time() {
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  return tv.tv_sec * 1000 + tv.tv_usec / 1000;
+}
 
 void BFSGraph(int argc, char **argv);
 
@@ -55,6 +63,8 @@ void BFSGraph(int argc, char **argv) {
     printf("Error Reading graph file\n");
     return;
   }
+
+  long start_time = get_time();
 
   int source = 0;
 
@@ -113,14 +123,17 @@ void BFSGraph(int argc, char **argv) {
 
   buffer<int> h_cost_buf(h_cost, range<1>(no_of_nodes));
 
-
   for (int i = 0; i < no_of_nodes; i++)
     h_cost[i] = -1;
   h_cost[source] = 0;
 
   printf("Start traversing the tree\n");
 
-  queue q;
+  long kernel_start_time = get_time();
+
+  ve_queue q;
+
+  buffer<int> n_buf(&no_of_nodes, range<1>(1));
 
   q.submit([&](handler &cgh) {
     auto h_graph_mask_buf_access = h_graph_mask_buf.get_access<access::mode::read_write>(cgh);
@@ -131,13 +144,15 @@ void BFSGraph(int argc, char **argv) {
     auto h_graph_edges_buf_access = h_graph_edges_buf.get_access<access::mode::read>(cgh);
     auto h_cost_buf_access = h_cost_buf.get_access<access::mode::read_write>(cgh);
 
+    auto no_of_nodes_access = n_buf.get_access<access::mode::read>(cgh);
+
     cgh.single_task<class traversing>([=]() {
       int k = 0;
       bool stop;
       do {
         //if no thread changes this value then the loop stops
         stop = false;
-        for (int tid = 0; tid < no_of_nodes; tid++) {
+        for (int tid = 0; tid < no_of_nodes_access[0]; tid++) {
           if (h_graph_mask_buf_access[tid] == true) {
             h_graph_mask_buf_access[tid] = false;
             for (int i = h_graph_nodes_buf_access[tid].starting;
@@ -152,7 +167,7 @@ void BFSGraph(int argc, char **argv) {
           }
         }
 
-        for (int tid = 0; tid < no_of_nodes; tid++) {
+        for (int tid = 0; tid < no_of_nodes_access[0]; tid++) {
           if (h_updating_graph_mask_buf_access[tid] == true) {
             h_graph_mask_buf_access[tid] = true;
             h_graph_visited_buf_access[tid] = true;
@@ -169,8 +184,13 @@ void BFSGraph(int argc, char **argv) {
 
   q.wait();
 
+  long end_time = get_time();
+
+  printf("Total cost: %ld ms\n", end_time - start_time);
+  printf("Kernel cost: %ld ms\n", end_time - kernel_start_time);
+
   //Store the result into a file
-  FILE *fpo = fopen("result.txt", "w");
+  FILE * fpo = fopen("result.txt", "w");
   for (int i = 0; i < no_of_nodes; i++)
     fprintf(fpo, "%d) cost:%d\n", i, h_cost[i]);
   fclose(fpo);

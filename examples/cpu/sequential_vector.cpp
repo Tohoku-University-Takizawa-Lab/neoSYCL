@@ -1,53 +1,27 @@
 #include <CL/sycl.hpp>
-#include <iostream>
-#include <unistd.h>
 
 using namespace cl::sycl;
 
-REGISTER_KERNEL(sequential_vector);
-
 int main() {
-  const int N = 3;
-  using Vector = float[N];
+  cl::sycl::queue q;
 
-  Vector a = {1, 2, 3};
-  Vector b = {5, 6, 8};
+  T *a;
+  T *b;
+  T *c;
 
-  float c[N];
+  buffer<T> buf_a(a, range<1>(n));
+  buffer<T> buf_b(b, range<1>(n));
+  buffer<T> buf_c(c, range<1>(n));
 
-  { // By sticking all the SYCL work in a {} block, we ensure
-    // all SYCL tasks must complete before exiting the block
+  q.submit([&](handler &cgh) {
+    auto ka = buf_a.template get_access<access::mode::write>(cgh);
+    auto kb = buf_b.template get_access<access::mode::read>(cgh);
+    auto kc = buf_c.template get_access<access::mode::read>(cgh);
+    cgh.parallel_for<class triad_kernel>(range<1>(n), [=](const id<1> &i) {
+      ka[i] = kb[i] + 0.4 * kc[i];
+    });
+  });
+  queue.wait();
 
-    // Create a queue to work on
-    queue myQueue;
-
-    // Create buffers from a & b vectors with 2 different syntax
-    buffer<float> A(a, range<1>(N));
-    buffer<float> B{b, range<1>(N)};
-
-    // A buffer of N float using the storage of c
-    buffer<float> C(c, N);
-
-    /* The command group describing all operations needed for the kernel
-       execution */
-    myQueue.submit([&](handler &cgh) {
-      // In the kernel A and B are read, but C is written
-      auto ka = A.get_access<access::mode::read>(cgh);
-      auto kb = B.get_access<access::mode::read>(cgh);
-      auto kc = C.get_access<access::mode::write>(cgh);
-
-      // Enqueue a single, simple task
-      cgh.single_task<class sequential_vector>([=]() {
-        for (size_t i = 0; i != N; i++) {
-          kc[i] = ka[i] + kb[i];
-        }
-      });
-    }); // End of our commands for this queue
-
-  } // End scope, so we wait for the queue to complete
-
-  std::cout << "Result:" << std::endl;
-  for (size_t i = 0; i != N; i++)
-    std::cout << c[i] << " ";
-  std::cout << std::endl;
+  return 0;
 }

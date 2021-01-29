@@ -1,6 +1,7 @@
 #ifndef SYCL_INCLUDE_CL_SYCL_NEC_VE_QUEUE_HPP_
 #define SYCL_INCLUDE_CL_SYCL_NEC_VE_QUEUE_HPP_
 
+#include "ve_offload.h"
 #include "CL/SYCL/nec/ve_task.hpp"
 
 namespace cl::sycl {
