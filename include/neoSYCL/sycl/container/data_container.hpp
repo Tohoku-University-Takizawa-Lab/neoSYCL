@@ -1,6 +1,9 @@
 #ifndef SYCL_INCLUDE_CL_SYCL_BUFFER_DATA_CONTAINER_HPP_
 #define SYCL_INCLUDE_CL_SYCL_BUFFER_DATA_CONTAINER_HPP_
 
+#include <mutex>
+#include <shared_mutex>
+
 namespace neosycl::sycl::detail {
 
 // Data container interface

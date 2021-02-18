@@ -47,6 +47,4 @@ endif ()
 add_subdirectory(examples)
 
 # add tests
-if (BUILD_TESTING)
-    add_subdirectory(tests)
-endif ()
+add_subdirectory(tests)

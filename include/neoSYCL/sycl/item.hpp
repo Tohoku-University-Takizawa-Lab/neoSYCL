@@ -7,7 +7,35 @@ template<std::size_t dimensions>
 struct id;
 
 template<int dimensions = 1, bool with_offset = true>
-struct item {};
+struct item {
+ public:
+
+  item() = delete;
+
+  id<dimensions> get_id() const {
+    return id<dimensions>(this);
+  };
+
+  size_t get_id(int dimension) const {
+    return this->index[dimension];
+  };
+
+  size_t operator[](int dimension) const {
+    return this->index[dimension];
+  }
+
+  template<typename = std::enable_if_t<dimensions == 1>>
+  range<dimensions> get_range() const {
+    return range<dimensions>(this->size[0]);
+  }
+
+ private:
+
+  size_t offset;
+  size_t index[3];
+  size_t size[3];
+
+};
 
 template<bool with_offset>
 struct item<1, with_offset> {

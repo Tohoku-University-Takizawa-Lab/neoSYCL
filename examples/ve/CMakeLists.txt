@@ -1,9 +1,0 @@
-add_executable(
-        ve_sequential_vector
-        sequential_vector.cpp
-)
-
-if (CMAKE_BUILD_TYPE STREQUAL Debug)
-    target_link_libraries(ve_sequential_vector fmt)
-endif ()
-
