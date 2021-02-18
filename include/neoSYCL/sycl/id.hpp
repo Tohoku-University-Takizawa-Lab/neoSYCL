@@ -9,14 +9,14 @@ namespace neosycl::sycl {
 
 template<std::size_t dimensions = 1>
 struct id {
- public:
-  template<typename = std::enable_if_t<dimensions == 1>>
+public:
+  template<int D = dimensions, typename = std::enable_if_t<D == 1>>
   id(size_t dim0) : data{dim0} {}
 
-  template<typename = std::enable_if_t<dimensions == 2>>
+  template<int D = dimensions, typename = std::enable_if_t<D == 2>>
   id(size_t dim0, size_t dim1) : data{dim0, dim1} {}
 
-  template<typename = std::enable_if_t<dimensions == 3>>
+  template<int D = dimensions, typename = std::enable_if_t<D == 3>>
   id(size_t dim0, size_t dim1, size_t dim2) : data{dim0, dim1, dim2} {}
 
   id(const range<dimensions> &range) {
@@ -35,7 +35,15 @@ struct id {
     return data[dimension];
   }
 
- private:
+  size_t &operator[](int dimension) {
+    return data[dimension];
+  }
+
+  size_t operator[](int dimension) const {
+    return data[dimension];
+  }
+
+private:
   detail::ArrayND<dimensions> data;
 };
 
