@@ -33,8 +33,6 @@ public:
     return data.get_liner();
   }
 
-
-
 private:
   detail::ArrayND<dimensions> data;
 };

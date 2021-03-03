@@ -16,7 +16,7 @@
 namespace neosycl::sycl {
 
 class queue {
- public:
+public:
   explicit queue(const property_list &propList = {});
 
   explicit queue(const async_handler &asyncHandler, const property_list &propList = {});
@@ -58,9 +58,7 @@ class queue {
   typename info::param_traits<info::queue, param>::return_type get_info() const;
 
   template<typename T>
-  event submit(T cgf) {
-
-  }
+  event submit(T cgf) {}
 
   template<typename T>
   event submit(T cgf, const queue &secondaryQueue);

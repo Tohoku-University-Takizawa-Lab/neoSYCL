@@ -8,36 +8,65 @@ namespace neosycl::sycl::detail {
 
 template<typename T, typename AllocatorT>
 class DataContainerND<T, 1, AllocatorT> : public DataContainer {
- private:
+private:
   size_t dim0;
-  std::shared_ptr<std::vector<T> > data_ptr;
-  buffer_allocator<T> alloc;
-  T *raw;
+  AllocatorT alloc;
+  T *ptr;
+  shared_ptr_class <T> allocate_ptr;
 
- public:
-  explicit DataContainerND(size_t dim0) : dim0(dim0), data_ptr(alloc.allocate(dim0)), raw(data_ptr.get()->begin()) {}
-
-  explicit DataContainerND(T *data, size_t dim0) : dim0(dim0), raw(data) {}
-
-  size_t get_size() override {
-    size_t ret = sizeof(T) * dim0;;
-    return ret;
+public:
+  explicit DataContainerND(size_t dim0) : dim0(dim0) {
+    allocate_ptr = shared_ptr_class<T>(alloc.allocate(dim0));
+    ptr = allocate_ptr.get();
   }
 
-  void *get_data_ptr() override {
-    return (void *) raw;
+  DataContainerND(size_t dim0, AllocatorT allocatorT) : alloc(allocatorT), dim0(dim0) {
+    allocate_ptr = shared_ptr_class<T>(alloc.allocate(dim0));
+    ptr = allocate_ptr.get();
+  }
+
+  DataContainerND(T *data, size_t dim0) : dim0(dim0), ptr(data) {}
+
+  DataContainerND(const T *data, size_t dim0) : dim0(dim0) {
+    allocate_ptr = shared_ptr_class<T>(alloc.allocate(dim0));
+    ptr = allocate_ptr.get();
+    memccpy(ptr, data, sizeof(T) * dim0);
+  }
+
+  DataContainerND(const T *data, size_t dim0, AllocatorT allocatorT) : alloc(allocatorT), dim0(dim0) {
+    allocate_ptr = shared_ptr_class<T>(alloc.allocate(dim0));
+    ptr = allocate_ptr.get();
+    memccpy(ptr, data, sizeof(T) * dim0);
+  }
+
+  DataContainerND(const DataContainerND &obj) :
+      dim0(obj.dim0),
+      alloc(obj.alloc) {
+    allocate_ptr = shared_ptr_class<T>(alloc.allocate(dim0));
+    ptr = allocate_ptr.get();
+    memcpy(ptr, obj.ptr, sizeof(T) * dim0);
+  }
+
+  DataContainerND &operator=(const DataContainerND &obj) = delete;
+
+  size_t get_size() {
+    return sizeof(T) * dim0;
+  }
+
+  T *get_ptr() {
+    return ptr;
   }
 
   T *begin() {
-    return raw;
+    return ptr;
   }
 
   T *end() {
-    return raw + dim0;
+    return ptr + dim0;
   }
 
   T &operator[](size_t x) const {
-    return raw[x];
+    return ptr[x];
   }
 
 };

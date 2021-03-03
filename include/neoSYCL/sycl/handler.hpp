@@ -32,11 +32,9 @@ string_class get_kernel_name_from_class() {
 }
 
 class handler {
- public:
+public:
   template<typename KernelName, typename KernelType>
-  void single_task(KernelType kernelFunc) {
-
-  }
+  void single_task(KernelType kernelFunc) {}
 
   template<typename KernelName, typename KernelType>
   void parallel_for(range<1> numWorkItems, KernelType kernelFunc);

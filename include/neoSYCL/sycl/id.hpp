@@ -10,6 +10,7 @@ namespace neosycl::sycl {
 template<std::size_t dimensions = 1>
 struct id {
 public:
+
   template<int D = dimensions, typename = std::enable_if_t<D == 1>>
   id(size_t dim0) : data{dim0} {}
 

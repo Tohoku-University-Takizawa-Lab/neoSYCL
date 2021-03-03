@@ -30,10 +30,6 @@ class DataContainer {
     mtx.unlock();
   }
 
-  virtual void *get_data_ptr() = 0;
-
-  virtual size_t get_size() = 0;
-
 };
 
 }

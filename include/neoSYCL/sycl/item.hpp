@@ -8,9 +8,16 @@ struct id;
 
 template<int dimensions = 1, bool with_offset = true>
 struct item {
- public:
+public:
 
   item() = delete;
+
+  template<int D = dimensions, typename = std::enable_if_t<D == 1>>
+  item(const range <dimensions> &r,
+       const detail::ArrayND <dimensions> &index,
+       const detail::ArrayND <dimensions> &offsets)
+      : max_range(r), data{index}, offset{offsets} {
+  }
 
   id<dimensions> get_id() const {
     return id<dimensions>(this);
@@ -24,80 +31,27 @@ struct item {
     return this->index[dimension];
   }
 
-  template<typename = std::enable_if_t<dimensions == 1>>
-  range<dimensions> get_range() const {
-    return range<dimensions>(this->size[0]);
+  range <dimensions> get_range() const {
+    return this->max_range;
   }
 
- private:
+  // only available if with_offset is true
+  template<bool OFFSET = with_offset, typename = std::enable_if_t<OFFSET>>
+  id<dimensions> get_offset() const {
+    return this->get_id();
+  }
 
-  size_t offset;
-  size_t index[3];
-  size_t size[3];
+  // only available if with_offset is false
+  template<bool OFFSET = with_offset, typename = std::enable_if_t<!OFFSET>>
+  operator item<dimensions, true>() const {
+    return item<dimensions, true>(this->max_range, this->data, this->data);
+  }
 
-};
+private:
+  range <dimensions> max_range;
+  detail::ArrayND <dimensions> offset;
+  detail::ArrayND <dimensions> data;
 
-template<bool with_offset>
-struct item<1, with_offset> {
-  item() = delete;
-
-  id<1> get_id() const;
-
-  size_t get_id(int dimension) const;
-
-  size_t operator[](int dimension) const;
-
-  range<1> get_range() const;
-
-  size_t get_range(int dimension) const;
-
-  size_t get_linear_id() const;
-
-  operator item<1, true>() const;
-
-  id<1> get_offset() const;
-};
-
-template<bool with_offset>
-struct item<2, with_offset> {
-  item() = delete;
-
-  id<2> get_id() const;
-
-  size_t get_id(int dimension) const;
-
-  size_t operator[](int dimension) const;
-
-  range<2> get_range() const;
-
-  size_t get_range(int dimension) const;
-
-  size_t get_linear_id() const;
-
-  operator item<2, true>() const;
-
-  id<2> get_offset() const;
-};
-
-template<bool with_offset>
-struct item<3, with_offset> {
-  item() = delete;
-
-  id<3> get_id() const;
-
-  size_t get_id(int dimension) const;
-
-  size_t operator[](int dimension) const;
-
-  range<3> get_range() const;
-
-  size_t get_range(int dimension) const;
-
-  size_t get_linear_id() const;
-
-  operator item<3, true>() const;
-
-  id<3> get_offset() const;
 };
 
 }
