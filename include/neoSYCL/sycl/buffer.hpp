@@ -7,8 +7,10 @@
 #include "accessor.hpp"
 #include "allocator.hpp"
 #include "handler.hpp"
+#include "context.hpp"
 #include "property_list.hpp"
-#include "container/containers.hpp"
+#include "detail/container/data_container.hpp"
+#include "detail/container/data_container_nd.hpp"
 
 namespace neosycl::sycl {
 
@@ -51,14 +53,16 @@ public:
 
   buffer(const range<dimensions> &bufferRange, AllocatorT allocator, const property_list &propList = {})
       : bufferRange(bufferRange),
-        data(new detail::DataContainerND<T, dimensions, AllocatorT>(bufferRange.size(), allocator)) {}
+        data(new detail::container::DataContainerND<T, AllocatorT>(bufferRange.size(), allocator)) {}
 
   buffer(T *hostData, const range<dimensions> &bufferRange, const property_list &propList = {}) :
       buffer(hostData, bufferRange, allocator_type(), propList) {}
 
   buffer(T *hostData, const range<dimensions> &bufferRange, AllocatorT allocator, const property_list &propList = {}) :
       bufferRange(bufferRange),
-      data(new detail::DataContainerND<T, dimensions, AllocatorT>(hostData, bufferRange.size(), allocator)) {}
+      data(new detail::container::DataContainerND<T, AllocatorT>(hostData,
+                                                                 bufferRange.size(),
+                                                                 allocator)) {}
 
   buffer(const T *hostData, const range<dimensions> &bufferRange, const property_list &propList = {}) :
       buffer(hostData, bufferRange, allocator_type(), propList) {}
@@ -68,16 +72,16 @@ public:
          AllocatorT allocator,
          const property_list &propList = {}) :
       bufferRange(bufferRange),
-      data(new detail::DataContainerND<T, dimensions, AllocatorT>(hostData, bufferRange.size())) {}
+      data(new detail::container::DataContainerND<T, AllocatorT>(hostData, bufferRange.size())) {}
 
   buffer(const shared_ptr_class<T> &hostData,
          const range<dimensions> &bufferRange, AllocatorT allocator, const property_list &propList = {}) :
       bufferRange(bufferRange),
-      data(new detail::DataContainerND<T, dimensions, AllocatorT>(hostData, bufferRange.size())) {}
+      data(new detail::container::DataContainerND<T, AllocatorT>(hostData, bufferRange.size())) {}
 
   buffer(const shared_ptr_class<T> &hostData, const range<dimensions> &bufferRange, const property_list &propList = {})
       : bufferRange(bufferRange),
-        data(new detail::DataContainerND<T, dimensions>(hostData, bufferRange.size())) {}
+        data(new detail::container::DataContainerND<T>(hostData, bufferRange.size())) {}
 
   template<typename InputIterator, int D = dimensions, typename = std::enable_if_t<D == 1>>
   buffer(InputIterator first,
@@ -85,12 +89,12 @@ public:
          AllocatorT allocator,
          const property_list &propList = {}) :
       bufferRange((last - first) / sizeof(T)),
-      data(new detail::DataContainerND<T, dimensions, AllocatorT>(first, (last - first) / sizeof(T))) {}
+      data(new detail::container::DataContainerND<T, AllocatorT>(first, (last - first) / sizeof(T))) {}
 
   template<typename InputIterator, int D = dimensions, typename = std::enable_if_t<D == 1>>
   buffer(InputIterator first, InputIterator last, const property_list &propList = {}) :
       bufferRange((last - first) / sizeof(T)),
-      data(new detail::DataContainerND<T, dimensions>(first, (last - first) / sizeof(T))) {}
+      data(new detail::container::DataContainerND<T>(first, (last - first) / sizeof(T))) {}
 
   buffer(buffer<T, dimensions, AllocatorT> b, const id<dimensions> &baseIndex,
          const range<dimensions> &subRange) {}
@@ -143,7 +147,7 @@ public:
   buffer<ReinterpretT, ReinterpretDim, AllocatorT> reinterpret(range<ReinterpretDim> reinterpretRange) const;
 
 private:
-  std::shared_ptr<detail::DataContainerND<T, dimensions>> data;
+  std::shared_ptr<detail::container::DataContainerND<T>> data;
 
   range<dimensions> bufferRange;
 };

@@ -1,6 +1,8 @@
 #ifndef SYCL_INCLUDE_CL_SYCL_ITEM_HPP_
 #define SYCL_INCLUDE_CL_SYCL_ITEM_HPP_
 
+#include "detail/container/array_nd.hpp"
+
 namespace neosycl::sycl {
 
 template<std::size_t dimensions>
@@ -13,9 +15,9 @@ public:
   item() = delete;
 
   template<int D = dimensions, typename = std::enable_if_t<D == 1>>
-  item(const range <dimensions> &r,
-       const detail::ArrayND <dimensions> &index,
-       const detail::ArrayND <dimensions> &offsets)
+  item(const range<dimensions> &r,
+       const detail::container::ArrayND<dimensions> &index,
+       const detail::container::ArrayND<dimensions> &offsets)
       : max_range(r), data{index}, offset{offsets} {
   }
 
@@ -31,7 +33,7 @@ public:
     return this->index[dimension];
   }
 
-  range <dimensions> get_range() const {
+  range<dimensions> get_range() const {
     return this->max_range;
   }
 
@@ -48,10 +50,9 @@ public:
   }
 
 private:
-  range <dimensions> max_range;
-  detail::ArrayND <dimensions> offset;
-  detail::ArrayND <dimensions> data;
-
+  range<dimensions> max_range;
+  detail::container::ArrayND<dimensions> offset;
+  detail::container::ArrayND<dimensions> data;
 };
 
 }

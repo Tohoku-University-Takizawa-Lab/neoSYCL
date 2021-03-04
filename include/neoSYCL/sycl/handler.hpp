@@ -9,8 +9,8 @@
 #include "event.hpp"
 #include "id.hpp"
 #include "allocator.hpp"
-#include "kernel/highlight_func.hpp"
-#include "kernel.hpp"
+#include "detail/highlight_func.hpp"
+#include "detail/kernel.hpp"
 
 namespace neosycl::sycl {
 
@@ -33,43 +33,60 @@ string_class get_kernel_name_from_class() {
 
 class handler {
 public:
-  template<typename KernelName, typename KernelType>
-  void single_task(KernelType kernelFunc) {}
+  handler() = default;
 
   template<typename KernelName, typename KernelType>
-  void parallel_for(range<1> numWorkItems, KernelType kernelFunc);
+  void single_task(KernelType kernelFunc) {
+    kernel.kernel_name = detail::get_kernel_name_from_class<KernelName>();
+
+  }
+
+  template<typename KernelName, typename KernelType>
+  void parallel_for(range<1> numWorkItems, KernelType kernelFunc) {
+    kernel.kernel_name = detail::get_kernel_name_from_class<KernelName>();
+
+  }
 
   template<typename KernelName, typename KernelType, int dimensions>
-  void parallel_for(range<dimensions> numWorkItems, id<dimensions> workItemOffset, KernelType kernelFunc);
+  void parallel_for(range<dimensions> numWorkItems, id<dimensions> workItemOffset, KernelType kernelFunc) {
+    kernel.kernel_name = detail::get_kernel_name_from_class<KernelName>();
+
+  }
 
   template<typename KernelName, typename KernelType, int dimensions>
-  void parallel_for(nd_range<dimensions> executionRange, KernelType kernelFunc);
+  void parallel_for(nd_range<dimensions> executionRange, KernelType kernelFunc) {
+    kernel.kernel_name = detail::get_kernel_name_from_class<KernelName>();
+
+  }
 
   template<typename KernelName, typename WorkgroupFunctionType, int dimensions>
-  void parallel_for_work_group(range<dimensions> numWorkGroups, WorkgroupFunctionType kernelFunc);
+  void parallel_for_work_group(range<dimensions> numWorkGroups, WorkgroupFunctionType kernelFunc) {
+    kernel.kernel_name = detail::get_kernel_name_from_class<KernelName>();
+
+  }
 
   template<typename KernelName, typename WorkgroupFunctionType, int dimensions>
   void parallel_for_work_group(range<dimensions> numWorkGroups,
                                range<dimensions> workGroupSize,
-                               WorkgroupFunctionType kernelFunc);
+                               WorkgroupFunctionType kernelFunc) {
+    kernel.kernel_name = detail::get_kernel_name_from_class<KernelName>();
 
-  void single_task(kernel syclKernel);
-
-  template<int dimensions>
-  void parallel_for(range<dimensions> numWorkItems, kernel syclKernel);
-
-  template<int dimensions>
-  void parallel_for(range<dimensions> numWorkItems, id<dimensions> workItemOffset, kernel syclKernel);
-
-  template<int dimensions>
-  void parallel_for(nd_range<dimensions> ndRange, kernel syclKernel);
+  }
 
   //----- OpenCL interoperability interface //
   template<typename T>
-  void set_arg(int argIndex, T &&arg);
+  void set_arg(int argIndex, T &&arg) {
+    kernel.args.insert(argIndex, arg);
+  }
 
   template<typename... Ts>
-  void set_args(Ts &&... args);
+  void set_args(Ts &&... args) {
+    kernel.args.push_back(args...);
+  }
+
+private:
+  detail::Kernel kernel;
+
 };
 
 }

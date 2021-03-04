@@ -1,7 +1,7 @@
 #ifndef CUSTOM_SYCL_INCLUDE_SYCL_RANGE_H_
 #define CUSTOM_SYCL_INCLUDE_SYCL_RANGE_H_
 
-#include "container/containers.hpp"
+#include "detail/container/array_nd.hpp"
 
 namespace neosycl::sycl {
 
@@ -34,7 +34,7 @@ public:
   }
 
 private:
-  detail::ArrayND<dimensions> data;
+  detail::container::ArrayND<dimensions> data;
 };
 
 }

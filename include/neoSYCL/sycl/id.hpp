@@ -5,6 +5,8 @@
 #include "range.hpp"
 #include "item.hpp"
 
+#include "detail/container/array_nd.hpp"
+
 namespace neosycl::sycl {
 
 template<std::size_t dimensions = 1>
@@ -45,7 +47,7 @@ public:
   }
 
 private:
-  detail::ArrayND<dimensions> data;
+  detail::container::ArrayND<dimensions> data;
 };
 
 }

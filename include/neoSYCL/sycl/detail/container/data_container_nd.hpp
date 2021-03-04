@@ -1,19 +1,13 @@
-#ifndef SYCL_INCLUDE_CL_SYCL_BUFFER_DATA_CONTAINER_1D_HPP_
-#define SYCL_INCLUDE_CL_SYCL_BUFFER_DATA_CONTAINER_1D_HPP_
+#ifndef SYCL_INCLUDE_CL_SYCL_BUFFER_DATA_CONTAINER_ND_HPP_
+#define SYCL_INCLUDE_CL_SYCL_BUFFER_DATA_CONTAINER_ND_HPP_
 
-#include <vector>
-#include "data_container.hpp"
+#include <shared_mutex>
+#include "array_nd.hpp"
 
-namespace neosycl::sycl::detail {
+namespace neosycl::sycl::detail::container {
 
-template<typename T, typename AllocatorT>
-class DataContainerND<T, 1, AllocatorT> : public DataContainer {
-private:
-  size_t dim0;
-  AllocatorT alloc;
-  T *ptr;
-  shared_ptr_class <T> allocate_ptr;
-
+template<typename T, typename AllocatorT = buffer_allocator <T>>
+class DataContainerND : public DataContainer {
 public:
   explicit DataContainerND(size_t dim0) : dim0(dim0) {
     allocate_ptr = shared_ptr_class<T>(alloc.allocate(dim0));
@@ -49,12 +43,16 @@ public:
 
   DataContainerND &operator=(const DataContainerND &obj) = delete;
 
-  size_t get_size() {
+  size_t get_size() override {
     return sizeof(T) * dim0;
   }
 
   T *get_ptr() {
     return ptr;
+  }
+
+  void *get_raw_ptr() override {
+    return (void *) get_ptr();
   }
 
   T *begin() {
@@ -69,8 +67,18 @@ public:
     return ptr[x];
   }
 
+  template<int dimensions>
+  T &operator[](ArrayND <dimensions> item) const {
+    return ptr[item.get_liner()];
+  }
+
+private:
+  size_t dim0;
+  AllocatorT alloc;
+  T *ptr;
+  shared_ptr_class <T> allocate_ptr;
 };
 
 }
 
-#endif //SYCL_INCLUDE_CL_SYCL_BUFFER_DATA_CONTAINER_1D_HPP_
+#endif //SYCL_INCLUDE_CL_SYCL_BUFFER_DATA_CONTAINER_ND_HPP_

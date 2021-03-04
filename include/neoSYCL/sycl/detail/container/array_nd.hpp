@@ -1,7 +1,7 @@
 #ifndef NEOSYCL_INCLUDE_NEOSYCL_SYCL_BUFFER_ARRAY_ND_HPP_
 #define NEOSYCL_INCLUDE_NEOSYCL_SYCL_BUFFER_ARRAY_ND_HPP_
 
-namespace neosycl::sycl::detail {
+namespace neosycl::sycl::detail::container {
 
 template<size_t dimensions = 1>
 struct ArrayND {
