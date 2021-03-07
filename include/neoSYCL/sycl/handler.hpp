@@ -11,6 +11,9 @@
 #include "allocator.hpp"
 #include "detail/highlight_func.hpp"
 #include "detail/kernel.hpp"
+#include "detail/task.hpp"
+#include "detail/task_handler.hpp"
+#include "detail/registered_platforms.hpp"
 
 namespace neosycl::sycl {
 
@@ -33,35 +36,37 @@ string_class get_kernel_name_from_class() {
 
 class handler {
 public:
-  handler() = default;
+  handler() : device_type(detail::SUPPORT_PLATFORM_TYPE::CPU) {};
+
+  explicit handler(detail::SUPPORT_PLATFORM_TYPE type) : device_type(type) {}
 
   template<typename KernelName, typename KernelType>
   void single_task(KernelType kernelFunc) {
-    kernel.kernel_name = detail::get_kernel_name_from_class<KernelName>();
-
+    kernel.name = detail::get_kernel_name_from_class<KernelName>();
+    shared_ptr_class<detail::task_handler> handler = detail::PLATFORM_HANDLER_MAP[device_type];
+    handler->single_task(kernelFunc);
   }
 
   template<typename KernelName, typename KernelType>
   void parallel_for(range<1> numWorkItems, KernelType kernelFunc) {
-    kernel.kernel_name = detail::get_kernel_name_from_class<KernelName>();
-
+    kernel.name = detail::get_kernel_name_from_class<KernelName>();
   }
 
   template<typename KernelName, typename KernelType, int dimensions>
   void parallel_for(range<dimensions> numWorkItems, id<dimensions> workItemOffset, KernelType kernelFunc) {
-    kernel.kernel_name = detail::get_kernel_name_from_class<KernelName>();
+    kernel.name = detail::get_kernel_name_from_class<KernelName>();
 
   }
 
   template<typename KernelName, typename KernelType, int dimensions>
   void parallel_for(nd_range<dimensions> executionRange, KernelType kernelFunc) {
-    kernel.kernel_name = detail::get_kernel_name_from_class<KernelName>();
+    kernel.name = detail::get_kernel_name_from_class<KernelName>();
 
   }
 
   template<typename KernelName, typename WorkgroupFunctionType, int dimensions>
   void parallel_for_work_group(range<dimensions> numWorkGroups, WorkgroupFunctionType kernelFunc) {
-    kernel.kernel_name = detail::get_kernel_name_from_class<KernelName>();
+    kernel.name = detail::get_kernel_name_from_class<KernelName>();
 
   }
 
@@ -69,7 +74,7 @@ public:
   void parallel_for_work_group(range<dimensions> numWorkGroups,
                                range<dimensions> workGroupSize,
                                WorkgroupFunctionType kernelFunc) {
-    kernel.kernel_name = detail::get_kernel_name_from_class<KernelName>();
+    kernel.name = detail::get_kernel_name_from_class<KernelName>();
 
   }
 
@@ -85,8 +90,8 @@ public:
   }
 
 private:
-  detail::Kernel kernel;
-
+  detail::kernel kernel;
+  detail::SUPPORT_PLATFORM_TYPE device_type;
 };
 
 }

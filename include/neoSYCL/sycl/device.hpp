@@ -7,28 +7,38 @@
 #include "info/device_type.hpp"
 #include "info/device.hpp"
 #include "info/param_traits.hpp"
+#include "detail/device_info.hpp"
 
 namespace neosycl::sycl {
 
 class device {
- public:
- public:
-  device();
+public:
+  device() : device_info(new detail::default_device_info()) {};
+
+  device(const shared_ptr_class<detail::device_info> &info) : device_info(info) {}
 
 //  explicit device(cl_device_id deviceId);
 
-  explicit device(const device_selector &deviceSelector);
+  explicit device(const device_selector &deviceSelector) {};
 
   /* -- common interface members -- */
 //  cl_device_id get() const;
 
-  bool is_host() const;
+  bool is_host() const {
+    return device_info->is_host();
+  }
 
-  bool is_cpu() const;
+  bool is_cpu() const {
+    return device_info->is_cpu();
+  }
 
-  bool is_gpu() const;
+  bool is_gpu() const {
+    return device_info->is_gpu();
+  }
 
-  bool is_accelerator() const;
+  bool is_accelerator() const {
+    return device_info->is_accelerator();
+  }
 
   platform get_platform() const;
   template<info::device param>
@@ -49,8 +59,31 @@ class device {
 //  vector_class<device> create_sub_devices(info::affinity_domain affinityDomain) const;
 
   static vector_class<device> get_devices(
-      info::device_type deviceType = info::device_type::all);
+      info::device_type deviceType = info::device_type::all) {
+    vector_class<device> ret;
+    for (const platform &info: platform::get_platforms()) {
+      for (const device &dev:info.get_devices()) {
+        ret.push_back(dev);
+      }
+    }
+    return ret;
+  }
+
+private:
+  shared_ptr_class<detail::device_info> device_info;
 };
+
+device device_selector::select_device() const {
+  return device();
+}
+
+vector_class<device> platform::get_devices(info::device_type) const {
+  vector_class<device> ret;
+  for (shared_ptr_class<detail::device_info> info:platform_info->list_devices()) {
+    ret.push_back(device(info));
+  }
+  return ret;
+}
 
 }
 

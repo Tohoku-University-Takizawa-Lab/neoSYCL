@@ -3,42 +3,78 @@
 
 #include <exception>
 #include <iterator>
-#include "types.hpp"
 
 namespace neosycl::sycl {
 
-class exception : public std::exception {
- public:
-  const char *what() const noexcept override {
-    return exception::what();
+class context;
+
+class exception {
+public:
+
+  exception(const string_class &message) : error_msg(message) {}
+
+  const char *what() const {
+    return error_msg.c_str();
   }
+
+  bool has_context() const;
+
+  context get_context() const;
+
+private:
+  string_class error_msg;
+
 };
 
-struct exception_list : std::vector<exception> {
-  using std::vector<exception>::vector;
-};
-
+using exception_list = vector_class<exception_ptr_class>;
 using async_handler = function_class<void, exception_list>;
 
-class UnimplementedException : public exception {
- public:
-  const char *what() const noexcept override {
-    return exception::what();
-  }
+class runtime_error : public exception {
+  using exception::exception;
+};
+class kernel_error : public runtime_error {
+  using runtime_error::runtime_error;
+};
+class accessor_error : public runtime_error {
+  using runtime_error::runtime_error;
+};
+class nd_range_error : public runtime_error {
+  using runtime_error::runtime_error;
+};
+class event_error : public runtime_error {
+  using runtime_error::runtime_error;
+};
+class invalid_parameter_error : public runtime_error {
+  using runtime_error::runtime_error;
+};
+class device_error : public exception {
+  using exception::exception;
+};
+class compile_program_error : public device_error {
+  using device_error::device_error;
+};
+class link_program_error : public device_error {
+  using device_error::device_error;
+};
+class invalid_object_error : public device_error {
+  using device_error::device_error;
+};
+class memory_allocation_error : public device_error {
+  using device_error::device_error;
+};
+class platform_error : public device_error {
+  using device_error::device_error;
+};
+class profiling_error : public device_error {
+  using device_error::device_error;
+};
+class feature_not_supported : public device_error {
+  using device_error::device_error;
 };
 
-class OutOfRangeException : public exception {
- public:
-  const char *what() const noexcept override {
-    return exception::what();
-  }
-};
-
-class UnSupportDimensionException : public exception {
- public:
-  const char *what() const noexcept override {
-    return exception::what();
-  }
+class unimplemented : public exception {
+public:
+  unimplemented() : exception("not implemented") {}
 };
 
 }

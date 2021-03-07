@@ -7,33 +7,29 @@
 namespace neosycl::sycl {
 
 class event {
- public:
-  event() {
+public:
+  event() {}
 
-  }
+  ~event() {}
 
-  ~event() {
-
-  }
-
-  vector_class<event> get_wait_list() {
-    throw UnimplementedException();
+  vector_class <event> get_wait_list() {
+    throw unimplemented();
   }
 
   void wait() {
-    throw UnimplementedException();
+    throw unimplemented();
   }
 
-  static void wait(const vector_class<event> &eventList) {
-    throw UnimplementedException();
+  static void wait(const vector_class <event> &eventList) {
+    throw unimplemented();
   }
 
   void wait_and_throw() {
-    throw UnimplementedException();
+    throw unimplemented();
   }
 
-  static void wait_and_throw(const vector_class<event> &eventList) {
-    throw UnimplementedException();
+  static void wait_and_throw(const vector_class <event> &eventList) {
+    throw unimplemented();
   }
 
 };

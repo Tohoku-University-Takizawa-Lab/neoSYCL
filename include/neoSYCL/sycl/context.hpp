@@ -2,14 +2,14 @@
 #define CUSTOM_SYCL_INCLUDE_SYCL_CONTEXT_HPP_
 
 #include "exception.hpp"
-#include "neoSYCL/sycl/info/context.hpp"
+#include "info/context.hpp"
 #include "property_list.hpp"
 
 namespace neosycl::sycl {
 
 class context {
 
- public:
+public:
   explicit context(const property_list &propList = {});
 
   context(async_handler asyncHandler,

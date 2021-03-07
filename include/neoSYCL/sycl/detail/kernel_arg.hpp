@@ -2,6 +2,7 @@
 #define SYCL_INCLUDE_CL_SYCL_KERNEL_KERNEL_ARG_HPP_
 
 #include "container/data_container.hpp"
+#include "../access.hpp"
 
 namespace neosycl::sycl::detail {
 

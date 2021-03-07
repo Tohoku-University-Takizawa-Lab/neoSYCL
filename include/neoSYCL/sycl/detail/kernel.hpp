@@ -7,12 +7,9 @@
 
 namespace neosycl::sycl::detail {
 
-struct Kernel {
-
-  explicit Kernel() = default;
-
+struct kernel {
   vector_class<KernelArg> args;
-  string_class kernel_name;
+  string_class name;
 };
 
 }
