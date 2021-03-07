@@ -2,6 +2,7 @@
 #define CUSTOM_SYCL_INCLUDE_SYCL_RANGE_H_
 
 #include "detail/container/array_nd.hpp"
+#include "op_def.hpp"
 
 namespace neosycl::sycl {
 
@@ -32,6 +33,84 @@ public:
   size_t size() const {
     return data.get_liner();
   }
+
+  // Where OP is: +, -, *, /, %, <<, >>, &, |, ˆ, &&, ||, <, >, <=, >=.
+  DEFINE_OP_CONST(range, +);
+  DEFINE_OP_CONST(range, -);
+  DEFINE_OP_CONST(range, *);
+  DEFINE_OP_CONST(range, /);
+  DEFINE_OP_CONST(range, %);
+  DEFINE_OP_CONST(range, <<);
+  DEFINE_OP_CONST(range, >>);
+  DEFINE_OP_CONST(range, &);
+  DEFINE_OP_CONST(range, |);
+  DEFINE_OP_CONST(range, ^);
+  DEFINE_OP_CONST(range, &&);
+  DEFINE_OP_CONST(range, ||);
+  DEFINE_OP_CONST(range, <);
+  DEFINE_OP_CONST(range, >);
+  DEFINE_OP_CONST(range, <=);
+  DEFINE_OP_CONST(range, >=);
+
+  // Where OP is: +, -, *, /, %, <<, >>, &, |, ˆ, &&, ||, <, >, <=, >=.
+  DEFINE_OP_CONST_SIZE_T(range, +);
+  DEFINE_OP_CONST_SIZE_T(range, -);
+  DEFINE_OP_CONST_SIZE_T(range, *);
+  DEFINE_OP_CONST_SIZE_T(range, /);
+  DEFINE_OP_CONST_SIZE_T(range, %);
+  DEFINE_OP_CONST_SIZE_T(range, <<);
+  DEFINE_OP_CONST_SIZE_T(range, >>);
+  DEFINE_OP_CONST_SIZE_T(range, &);
+  DEFINE_OP_CONST_SIZE_T(range, |);
+  DEFINE_OP_CONST_SIZE_T(range, ^);
+  DEFINE_OP_CONST_SIZE_T(range, &&);
+  DEFINE_OP_CONST_SIZE_T(range, ||);
+  DEFINE_OP_CONST_SIZE_T(range, <);
+  DEFINE_OP_CONST_SIZE_T(range, >);
+  DEFINE_OP_CONST_SIZE_T(range, <=);
+  DEFINE_OP_CONST_SIZE_T(range, >=);
+
+  // Where OP is: +=, -=,*=, /=, %=, <<=, >>=, &=, |=, ˆ=.
+  DEFINE_OP(range, +=);
+  DEFINE_OP(range, -=);
+  DEFINE_OP(range, *=);
+  DEFINE_OP(range, /=);
+  DEFINE_OP(range, %=);
+  DEFINE_OP(range, <<=);
+  DEFINE_OP(range, >>=);
+  DEFINE_OP(range, &=);
+  DEFINE_OP(range, |=);
+  DEFINE_OP(range, ^=);
+
+  // Where OP is: +=, -=,*=, /=, %=, <<=, >>=, &=, |=, ˆ=.
+  DEFINE_OP_SIZE_T(range, +);
+  DEFINE_OP_SIZE_T(range, -=);
+  DEFINE_OP_SIZE_T(range, *=);
+  DEFINE_OP_SIZE_T(range, /=);
+  DEFINE_OP_SIZE_T(range, %=);
+  DEFINE_OP_SIZE_T(range, <<=);
+  DEFINE_OP_SIZE_T(range, >>=);
+  DEFINE_OP_SIZE_T(range, &=);
+  DEFINE_OP_SIZE_T(range, |=);
+  DEFINE_OP_SIZE_T(range, ^=);
+
+  // Where OP is: +, -, *, /, %, <<, >>, &, |, ˆ, &&, ||, <, >, <=, >=.
+  DEFINE_OP_CONST_SIZE_T_LEFT(range, +);
+  DEFINE_OP_CONST_SIZE_T_LEFT(range, -);
+  DEFINE_OP_CONST_SIZE_T_LEFT(range, *);
+  DEFINE_OP_CONST_SIZE_T_LEFT(range, /);
+  DEFINE_OP_CONST_SIZE_T_LEFT(range, %);
+  DEFINE_OP_CONST_SIZE_T_LEFT(range, <<);
+  DEFINE_OP_CONST_SIZE_T_LEFT(range, >>);
+  DEFINE_OP_CONST_SIZE_T_LEFT(range, &);
+  DEFINE_OP_CONST_SIZE_T_LEFT(range, |);
+  DEFINE_OP_CONST_SIZE_T_LEFT(range, ^);
+  DEFINE_OP_CONST_SIZE_T_LEFT(range, &&);
+  DEFINE_OP_CONST_SIZE_T_LEFT(range, ||);
+  DEFINE_OP_CONST_SIZE_T_LEFT(range, <);
+  DEFINE_OP_CONST_SIZE_T_LEFT(range, >);
+  DEFINE_OP_CONST_SIZE_T_LEFT(range, <=);
+  DEFINE_OP_CONST_SIZE_T_LEFT(range, >=);
 
 private:
   detail::container::ArrayND<dimensions> data;

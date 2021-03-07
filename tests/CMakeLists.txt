@@ -13,7 +13,7 @@ ExtProjectGit("https://github.com/google/googletest.git" "release-1.10.0" ${DEPS
 
 include_directories("${DEPS_ROOT}/include")
 link_directories("${DEPS_ROOT}/lib")
-#link_directories("${DEPS_ROOT}/lib64")
+link_directories("${DEPS_ROOT}/lib64")
 
 
 #-------------------

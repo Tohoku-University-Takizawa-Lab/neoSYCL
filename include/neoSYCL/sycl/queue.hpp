@@ -65,8 +65,8 @@ public:
 
   template<typename T>
   event submit(T cgf) {
+    counter->incr();
     std::thread t([&]() {
-      counter->incr();
       try {
         handler command_group_handler;
         cgf(command_group_handler);
@@ -75,7 +75,7 @@ public:
       }
       counter->decr();
     });
-
+    t.detach();
     return event();
   }
 
@@ -83,7 +83,7 @@ public:
   event submit(T cgf, const queue &secondaryQueue);
 
   void wait() {
-
+    counter->wait();
   }
 
   void wait_and_throw();

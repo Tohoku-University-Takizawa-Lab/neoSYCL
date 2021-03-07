@@ -44,7 +44,7 @@ public:
   void single_task(KernelType kernelFunc) {
     kernel.name = detail::get_kernel_name_from_class<KernelName>();
     shared_ptr_class<detail::task_handler> handler = detail::PLATFORM_HANDLER_MAP[device_type];
-    handler->single_task(kernelFunc);
+    handler->single_task(kernel, kernelFunc);
   }
 
   template<typename KernelName, typename KernelType>

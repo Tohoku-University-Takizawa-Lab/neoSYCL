@@ -7,7 +7,7 @@ namespace neosycl::sycl::detail {
 
 struct task_handler {
 
-  virtual void single_task(kernel k, const std::function<void()> &func) = 0;
+  virtual void single_task(kernel k, const std::function<void(void)> &func) = 0;
 
   virtual SUPPORT_PLATFORM_TYPE type() = 0;
 
@@ -15,7 +15,7 @@ struct task_handler {
 
 struct task_handler_cpu : public task_handler {
 
-  void single_task(kernel k, const std::function<void()> &func) override {
+  void single_task(kernel k, const std::function<void(void)> &func) override {
     DEBUG_INFO("execute kernel with type {}, name: {}", type(), k.name);
     func();
   }

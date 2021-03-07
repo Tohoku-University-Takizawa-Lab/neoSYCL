@@ -4,7 +4,7 @@
 #include "types.hpp"
 #include "range.hpp"
 #include "item.hpp"
-
+#include "op_def.hpp"
 #include "detail/container/array_nd.hpp"
 
 namespace neosycl::sycl {
@@ -45,6 +45,85 @@ public:
   size_t operator[](int dimension) const {
     return data[dimension];
   }
+
+
+  // Where OP is: +, -, *, /, %, <<, >>, &, |, ˆ, &&, ||, <, >, <=, >=.
+  DEFINE_OP_CONST(id, +);
+  DEFINE_OP_CONST(id, -);
+  DEFINE_OP_CONST(id, *);
+  DEFINE_OP_CONST(id, /);
+  DEFINE_OP_CONST(id, %);
+  DEFINE_OP_CONST(id, <<);
+  DEFINE_OP_CONST(id, >>);
+  DEFINE_OP_CONST(id, &);
+  DEFINE_OP_CONST(id, |);
+  DEFINE_OP_CONST(id, ^);
+  DEFINE_OP_CONST(id, &&);
+  DEFINE_OP_CONST(id, ||);
+  DEFINE_OP_CONST(id, <);
+  DEFINE_OP_CONST(id, >);
+  DEFINE_OP_CONST(id, <=);
+  DEFINE_OP_CONST(id, >=);
+
+  // Where OP is: +, -, *, /, %, <<, >>, &, |, ˆ, &&, ||, <, >, <=, >=.
+  DEFINE_OP_CONST_SIZE_T(id, +);
+  DEFINE_OP_CONST_SIZE_T(id, -);
+  DEFINE_OP_CONST_SIZE_T(id, *);
+  DEFINE_OP_CONST_SIZE_T(id, /);
+  DEFINE_OP_CONST_SIZE_T(id, %);
+  DEFINE_OP_CONST_SIZE_T(id, <<);
+  DEFINE_OP_CONST_SIZE_T(id, >>);
+  DEFINE_OP_CONST_SIZE_T(id, &);
+  DEFINE_OP_CONST_SIZE_T(id, |);
+  DEFINE_OP_CONST_SIZE_T(id, ^);
+  DEFINE_OP_CONST_SIZE_T(id, &&);
+  DEFINE_OP_CONST_SIZE_T(id, ||);
+  DEFINE_OP_CONST_SIZE_T(id, <);
+  DEFINE_OP_CONST_SIZE_T(id, >);
+  DEFINE_OP_CONST_SIZE_T(id, <=);
+  DEFINE_OP_CONST_SIZE_T(id, >=);
+
+  // Where OP is: +=, -=,*=, /=, %=, <<=, >>=, &=, |=, ˆ=.
+  DEFINE_OP(id, +=);
+  DEFINE_OP(id, -=);
+  DEFINE_OP(id, *=);
+  DEFINE_OP(id, /=);
+  DEFINE_OP(id, %=);
+  DEFINE_OP(id, <<=);
+  DEFINE_OP(id, >>=);
+  DEFINE_OP(id, &=);
+  DEFINE_OP(id, |=);
+  DEFINE_OP(id, ^=);
+
+  // Where OP is: +=, -=,*=, /=, %=, <<=, >>=, &=, |=, ˆ=.
+  DEFINE_OP_SIZE_T(id, +);
+  DEFINE_OP_SIZE_T(id, -=);
+  DEFINE_OP_SIZE_T(id, *=);
+  DEFINE_OP_SIZE_T(id, /=);
+  DEFINE_OP_SIZE_T(id, %=);
+  DEFINE_OP_SIZE_T(id, <<=);
+  DEFINE_OP_SIZE_T(id, >>=);
+  DEFINE_OP_SIZE_T(id, &=);
+  DEFINE_OP_SIZE_T(id, |=);
+  DEFINE_OP_SIZE_T(id, ^=);
+
+  // Where OP is: +, -, *, /, %, <<, >>, &, |, ˆ, &&, ||, <, >, <=, >=.
+  DEFINE_OP_CONST_SIZE_T_LEFT(id, +);
+  DEFINE_OP_CONST_SIZE_T_LEFT(id, -);
+  DEFINE_OP_CONST_SIZE_T_LEFT(id, *);
+  DEFINE_OP_CONST_SIZE_T_LEFT(id, /);
+  DEFINE_OP_CONST_SIZE_T_LEFT(id, %);
+  DEFINE_OP_CONST_SIZE_T_LEFT(id, <<);
+  DEFINE_OP_CONST_SIZE_T_LEFT(id, >>);
+  DEFINE_OP_CONST_SIZE_T_LEFT(id, &);
+  DEFINE_OP_CONST_SIZE_T_LEFT(id, |);
+  DEFINE_OP_CONST_SIZE_T_LEFT(id, ^);
+  DEFINE_OP_CONST_SIZE_T_LEFT(id, &&);
+  DEFINE_OP_CONST_SIZE_T_LEFT(id, ||);
+  DEFINE_OP_CONST_SIZE_T_LEFT(id, <);
+  DEFINE_OP_CONST_SIZE_T_LEFT(id, >);
+  DEFINE_OP_CONST_SIZE_T_LEFT(id, <=);
+  DEFINE_OP_CONST_SIZE_T_LEFT(id, >=);
 
 private:
   detail::container::ArrayND<dimensions> data;

@@ -81,7 +81,7 @@ public:
 
   buffer(const shared_ptr_class<T> &hostData, const range<dimensions> &bufferRange, const property_list &propList = {})
       : bufferRange(bufferRange),
-        data(new detail::container::DataContainerND<T>(hostData, bufferRange.size())) {}
+        data(new detail::container::DataContainerND<T>(hostData.get(), bufferRange.size())) {}
 
   template<typename InputIterator, int D = dimensions, typename = std::enable_if_t<D == 1>>
   buffer(InputIterator first,
@@ -122,19 +122,27 @@ public:
 
   template<access::mode mode, access::target target = access::target::global_buffer>
   accessor<T, dimensions, mode, target> get_access(handler &commandGroupHandler) {
-
+    return accessor<T, dimensions, mode, target>(*this);
   }
 
   template<access::mode mode>
-  accessor<T, dimensions, mode, access::target::host_buffer> get_access();
+  accessor<T, dimensions, mode, access::target::host_buffer> get_access() {
+    return accessor<T, dimensions, mode, access::target::host_buffer>(*this);
+  }
 
   template<access::mode mode, access::target target = access::target::global_buffer>
   accessor<T, dimensions, mode, target> get_access(
-      handler &commandGroupHandler, range<dimensions> accessRange, id<dimensions> accessOffset = {});
+      handler &commandGroupHandler, range<dimensions> accessRange, id<dimensions> accessOffset = {}) {
+    return accessor<T, dimensions, mode, target>
+        (*this, commandGroupHandler, accessRange, accessOffset);
+  }
 
   template<access::mode mode>
   accessor<T, dimensions, mode, access::target::host_buffer> get_access(
-      range<dimensions> accessRange, id<dimensions> accessOffset = {});
+      range<dimensions> accessRange, id<dimensions> accessOffset = {}) {
+    return accessor<T, dimensions, mode, access::target::host_buffer>
+        (*this, accessRange, accessOffset);
+  }
 
   template<typename Destination = std::nullptr_t>
   void set_final_data(Destination finalData = nullptr);
