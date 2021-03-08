@@ -8,7 +8,7 @@ function(add_executable_sycl name)
     endif ()
 endfunction()
 
-add_executable_sycl(single_task single_task.cpp)
 add_executable_sycl(sequential_vector sequential_vector.cpp)
 
+add_subdirectory(computecpp)
 
