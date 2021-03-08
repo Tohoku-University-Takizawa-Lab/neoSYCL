@@ -112,6 +112,8 @@ public:
   DEFINE_OP_CONST_SIZE_T_LEFT(range, <=);
   DEFINE_OP_CONST_SIZE_T_LEFT(range, >=);
 
+  DEFINE_COMMON_BY_VALUE_SEMANTICS(range);
+
 private:
   detail::container::ArrayND<dimensions> data;
 };

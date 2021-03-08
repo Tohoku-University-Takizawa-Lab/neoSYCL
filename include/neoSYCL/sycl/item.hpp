@@ -3,6 +3,14 @@
 
 #include "detail/container/array_nd.hpp"
 
+#define DEFINE_ITEM_BY_VALUE_OP(cls)                                                                  \
+friend bool operator ==(const cls<dimensions> &lhs, const cls<dimensions> &rhs) {                     \
+    return (lhs.data == rhs.data) && (lhs.max_range == rhs.max_range) && (lhs.offset == rhs.offset);  \
+}                                                                                                     \
+friend bool operator !=(const cls<dimensions> &lhs, const cls<dimensions> &rhs) {                     \
+    return (lhs.data != rhs.data) || (lhs.max_range != rhs.max_range) || (lhs.offset != rhs.offset);  \
+}
+
 namespace neosycl::sycl {
 
 template<std::size_t dimensions>
@@ -15,9 +23,9 @@ public:
   item() = delete;
 
   template<int D = dimensions, typename = std::enable_if_t<D == 1>>
-  item(const range<dimensions> &r,
-       const detail::container::ArrayND<dimensions> &index,
-       const detail::container::ArrayND<dimensions> &offsets)
+  item(const range <dimensions> &r,
+       const detail::container::ArrayND <dimensions> &index,
+       const detail::container::ArrayND <dimensions> &offsets)
       : max_range(r), data{index}, offset{offsets} {
   }
 
@@ -33,7 +41,7 @@ public:
     return this->index[dimension];
   }
 
-  range<dimensions> get_range() const {
+  range <dimensions> get_range() const {
     return this->max_range;
   }
 
@@ -49,10 +57,12 @@ public:
     return item<dimensions, true>(this->max_range, this->data, this->data);
   }
 
+  DEFINE_ITEM_BY_VALUE_OP(item);
+
 private:
-  range<dimensions> max_range;
-  detail::container::ArrayND<dimensions> offset;
-  detail::container::ArrayND<dimensions> data;
+  range <dimensions> max_range;
+  detail::container::ArrayND <dimensions> offset;
+  detail::container::ArrayND <dimensions> data;
 };
 
 }

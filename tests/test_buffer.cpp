@@ -47,3 +47,14 @@ TEST(buffer, container_create_from_arr) {
 
 }
 
+TEST(buffer, buffer_basic_tests) {
+  size_t SIZE = 10;
+  float val[10];
+
+  buffer<float, 1> buf(val, range<1>(SIZE));
+
+  EXPECT_EQ(buf.get_count(), SIZE);
+  EXPECT_EQ(buf.get_size(), SIZE * sizeof(float));
+  EXPECT_EQ(buf.get_range(), range<1>(SIZE));
+}
+

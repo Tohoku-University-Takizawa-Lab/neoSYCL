@@ -125,6 +125,8 @@ public:
   DEFINE_OP_CONST_SIZE_T_LEFT(id, <=);
   DEFINE_OP_CONST_SIZE_T_LEFT(id, >=);
 
+  DEFINE_COMMON_BY_VALUE_SEMANTICS(id);
+
 private:
   detail::container::ArrayND<dimensions> data;
 };

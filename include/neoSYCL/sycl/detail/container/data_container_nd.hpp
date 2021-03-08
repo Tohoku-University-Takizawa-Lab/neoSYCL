@@ -9,6 +9,7 @@ namespace neosycl::sycl::detail::container {
 template<typename T, typename AllocatorT = buffer_allocator <T>>
 class DataContainerND : public DataContainer {
 public:
+
   explicit DataContainerND(size_t dim0) : dim0(dim0) {
     allocate_ptr = shared_ptr_class<T>(alloc.allocate(dim0));
     ptr = allocate_ptr.get();
@@ -30,7 +31,7 @@ public:
   DataContainerND(const T *data, size_t dim0, AllocatorT allocatorT) : alloc(allocatorT), dim0(dim0) {
     allocate_ptr = shared_ptr_class<T>(alloc.allocate(dim0));
     ptr = allocate_ptr.get();
-    memccpy(ptr, data, sizeof(T) * dim0);
+    memcpy(ptr, data, sizeof(T) * dim0);
   }
 
   DataContainerND(const DataContainerND &obj) :

@@ -53,16 +53,14 @@ public:
 
   buffer(const range<dimensions> &bufferRange, AllocatorT allocator, const property_list &propList = {})
       : bufferRange(bufferRange),
-        data(new detail::container::DataContainerND<T, AllocatorT>(bufferRange.size(), allocator)) {}
+        data(new detail::container::DataContainerND<T>(bufferRange.size(), allocator)) {}
 
   buffer(T *hostData, const range<dimensions> &bufferRange, const property_list &propList = {}) :
       buffer(hostData, bufferRange, allocator_type(), propList) {}
 
   buffer(T *hostData, const range<dimensions> &bufferRange, AllocatorT allocator, const property_list &propList = {}) :
       bufferRange(bufferRange),
-      data(new detail::container::DataContainerND<T, AllocatorT>(hostData,
-                                                                 bufferRange.size(),
-                                                                 allocator)) {}
+      data(new detail::container::DataContainerND<T>(hostData, bufferRange.size(), allocator)) {}
 
   buffer(const T *hostData, const range<dimensions> &bufferRange, const property_list &propList = {}) :
       buffer(hostData, bufferRange, allocator_type(), propList) {}
@@ -77,7 +75,7 @@ public:
   buffer(const shared_ptr_class<T> &hostData,
          const range<dimensions> &bufferRange, AllocatorT allocator, const property_list &propList = {}) :
       bufferRange(bufferRange),
-      data(new detail::container::DataContainerND<T, AllocatorT>(hostData, bufferRange.size())) {}
+      data(new detail::container::DataContainerND<T>(hostData, bufferRange.size(), allocator)) {}
 
   buffer(const shared_ptr_class<T> &hostData, const range<dimensions> &bufferRange, const property_list &propList = {})
       : bufferRange(bufferRange),
@@ -89,7 +87,7 @@ public:
          AllocatorT allocator,
          const property_list &propList = {}) :
       bufferRange((last - first) / sizeof(T)),
-      data(new detail::container::DataContainerND<T, AllocatorT>(first, (last - first) / sizeof(T))) {}
+      data(new detail::container::DataContainerND<T>(first, (last - first) / sizeof(T), allocator)) {}
 
   template<typename InputIterator, int D = dimensions, typename = std::enable_if_t<D == 1>>
   buffer(InputIterator first, InputIterator last, const property_list &propList = {}) :
@@ -97,7 +95,7 @@ public:
       data(new detail::container::DataContainerND<T>(first, (last - first) / sizeof(T))) {}
 
   buffer(buffer<T, dimensions, AllocatorT> b, const id<dimensions> &baseIndex,
-         const range<dimensions> &subRange) {}
+         const range<dimensions> &subRange);
 
   /* Available only when: dimensions == 1. */
 //  buffer(cl_mem clMemObject, const context &syclContext, event availableEvent = {});
