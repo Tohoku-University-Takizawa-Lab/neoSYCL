@@ -17,18 +17,18 @@ namespace neosycl::sycl {
 
 class queue {
 public:
-  explicit queue(const property_list &propList = {}) : bind_deice(), counter(new detail::task_counter()) {}
+  explicit queue(const property_list &propList = {}) : bind_device(), counter(new detail::task_counter()) {}
 
   explicit queue(const async_handler &asyncHandler, const property_list &propList = {});
 
   explicit queue(const device_selector &deviceSelector, const property_list &propList = {})
-      : bind_deice(deviceSelector.select_device()), counter(new detail::task_counter()) {}
+      : bind_device(deviceSelector.select_device()), counter(new detail::task_counter()) {}
 
   explicit queue(const device_selector &deviceSelector,
                  const async_handler &asyncHandler, const property_list &propList = {});
 
   explicit queue(const device &syclDevice, const property_list &propList = {}) :
-      bind_deice(syclDevice), counter(new detail::task_counter()) {}
+      bind_device(syclDevice), counter(new detail::task_counter()) {}
 
   explicit queue(const device &syclDevice, const async_handler &asyncHandler,
                  const property_list &propList = {});
@@ -53,11 +53,11 @@ public:
   context get_context() const;
 
   device get_device() const {
-    return bind_deice;
+    return bind_device;
   }
 
   bool is_host() const {
-    return bind_deice.is_host();
+    return bind_device.is_host();
   }
 
   template<info::queue param>
@@ -65,17 +65,12 @@ public:
 
   template<typename T>
   event submit(T cgf) {
-    counter->incr();
-    std::thread t([&]() {
-      try {
-        handler command_group_handler;
-        cgf(command_group_handler);
-      } catch (...) {
-        throw;
-      }
-      counter->decr();
-    });
-    t.detach();
+    try {
+      handler command_group_handler(bind_device, counter);
+      cgf(command_group_handler);
+    } catch (...) {
+      throw;
+    }
     return event();
   }
 
@@ -90,8 +85,12 @@ public:
 
   void throw_asynchronous();
 
+  virtual ~queue() {
+    counter->wait();
+  }
+
 private:
-  device bind_deice;
+  device bind_device;
   shared_ptr_class<detail::task_counter> counter;
 };
 

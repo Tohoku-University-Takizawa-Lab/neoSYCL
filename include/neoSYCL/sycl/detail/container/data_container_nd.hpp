@@ -20,29 +20,11 @@ public:
     ptr = allocate_ptr.get();
   }
 
-  DataContainerND(T *data, size_t dim0) : dim0(dim0), ptr(data) {}
-
-  DataContainerND(const T *data, size_t dim0) : dim0(dim0) {
-    allocate_ptr = shared_ptr_class<T>(alloc.allocate(dim0));
-    ptr = allocate_ptr.get();
-    memccpy(ptr, data, sizeof(T) * dim0);
+  DataContainerND(T *data, size_t dim0) : dim0(dim0), ptr(data), allocate_ptr(nullptr) {
   }
 
-  DataContainerND(const T *data, size_t dim0, AllocatorT allocatorT) : alloc(allocatorT), dim0(dim0) {
-    allocate_ptr = shared_ptr_class<T>(alloc.allocate(dim0));
-    ptr = allocate_ptr.get();
-    memcpy(ptr, data, sizeof(T) * dim0);
-  }
-
-  DataContainerND(const DataContainerND &obj) :
-      dim0(obj.dim0),
-      alloc(obj.alloc) {
-    allocate_ptr = shared_ptr_class<T>(alloc.allocate(dim0));
-    ptr = allocate_ptr.get();
-    memcpy(ptr, obj.ptr, sizeof(T) * dim0);
-  }
-
-  DataContainerND &operator=(const DataContainerND &obj) = delete;
+  DataContainerND(T *data, size_t dim0, AllocatorT allocatorT) :
+      ptr(data), alloc(allocatorT), dim0(dim0), allocate_ptr(nullptr) {}
 
   size_t get_size() override {
     return sizeof(T) * dim0;
@@ -64,6 +46,10 @@ public:
     return ptr + dim0;
   }
 
+  T &get(size_t x) const {
+    return ptr[x];
+  }
+
   T &operator[](size_t x) const {
     return ptr[x];
   }
@@ -71,6 +57,34 @@ public:
   template<int dimensions>
   T &operator[](ArrayND <dimensions> item) const {
     return ptr[item.get_liner()];
+  }
+
+  DataContainerND(const DataContainerND &rhs) :
+      dim0(rhs.dim0),
+      alloc(rhs.alloc) {
+    allocate_ptr = shared_ptr_class<T>(alloc.allocate(dim0));
+    ptr = allocate_ptr.get();
+    memcpy(ptr, rhs.ptr, sizeof(T) * dim0);
+  }
+
+  DataContainerND(DataContainerND &&rhs) :
+      dim0(rhs.dim0),
+      alloc(rhs.alloc),
+      allocate_ptr(rhs.allocate_ptr),
+      ptr(rhs.ptr) {}
+
+  DataContainerND &operator=(const DataContainerND &rhs) {
+    dim0 = rhs.dim0;
+    alloc = rhs.alloc;
+    ptr = rhs.ptr;
+    allocate_ptr = rhs.allocate_ptr;
+  }
+
+  DataContainerND &operator=(DataContainerND &&rhs) {
+    dim0 = rhs.dim0;
+    alloc = rhs.alloc;
+    ptr = rhs.ptr;
+    allocate_ptr = rhs.allocate_ptr;
   }
 
 private:

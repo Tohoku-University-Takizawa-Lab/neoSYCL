@@ -5,52 +5,52 @@
 
 namespace neosycl::sycl {
 
-template<typename T, int dimensions, access::mode accessMode, access::placeholder isPlaceholder>
-class accessor<T, dimensions, accessMode, access::target::global_buffer, isPlaceholder> {
+template<typename dataT, int dimensions, access::mode accessMode, access::placeholder isPlaceholder>
+class accessor<dataT, dimensions, accessMode, access::target::global_buffer, isPlaceholder> {
 
 public:
   template<typename AllocatorT>
-  explicit accessor(buffer <T, dimensions, AllocatorT> &bufferRef, const property_list &propList = {}):
-      bufferRef(bufferRef), accessRange(bufferRef.get_range()), accessOffset(0) {}
+  explicit accessor(buffer <dataT, dimensions, AllocatorT> &bufferRef, const property_list &propList = {}):
+      bind_buffer(bufferRef), accessRange(bufferRef.get_range()), accessOffset(0) {}
 
   template<typename AllocatorT>
-  accessor(buffer <T, dimensions, AllocatorT> &bufferRef,
+  accessor(buffer <dataT, dimensions, AllocatorT> &bufferRef,
            range <dimensions> accessRange,
            const property_list &propList = {}):
-      bufferRef(bufferRef), accessRange(accessRange), accessOffset(0) {}
+      bind_buffer(bufferRef), accessRange(accessRange), accessOffset(0) {}
 
   template<typename AllocatorT>
-  accessor(buffer <T, dimensions, AllocatorT> &bufferRef,
+  accessor(buffer <dataT, dimensions, AllocatorT> &bufferRef,
            range <dimensions> accessRange,
            id <dimensions> accessOffset,
            const property_list &propList = {}
-  ):bufferRef(bufferRef), accessRange(accessRange), accessOffset(accessOffset) {}
+  ):bind_buffer(bufferRef), accessRange(accessRange), accessOffset(accessOffset) {}
 
   template<typename AllocatorT>
-  accessor(buffer <T, dimensions, AllocatorT> &bufferRef,
+  accessor(buffer <dataT, dimensions, AllocatorT> &bufferRef,
            handler &commandGroupHandlerRef,
            range <dimensions> accessRange,
            const property_list &propList = {}
-  ):bufferRef(bufferRef), accessRange(accessRange), accessOffset(0) {}
+  ):bind_buffer(bufferRef), accessRange(accessRange), accessOffset(0) {}
 
   template<typename AllocatorT>
-  accessor(buffer <T, dimensions, AllocatorT> &bufferRef,
+  accessor(buffer <dataT, dimensions, AllocatorT> &bufferRef,
            handler &commandGroupHandlerRef,
            range <dimensions> accessRange,
            id <dimensions> accessOffset,
            const property_list &propList = {}
-  ):bufferRef(bufferRef), accessRange(accessRange), accessOffset(accessOffset) {}
+  ):bind_buffer(bufferRef), accessRange(accessRange), accessOffset(accessOffset) {}
 
   constexpr bool is_placeholder() const {
     return isPlaceholder;
   }
 
   size_t get_size() const {
-    return bufferRef.get_size();
+    return bind_buffer.get_size();
   }
 
   size_t get_count() const {
-    return bufferRef.get_count();
+    return bind_buffer.get_count();
   }
 
   range <dimensions> get_range() const {
@@ -61,16 +61,60 @@ public:
     return accessOffset;
   }
 
-  operator T &() const;
+  /* Available only when: (accessMode == access::mode::read_write || accessMode == access::mode::discard_read_write) && dimensions == 0) */
+  template<access::mode Mode = accessMode, int D = dimensions, typename = std::enable_if_t<
+      ((Mode == access::mode::read_write) ||
+          (Mode == access::mode::discard_read_write)) &&
+          (D == 0)>>
+  operator dataT &() const;
 
-  T operator[](id <dimensions> index) const {
-    return bufferRef.data[id2index(index)];
+  /* Available only when: (accessMode == access::mode::write || accessMode == access::mode::read_write || accessMode == access::mode::discard_write || accessMode == access::mode::discard_read_write) && dimensions > 0) */
+  template<access::mode Mode = accessMode, int D = dimensions, typename = std::enable_if_t<
+      (Mode == access::mode::read_write) ||
+          (Mode == access::mode::discard_write) ||
+          (Mode == access::mode::discard_read_write) ||
+          (D > 0)>>
+  dataT &operator[](id <dimensions> index) const {
+    return bind_buffer.data->get(id2index(index));
   }
 
-  operator T() const;
+  /* Available only when: (accessMode == access::mode::write || accessMode == access::mode::read_write || accessMode == access::mode::discard_write || accessMode == access::mode::discard_read_write) && dimensions == 1) */
+  template<access::mode Mode = accessMode, int D = dimensions, typename = std::enable_if_t<
+      (Mode == access::mode::write) ||
+          (Mode == access::mode::read_write) ||
+          (Mode == access::mode::discard_write) ||
+          (Mode == access::mode::discard_read_write) ||
+          (D == 1)>>
+  dataT &operator[](size_t index) const {
+    return bind_buffer.data->get(index);
+  }
+
+  /* Available only when: accessMode == access::mode::read && dimensions == 0 */
+  template<access::mode Mode = accessMode, int D = dimensions, typename = std::enable_if_t<
+      (Mode == access::mode::read) && (D == 0)>>
+  operator dataT() const;
+
+  accessor(const accessor &rhs)
+      : bind_buffer(rhs.bind_buffer), accessRange(rhs.accessRange), accessOffset(rhs.accessOffset) {}
+
+  accessor(accessor &&rhs) : bind_buffer(rhs.bind_buffer), accessRange(rhs.accessRange), accessOffset(rhs.accessOffset) {}
+
+  accessor &operator=(const accessor &rhs) {
+    bind_buffer = rhs.bind_buffer;
+    accessRange = rhs.accessRange;
+    accessOffset = rhs.accessOffset;
+  }
+
+  accessor &operator=(accessor &&rhs) {
+    bind_buffer = rhs.bind_buffer;
+    accessRange = rhs.accessRange;
+    accessOffset = rhs.accessOffset;
+  }
+
+  ~accessor() = default;
 
 private:
-  buffer <T, dimensions> &bufferRef;
+  buffer <dataT, dimensions> bind_buffer;
   range <dimensions> accessRange;
   id <dimensions> accessOffset;
 

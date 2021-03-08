@@ -12,6 +12,8 @@
 namespace neosycl::sycl {
 
 class device {
+  friend class handler;
+
 public:
   device() : device_info(new detail::default_device_info()) {};
 

@@ -152,9 +152,24 @@ public:
   template<typename ReinterpretT, int ReinterpretDim>
   buffer<ReinterpretT, ReinterpretDim, AllocatorT> reinterpret(range<ReinterpretDim> reinterpretRange) const;
 
+  buffer(const buffer &rhs) : data(rhs.data), bufferRange(rhs.bufferRange) {}
+
+  buffer(buffer &&rhs) : data(rhs.data), bufferRange(rhs.bufferRange) {}
+
+  buffer &operator=(const buffer &rhs) {
+    data = rhs.data;
+    bufferRange = rhs.bufferRange;
+  }
+
+  buffer &operator=(buffer &&rhs) {
+    data = rhs.data;
+    bufferRange = rhs.bufferRange;
+  }
+
+  ~buffer() = default;
+
 private:
   std::shared_ptr<detail::container::DataContainerND<T>> data;
-
   range<dimensions> bufferRange;
 };
 }

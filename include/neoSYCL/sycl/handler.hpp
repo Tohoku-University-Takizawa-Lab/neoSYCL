@@ -14,6 +14,7 @@
 #include "detail/task.hpp"
 #include "detail/task_handler.hpp"
 #include "detail/registered_platforms.hpp"
+#include "detail/task_counter.hpp"
 
 namespace neosycl::sycl {
 
@@ -36,15 +37,17 @@ string_class get_kernel_name_from_class() {
 
 class handler {
 public:
-  handler() : device_type(detail::SUPPORT_PLATFORM_TYPE::CPU) {};
-
-  explicit handler(detail::SUPPORT_PLATFORM_TYPE type) : device_type(type) {}
+  explicit handler(device dev,
+                   shared_ptr_class<detail::task_counter> counter) :
+      bind_device(std::move(dev)), counter(std::move(counter)) {}
 
   template<typename KernelName, typename KernelType>
   void single_task(KernelType kernelFunc) {
     kernel.name = detail::get_kernel_name_from_class<KernelName>();
-    shared_ptr_class<detail::task_handler> handler = detail::PLATFORM_HANDLER_MAP[device_type];
-    handler->single_task(kernel, kernelFunc);
+    shared_ptr_class<detail::task_handler> handler = detail::PLATFORM_HANDLER_MAP[bind_device.device_info->type()];
+    submit_task([f = kernelFunc, c = counter, h = handler, k = kernel]() {
+      h->single_task(k, f);
+    });
   }
 
   template<typename KernelName, typename KernelType>
@@ -75,7 +78,6 @@ public:
                                range<dimensions> workGroupSize,
                                WorkgroupFunctionType kernelFunc) {
     kernel.name = detail::get_kernel_name_from_class<KernelName>();
-
   }
 
   //----- OpenCL interoperability interface //
@@ -91,7 +93,22 @@ public:
 
 private:
   detail::kernel kernel;
-  detail::SUPPORT_PLATFORM_TYPE device_type;
+  device bind_device;
+  shared_ptr_class<detail::task_counter> counter;
+
+  template<typename Func>
+  void submit_task(Func func) {
+    counter->incr();
+    std::thread t([f = func, c = counter]() {
+      try {
+        f();
+      } catch (...) {
+        throw;
+      }
+      c->decr();
+    });
+    t.detach();
+  }
 };
 
 }

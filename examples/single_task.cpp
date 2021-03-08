@@ -1,16 +1,28 @@
 #include <CL/sycl.hpp>
 #include <iostream>
+#include <thread>
 #include <unistd.h>
 
 using namespace cl::sycl;
 
-
 int main() {
-  queue myQueue;
-  myQueue.submit([&](handler &cgh) {
-    cgh.single_task<class simple_test>([=]() {
-      std::cout << "single task" << std::endl;
-    });
-  });
-  myQueue.wait();
+  long arr[] = {1, 2, 3};
+
+  {
+    std::shared_ptr<long[]> ptr(arr);
+
+    std::function<void(void)> func = [=]() {
+      sleep(2);
+      std::cout << "output: " << ptr[2] << std::endl;
+      ptr[2] = 233;
+    };
+
+    std::thread t(func);
+    t.detach();
+  }
+
+  sleep(4);
+
+  std::cout << "end" << std::endl;
+
 }
