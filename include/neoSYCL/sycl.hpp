@@ -20,9 +20,9 @@
 #include "sycl/platform.hpp"
 
 // include buffer headers
-#include "sycl/buffer.hpp"
 #include "sycl/accessor.hpp"
-#include "sycl/accessor_impl.hpp"
+#include "sycl/accessor.hpp"
+#include "sycl/buffer.hpp"
 
 #include "sycl/queue.hpp"
 #include "sycl/handler.hpp"

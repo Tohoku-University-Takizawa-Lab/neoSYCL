@@ -45,40 +45,53 @@ public:
   void single_task(KernelType kernelFunc) {
     kernel.name = detail::get_kernel_name_from_class<KernelName>();
     shared_ptr_class<detail::task_handler> handler = detail::PLATFORM_HANDLER_MAP[bind_device.device_info->type()];
-    submit_task([f = kernelFunc, c = counter, h = handler, k = kernel]() {
+    submit_task([f = kernelFunc, h = handler, k = kernel]() {
       h->single_task(k, f);
     });
   }
 
-  template<typename KernelName, typename KernelType>
-  void parallel_for(range<1> numWorkItems, KernelType kernelFunc) {
-    kernel.name = detail::get_kernel_name_from_class<KernelName>();
+  template<typename KernelType, int dimensions>
+  void submit_parallel_for(shared_ptr_class<detail::task_handler> handler,
+                           range<dimensions> numWorkItems,
+                           id<dimensions> offset,
+                           KernelType kernelFunc) {
+    submit_task([f = kernelFunc, n = numWorkItems, o = offset, h = std::move(handler), k = kernel]() {
+      switch (dimensions) {
+      case 1:h->parallel_for_1d(k, n, o, f);
+        break;
+      case 2:h->parallel_for_2d(k, n, o, f);
+        break;
+      case 3:h->parallel_for_3d(k, n, o, f);
+        break;
+      default:throw feature_not_supported("unsupported dimensions");
+      }
+    });
   }
 
-  template<typename KernelName, typename KernelType, int dimensions>
+  template<typename KernelName, typename KernelType, size_t dimensions>
+  void parallel_for(range<dimensions> numWorkItems, KernelType kernelFunc) {
+    kernel.name = detail::get_kernel_name_from_class<KernelName>();
+    shared_ptr_class<detail::task_handler> handler = detail::PLATFORM_HANDLER_MAP[bind_device.device_info->type()];
+    submit_parallel_for(handler, numWorkItems, id<dimensions>(), kernelFunc);
+  }
+
+  template<typename KernelName, typename KernelType, size_t dimensions>
   void parallel_for(range<dimensions> numWorkItems, id<dimensions> workItemOffset, KernelType kernelFunc) {
     kernel.name = detail::get_kernel_name_from_class<KernelName>();
-
+    shared_ptr_class<detail::task_handler> handler = detail::PLATFORM_HANDLER_MAP[bind_device.device_info->type()];
+    submit_parallel_for(handler, numWorkItems, workItemOffset, kernelFunc);
   }
 
-  template<typename KernelName, typename KernelType, int dimensions>
-  void parallel_for(nd_range<dimensions> executionRange, KernelType kernelFunc) {
-    kernel.name = detail::get_kernel_name_from_class<KernelName>();
-
-  }
+//  template<typename KernelName, typename KernelType, int dimensions>
+//  void parallel_for(nd_range<dimensions> executionRange, KernelType kernelFunc);
 
   template<typename KernelName, typename WorkgroupFunctionType, int dimensions>
-  void parallel_for_work_group(range<dimensions> numWorkGroups, WorkgroupFunctionType kernelFunc) {
-    kernel.name = detail::get_kernel_name_from_class<KernelName>();
-
-  }
+  void parallel_for_work_group(range<dimensions> numWorkGroups, WorkgroupFunctionType kernelFunc);
 
   template<typename KernelName, typename WorkgroupFunctionType, int dimensions>
   void parallel_for_work_group(range<dimensions> numWorkGroups,
                                range<dimensions> workGroupSize,
-                               WorkgroupFunctionType kernelFunc) {
-    kernel.name = detail::get_kernel_name_from_class<KernelName>();
-  }
+                               WorkgroupFunctionType kernelFunc);
 
   //----- OpenCL interoperability interface //
   template<typename T>

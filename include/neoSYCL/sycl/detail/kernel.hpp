@@ -1,8 +1,7 @@
-#include <utility>
-
 #ifndef SYCL_INCLUDE_CL_SYCL_KERNEL_KERNEL_HPP_
 #define SYCL_INCLUDE_CL_SYCL_KERNEL_KERNEL_HPP_
 
+#include <utility>
 #include "kernel_arg.hpp"
 
 namespace neosycl::sycl::detail {

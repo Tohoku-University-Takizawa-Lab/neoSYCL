@@ -16,7 +16,7 @@ namespace neosycl::sycl {
 template<std::size_t dimensions>
 struct id;
 
-template<int dimensions = 1, bool with_offset = true>
+template<size_t dimensions = 1, bool with_offset = true>
 struct item {
 public:
 

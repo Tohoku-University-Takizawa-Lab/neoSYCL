@@ -17,21 +17,26 @@ namespace neosycl::sycl {
 
 class queue {
 public:
-  explicit queue(const property_list &propList = {}) : bind_device(), counter(new detail::task_counter()) {}
+  explicit queue(const property_list &propList = {}) :
+      bind_device(), counter(new detail::task_counter()) {}
 
-  explicit queue(const async_handler &asyncHandler, const property_list &propList = {});
+  explicit queue(const async_handler &asyncHandler, const property_list &propList = {}) :
+      bind_device(), counter(new detail::task_counter()), err_handler(asyncHandler) {}
 
   explicit queue(const device_selector &deviceSelector, const property_list &propList = {})
       : bind_device(deviceSelector.select_device()), counter(new detail::task_counter()) {}
 
   explicit queue(const device_selector &deviceSelector,
-                 const async_handler &asyncHandler, const property_list &propList = {});
+                 const async_handler &asyncHandler, const property_list &propList = {})
+      : bind_device(deviceSelector.select_device()), counter(new detail::task_counter()),
+        err_handler(asyncHandler) {}
 
   explicit queue(const device &syclDevice, const property_list &propList = {}) :
       bind_device(syclDevice), counter(new detail::task_counter()) {}
 
   explicit queue(const device &syclDevice, const async_handler &asyncHandler,
-                 const property_list &propList = {});
+                 const property_list &propList = {}) :
+      bind_device(syclDevice), counter(new detail::task_counter()), err_handler(asyncHandler) {}
 
   explicit queue(const context &syclContext, const device_selector &deviceSelector,
                  const property_list &propList = {});
@@ -91,6 +96,7 @@ public:
 
 private:
   device bind_device;
+  async_handler err_handler;
   shared_ptr_class<detail::task_counter> counter;
 };
 

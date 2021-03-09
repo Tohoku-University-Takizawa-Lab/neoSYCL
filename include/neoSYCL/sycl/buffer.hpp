@@ -35,12 +35,14 @@ public:
 
 
 
-
 template<typename T, int dimensions = 1, typename AllocatorT = buffer_allocator<T>>
 class buffer {
   friend accessor<T, dimensions, access::mode::read, access::target::global_buffer>;
+  friend accessor<T, dimensions, access::mode::read, access::target::host_buffer>;
   friend accessor<T, dimensions, access::mode::write, access::target::global_buffer>;
+  friend accessor<T, dimensions, access::mode::write, access::target::host_buffer>;
   friend accessor<T, dimensions, access::mode::read_write, access::target::global_buffer>;
+  friend accessor<T, dimensions, access::mode::read_write, access::target::host_buffer>;
 
 public:
   using value_type = T;

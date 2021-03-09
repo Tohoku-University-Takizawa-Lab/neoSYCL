@@ -8,12 +8,12 @@ namespace neosycl::sycl {
 
 class context;
 
-class exception {
+class exception : public std::exception {
 public:
 
   exception(const string_class &message) : error_msg(message) {}
 
-  const char *what() const {
+  const char *what() const noexcept override {
     return error_msg.c_str();
   }
 
