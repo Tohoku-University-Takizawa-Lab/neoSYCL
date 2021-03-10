@@ -15,7 +15,19 @@ TEST(accessor, basic_tests) {
 
   buffer<float, 2> buf(val, range<2>(X, Y));
 
-  auto acc = buf.get_access<access::mode::read>();
+  auto acc = buf.get_access<access::mode::read_write>();
 
   EXPECT_EQ(acc[id<2>(0, 0)], 0);
+}
+
+TEST(accessor, buffer_2d) {
+  buffer<float, 2> buf(range<2>(2, 3));
+
+  auto acc = buf.get_access<access::mode::read_write>();
+
+  acc[id<2>(1, 1)] = 233;
+
+//  EXPECT_EQ(acc[1][1], SIZE);
+//  EXPECT_EQ(buf.get_size(), SIZE * sizeof(float));
+//  EXPECT_EQ(buf.get_range(), range<1>(SIZE));
 }

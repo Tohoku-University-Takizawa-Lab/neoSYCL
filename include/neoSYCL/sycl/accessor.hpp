@@ -79,12 +79,12 @@ public:
 
   /* Available only when: (accessMode == access::mode::write || accessMode == access::mode::read_write || accessMode == access::mode::discard_write || accessMode == access::mode::discard_read_write) && dimensions > 0) */
   template<access::mode Mode = accessMode, int D = dimensions, typename = std::enable_if_t<
-      (Mode == access::mode::read_write) ||
+      ((Mode == access::mode::read_write) ||
           (Mode == access::mode::discard_write) ||
-          (Mode == access::mode::discard_read_write) ||
+          (Mode == access::mode::discard_read_write)) &&
           (D > 0)>>
   dataT &operator[](id<dimensions> index) const {
-    return data->get(id2index(index));
+    return (*data.get()).get(id2index(index));
   }
 
   /* Available only when: (accessMode == access::mode::write || accessMode == access::mode::read_write || accessMode == access::mode::discard_write || accessMode == access::mode::discard_read_write) && dimensions == 1) */
@@ -95,7 +95,29 @@ public:
           (Mode == access::mode::discard_read_write) ||
           (D == 1)>>
   dataT &operator[](size_t index) const {
-    return data->get(index);
+    return (*data.get())[index];
+  }
+
+  /* Available only when: dimensions > 1 */
+  template<access::mode Mode = accessMode, int D = dimensions, typename = std::enable_if_t<
+      ((Mode == access::mode::write) ||
+          (Mode == access::mode::read_write) ||
+          (Mode == access::mode::discard_write) ||
+          (Mode == access::mode::discard_read_write)) &&
+          (D == 2)>>
+  dataT *operator[](size_t index) const {
+    return data[index];
+  }
+
+  /* Available only when: dimensions > 1 */
+  template<access::mode Mode = accessMode, int D = dimensions, typename = std::enable_if_t<
+      ((Mode == access::mode::write) ||
+          (Mode == access::mode::read_write) ||
+          (Mode == access::mode::discard_write) ||
+          (Mode == access::mode::discard_read_write)) &&
+          (D == 3)>>
+  dataT **operator[](size_t index) const {
+    return data[index];
   }
 
   /* Available only when: accessMode == access::mode::read && dimensions == 0 */
