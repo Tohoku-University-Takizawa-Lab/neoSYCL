@@ -84,18 +84,34 @@ public:
           (Mode == access::mode::discard_read_write)) &&
           (D > 0)>>
   dataT &operator[](id<dimensions> index) const {
-    return (*data.get()).get(id2index(index));
+    size_t index_val = id2index(index);
+    DEBUG_INFO("[Accessor] access with index: {}", index_val);
+    return (*data).get(index_val);
+  }
+
+  template<access::mode Mode = accessMode, int D = dimensions, typename = std::enable_if_t<
+      (Mode == access::mode::read) && (D > 0)>>
+  dataT operator[](id<dimensions> index) const {
+    size_t index_val = id2index(index);
+    DEBUG_INFO("[Accessor] read access with index: {}", index_val);
+    return (*data).get(index_val);
   }
 
   /* Available only when: (accessMode == access::mode::write || accessMode == access::mode::read_write || accessMode == access::mode::discard_write || accessMode == access::mode::discard_read_write) && dimensions == 1) */
   template<access::mode Mode = accessMode, int D = dimensions, typename = std::enable_if_t<
-      (Mode == access::mode::write) ||
+      ((Mode == access::mode::write) ||
           (Mode == access::mode::read_write) ||
           (Mode == access::mode::discard_write) ||
-          (Mode == access::mode::discard_read_write) ||
+          (Mode == access::mode::discard_read_write)) &&
           (D == 1)>>
   dataT &operator[](size_t index) const {
-    return (*data.get())[index];
+    return (*data)[index];
+  }
+
+  template<access::mode Mode = accessMode, int D = dimensions, typename = std::enable_if_t<
+      (Mode == access::mode::read) && (D == 1)>>
+  dataT operator[](size_t index) const {
+    return (*data)[index];
   }
 
   /* Available only when: dimensions > 1 */
@@ -106,7 +122,13 @@ public:
           (Mode == access::mode::discard_read_write)) &&
           (D == 2)>>
   dataT *operator[](size_t index) const {
-    return data[index];
+    return (*data)[index];
+  }
+
+  template<access::mode Mode = accessMode, int D = dimensions, typename = std::enable_if_t<
+      (Mode == access::mode::read) && (D == 2)>>
+  const dataT *operator[](size_t index) const {
+    return (*data)[index];
   }
 
   /* Available only when: dimensions > 1 */
@@ -116,8 +138,14 @@ public:
           (Mode == access::mode::discard_write) ||
           (Mode == access::mode::discard_read_write)) &&
           (D == 3)>>
-  dataT **operator[](size_t index) const {
-    return data[index];
+  detail::container::AccessProxyND<dataT, 3> operator[](size_t index) const {
+    return (*data)[index];
+  }
+
+  template<access::mode Mode = accessMode, int D = dimensions, typename = std::enable_if_t<
+      (Mode == access::mode::read) && (D == 3)>>
+  const dataT **operator[](size_t index) const {
+    return (*data)[index];
   }
 
   /* Available only when: accessMode == access::mode::read && dimensions == 0 */
@@ -133,10 +161,12 @@ private:
   id<dimensions> accessOffset;
 
   size_t id2index(id<dimensions> index) const {
+    size_t x = this->accessRange.get(0);
+    size_t y = this->accessRange.get(1);
     if (dimensions == 2) {
-      return index[0] * index[1];
+      return x * index[0] + index[1];
     } else if (dimensions == 3) {
-      return index[0] * index[1] * index[2];
+      return x * index[0] + y * index[1] + index[2];
     }
     return index[0];
   }

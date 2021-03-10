@@ -27,7 +27,20 @@ TEST(accessor, buffer_2d) {
 
   acc[id<2>(1, 1)] = 233;
 
-//  EXPECT_EQ(acc[1][1], SIZE);
-//  EXPECT_EQ(buf.get_size(), SIZE * sizeof(float));
-//  EXPECT_EQ(buf.get_range(), range<1>(SIZE));
+  EXPECT_EQ(acc[id<2>(1, 1)], 233);
+  EXPECT_EQ(acc[1][1], 233);
+  EXPECT_EQ(acc.get_range(), range<2>(2, 3));
 }
+
+TEST(accessor, buffer_3d) {
+  buffer<float, 3> buf(range<3>(2, 3, 3));
+
+  auto acc = buf.get_access<access::mode::read_write>();
+
+  acc[id<3>(1, 1, 1)] = 233;
+
+  EXPECT_EQ(acc[id<3>(1, 1, 1)], 233);
+  EXPECT_EQ(acc[1][1][1], 233);
+  EXPECT_EQ(acc.get_range(), range<3>(2, 3, 3));
+}
+

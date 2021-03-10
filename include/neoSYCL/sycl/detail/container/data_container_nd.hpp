@@ -9,87 +9,87 @@ namespace neosycl::sycl::detail::container {
 template<typename T, size_t dimensions, typename AllocatorT>
 class DataContainerD : public DataContainer {
 public:
-  explicit DataContainerD(ArrayND <dimensions> r) : size(r) {
-    this->allocate_ptr = shared_ptr_class<T>(alloc.allocate(r.get_liner()));
-    this->ptr = this->allocate_ptr.get();
+  explicit DataContainerD(ArrayND <dimensions> r) : range(r) {
+    allocate_ptr = shared_ptr_class<T>(alloc.allocate(r.get_liner()));
+    ptr = allocate_ptr.get();
   }
 
-  DataContainerD(ArrayND <dimensions> r, AllocatorT allocatorT) : alloc(allocatorT), size(r) {
-    this->allocate_ptr = shared_ptr_class<T>(alloc.allocate(r.get_liner()));
-    this->ptr = this->allocate_ptr.get();
+  DataContainerD(ArrayND <dimensions> r, AllocatorT allocatorT) : alloc(allocatorT), range(r) {
+    allocate_ptr = shared_ptr_class<T>(alloc.allocate(r.get_liner()));
+    ptr = allocate_ptr.get();
   }
 
-  DataContainerD(T *data, ArrayND <dimensions> r) : size(r), ptr(data), allocate_ptr(nullptr) {}
+  DataContainerD(T *data, ArrayND <dimensions> r) : range(r), ptr(data), allocate_ptr(nullptr) {}
 
   DataContainerD(T *data, ArrayND <dimensions> r, AllocatorT allocatorT) :
-      ptr(data), alloc(allocatorT), size(r), allocate_ptr(nullptr) {}
+      ptr(data), alloc(allocatorT), range(r), allocate_ptr(nullptr) {}
 
   size_t get_size() override {
-    return sizeof(T) * this->size.get_liner();
+    return sizeof(T) * range.get_liner();
   }
 
   size_t get_count() override {
-    return this->size.get_liner();
+    return range.get_liner();
   }
 
   T *get_ptr() const {
-    return this->ptr;
+    return ptr;
   }
 
   void *get_raw_ptr() override {
-    return (void *) this->get_ptr();
+    return (void *) get_ptr();
   }
 
   T *begin() const {
-    return this->ptr;
+    return ptr;
   }
 
   T *end() const {
-    return this->ptr + this->size.get_liner();
+    return ptr + range.get_liner();
   }
 
   T &get(size_t x) const {
-    return this->ptr[x];
+    return ptr[x];
   }
 
   AllocatorT get_allocator() {
-    return this->alloc;
+    return alloc;
   }
 
   ArrayND <dimensions> get_range() const {
-    return this->size;
+    return range;
   }
 
   DataContainerD(const DataContainerD &rhs) :
-      size(rhs.size),
+      range(rhs.range),
       alloc(rhs.alloc) {
-    this->allocate_ptr = shared_ptr_class<T>(alloc.allocate(size.get_liner()));
-    this->ptr = this->allocate_ptr.get();
-    memcpy(ptr, rhs.ptr, sizeof(T) * size.get_liner());
+    allocate_ptr = shared_ptr_class<T>(alloc.allocate(range.get_liner()));
+    ptr = allocate_ptr.get();
+    memcpy(ptr, rhs.ptr, sizeof(T) * range.get_liner());
   }
 
   DataContainerD(DataContainerD &&rhs) :
-      size(rhs.size),
+      range(rhs.range),
       alloc(rhs.alloc),
       allocate_ptr(rhs.allocate_ptr),
       ptr(rhs.ptr) {}
 
   DataContainerD &operator=(const DataContainerD &rhs) {
-    this->size = rhs.size;
-    this->alloc = rhs.alloc;
-    this->ptr = rhs.ptr;
-    this->allocate_ptr = rhs.allocate_ptr;
+    range = rhs.range;
+    alloc = rhs.alloc;
+    ptr = rhs.ptr;
+    allocate_ptr = rhs.allocate_ptr;
   }
 
   DataContainerD &operator=(DataContainerD &&rhs) {
-    this->size = rhs.size;
-    this->alloc = rhs.alloc;
-    this->ptr = rhs.ptr;
-    this->allocate_ptr = rhs.allocate_ptr;
+    range = rhs.range;
+    alloc = rhs.alloc;
+    ptr = rhs.ptr;
+    allocate_ptr = rhs.allocate_ptr;
   }
 
 private:
-  ArrayND <dimensions> size;
+  ArrayND <dimensions> range;
   AllocatorT alloc;
   T *ptr;
   shared_ptr_class <T> allocate_ptr;
@@ -143,33 +143,41 @@ public:
   DataContainerND(DataContainerD<T, 2, AllocatorT> &&rhs) :
       DataContainerD<T, 2, AllocatorT>(rhs) {}
 
-  T *operator[](size_t x) const {
-    size_t y = this->get_range()[1];
-    return this->get_ptr() + (x * y);
+  T *operator[](size_t i) const {
+    size_t x = this->get_range()[0];
+    return this->get_ptr() + (x * i);
   }
+};
+
+template<typename T, size_t dimensions>
+struct AccessProxyND {};
+
+template<typename T>
+struct AccessProxyND<T, 3> {
+  AccessProxyND(const ArrayND<3> &r, T *ptr) : range(r), base_ptr(ptr) {}
+
+  T *operator[](size_t i) const {
+    size_t y = range[1];
+    return base_ptr + i * y;
+  }
+
+  ArrayND<3> range;
+  T *base_ptr;
 };
 
 template<typename T, typename AllocatorT>
 class DataContainerND<T, 3, AllocatorT> : public DataContainerD<T, 3, AllocatorT> {
 public:
-  DataContainerND(const ArrayND<3> &r) : DataContainerD<T, 3, AllocatorT>(r) {
-    this->build_access_ptr();
-  }
+  DataContainerND(const ArrayND<3> &r) : DataContainerD<T, 3, AllocatorT>(r) {}
 
   DataContainerND(const ArrayND<3> &r, AllocatorT alloc) :
-      DataContainerD<T, 3, AllocatorT>(r, alloc) {
-    this->build_access_ptr();
-  }
+      DataContainerD<T, 3, AllocatorT>(r, alloc) {}
 
   DataContainerND(T *data, const ArrayND<3> &r) :
-      DataContainerD<T, 3, AllocatorT>(data, r) {
-    this->build_access_ptr();
-  }
+      DataContainerD<T, 3, AllocatorT>(data, r) {}
 
   DataContainerND(T *data, const ArrayND<3> &r, AllocatorT alloc) :
-      DataContainerD<T, 3, AllocatorT>(data, r, alloc) {
-    this->build_access_ptr();
-  }
+      DataContainerD<T, 3, AllocatorT>(data, r, alloc) {}
 
   DataContainerND(const DataContainerD<T, 3, AllocatorT> &rhs) :
       DataContainerD<T, 3, AllocatorT>(rhs) {}
@@ -177,22 +185,10 @@ public:
   DataContainerND(DataContainerD<T, 3, AllocatorT> &&rhs) :
       DataContainerD<T, 3, AllocatorT>(rhs) {}
 
-  T **operator[](size_t x) const {
-    size_t y = this->get_range()[1];
-    size_t z = this->get_range()[2];
-    return this->access_ptr.get() + (x * y * z);
-  }
-
-private:
-  shared_ptr_class<T *> access_ptr;
-
-  void build_access_ptr() {
-    size_t y = this->get_range()[1];
-    size_t z = this->get_range()[2];
-    this->access_ptr = shared_ptr_class<T *>(this->get_allocator().allocate(y));
-    for (size_t i = 0; i < y; i++) {
-      this->access_ptr.get()[i] = i * z;
-    }
+  AccessProxyND<T, 3> operator[](size_t i) const {
+    size_t x = this->get_range()[0];
+    T *base_ptr = this->get_ptr() + i * x;
+    return AccessProxyND<T, 3>(this->get_range(), base_ptr);
   }
 };
 
