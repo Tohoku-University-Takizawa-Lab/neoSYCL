@@ -18,8 +18,6 @@ struct id;
 
 template<size_t dimensions = 1, bool with_offset = true>
 struct item {
-public:
-
   item() = delete;
 
   template<int D = dimensions, typename = std::enable_if_t<D == 1>>
@@ -59,7 +57,6 @@ public:
 
   DEFINE_ITEM_BY_VALUE_OP(item);
 
-private:
   range <dimensions> max_range;
   detail::container::ArrayND <dimensions> offset;
   detail::container::ArrayND <dimensions> data;

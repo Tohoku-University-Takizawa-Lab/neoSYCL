@@ -11,7 +11,6 @@ namespace neosycl::sycl {
 
 template<std::size_t dimensions = 1>
 struct id {
-public:
   id() = default;
 
   template<int D = dimensions, typename = std::enable_if_t<D == 1>>
@@ -128,7 +127,6 @@ public:
 
   DEFINE_COMMON_BY_VALUE_SEMANTICS(id);
 
-private:
   detail::container::ArrayND<dimensions> data;
 };
 

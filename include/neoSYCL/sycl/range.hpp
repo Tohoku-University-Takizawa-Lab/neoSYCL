@@ -8,7 +8,6 @@ namespace neosycl::sycl {
 
 template<std::size_t dimensions = 1>
 struct range {
-public:
   template<int D = dimensions, typename = std::enable_if_t<D == 1>>
   range(size_t dim0) :data(dim0) {}
 
@@ -114,7 +113,6 @@ public:
 
   DEFINE_COMMON_BY_VALUE_SEMANTICS(range);
 
-private:
   detail::container::ArrayND<dimensions> data;
 };
 

@@ -106,7 +106,7 @@ public:
   ~accessor() = default;
 
 private:
-  std::shared_ptr<detail::container::DataContainerND<dataT>> data;
+  std::shared_ptr<detail::container::DataContainerND<dataT, dimensions>> data;
   range<dimensions> accessRange;
   id<dimensions> accessOffset;
 

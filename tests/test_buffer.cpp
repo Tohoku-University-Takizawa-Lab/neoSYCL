@@ -5,7 +5,7 @@ using namespace cl::sycl;
 
 TEST(buffer, container_test) {
 
-  detail::container::DataContainerND<int> container(10);
+  detail::container::DataContainerND<int, 1> container(10);
 
   for (int i = 0; i < 10; i++) {
     container[i] = i;
@@ -15,7 +15,7 @@ TEST(buffer, container_test) {
     EXPECT_EQ(container[i], i);
   }
 
-  detail::container::DataContainerND<int> copy_container(container);
+  detail::container::DataContainerND<int, 1> copy_container(container);
 
   for (int i = 0; i < 10; i++) {
     EXPECT_EQ(copy_container[i], i);
@@ -33,7 +33,7 @@ TEST(buffer, container_create_from_arr) {
   }
 
   {
-    detail::container::DataContainerND<float> container(val, 10);
+    detail::container::DataContainerND<float, 1> container(val, 10);
 
     for (int i = 0; i < 10; i++) {
       EXPECT_EQ(container[i], i);

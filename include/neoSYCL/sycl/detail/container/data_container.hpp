@@ -34,6 +34,8 @@ public:
 
   virtual size_t get_size() = 0;
 
+  virtual size_t get_count() = 0;
+
 };
 
 }
