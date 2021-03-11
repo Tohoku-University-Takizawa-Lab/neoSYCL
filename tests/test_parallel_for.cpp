@@ -3,7 +3,7 @@
 
 using namespace cl::sycl;
 
-TEST(sycl, parallel_vector_add) {
+TEST(parallel_for, simple_test) {
   constexpr size_t N = 3;
   using Vector = float[N];
 
@@ -11,19 +11,14 @@ TEST(sycl, parallel_vector_add) {
   Vector b = {5, 6, 8};
   Vector c;
 
-  // Create a queue to work on
   queue q;
 
-  // Create buffers from a & b vectors
   buffer<float> A{std::begin(a), std::end(a)};
   buffer<float> B{std::begin(b), std::end(b)};
 
   {
-    // A buffer of N float using the storage of c
     buffer<float> C{c, N};
 
-    /* The command group describing all operations needed for the kernel
-       execution */
     q.submit([&](handler &cgh) {
       // In the kernel A and B are read, but C is written
       auto ka = A.get_access<access::mode::read>(cgh);
@@ -31,12 +26,11 @@ TEST(sycl, parallel_vector_add) {
       auto kc = C.get_access<access::mode::write>(cgh);
 
       // Enqueue a parallel kernel
-      cgh.parallel_for<class vector_add>(N,
-                                         [=](id<1> index) {
-                                           kc[index] = ka[index] + kb[index];
-                                         });
-    }); //< End of our commands for this queue
-  } //< Buffer C goes out of scope and copies back values to c
+      cgh.parallel_for<class vector_add>(range<1>(N), [=](id<1> index) {
+        kc[index] = ka[index] + kb[index];
+      });
+    });
+  }
 
   q.wait();
 

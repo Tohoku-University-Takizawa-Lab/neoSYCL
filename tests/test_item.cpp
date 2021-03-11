@@ -3,7 +3,7 @@
 
 using namespace cl::sycl;
 
-TEST(id, basic_test) {
+TEST(item, basic_test) {
   range<2> range_2d(1, 2);
   range<3> range_3d(1, 2, 3);
 

@@ -9,7 +9,7 @@ find_package(Threads REQUIRED)
 
 # Will download external CMakeable project from git repo, branch "master" and install it in $DEPS_ROOT
 # This also will create "googletest.git" target, which we'll use as dependency for our test project
-ExtProjectGit("https://github.com/google/googletest.git" "master" ${DEPS_ROOT} CMAKE_ARGS "${_OPT_CMAKE_ARGS}")
+ExtProjectGit("https://github.com/google/googletest.git" "release-1.10.0" ${DEPS_ROOT} CMAKE_ARGS "${_OPT_CMAKE_ARGS}")
 
 include_directories("${DEPS_ROOT}/include")
 link_directories("${DEPS_ROOT}/lib")
@@ -21,7 +21,6 @@ link_directories("${DEPS_ROOT}/lib64")
 #-------------------
 set(COMMON_INCLUDES ${PROJECT_SOURCE_DIR}/include)
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
-    set(COMMON_LIBS fmt)
 endif ()
 
 #-------------------
