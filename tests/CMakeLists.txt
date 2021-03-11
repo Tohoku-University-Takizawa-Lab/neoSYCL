@@ -21,7 +21,6 @@ link_directories("${DEPS_ROOT}/lib64")
 #-------------------
 set(COMMON_INCLUDES ${PROJECT_SOURCE_DIR}/include)
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
-    set(COMMON_LIBS fmt)
 endif ()
 
 #-------------------

@@ -34,7 +34,7 @@ struct task_handler_cpu : public task_handler {
     for (const KernelArg &arg:k->args) {
       arg.acquire_access();
     }
-    DEBUG_INFO("execute single {} kernel, name: {}", int (type()), k->name);
+    DEBUG_INFO("execute single %d kernel, name: %s\n", type(), k->name.c_str());
     func();
     for (const KernelArg &arg:k->args) {
       arg.release_access();
