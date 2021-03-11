@@ -9,10 +9,10 @@
 
 namespace neosycl::sycl {
 
-template<typename T, int dimensions, typename AllocatorT>
+template<typename T, size_t dimensions, typename AllocatorT>
 class buffer;
 
-template<typename dataT, int dimensions, access::mode accessMode,
+template<typename dataT, size_t dimensions, access::mode accessMode,
     access::target accessTarget = access::target::global_buffer,
     access::placeholder isPlaceholder = access::placeholder::false_t>
 class accessor {

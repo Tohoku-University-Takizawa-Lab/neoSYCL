@@ -3,15 +3,11 @@ project(neoSYCL C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 
-option(BUILD_VE "Enable SX-Aurora support" OFF)
-option(BUILD_TESTING "Enable build tests" OFF)
+#option(BUILD_VE "Enable SX-Aurora support" OFF)
+#option(BUILD_TESTING "Enable build tests" OFF)
 
-include_directories(include)
-
-include_directories(third_party/eigen)
 
 if (BUILD_VE)
     ADD_DEFINITIONS(-DBUILD_VE)
@@ -26,24 +22,22 @@ if (BUILD_VE)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L${VEO_LIB_PATH} -Wl,-rpath=${VEO_LIB_PATH} -lveo")
 endif ()
 
-# use pthread
-find_package(Threads REQUIRED)
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lpthread")
-#find_package(OpenMP REQUIRED)
+
+add_subdirectory(third_party)
 
 # debug info
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
     message(STATUS "Enable debug mode")
     ADD_DEFINITIONS(-DDEBUG)
     include_directories(third_party/fmt/include)
-    add_subdirectory(third_party/fmt)
 endif ()
 
-if (SYNC_MODE)
-    message(STATUS "Enable sync mode")
-    ADD_DEFINITIONS(-DSYNC)
-endif ()
+include_directories(include)
 
+# use pthread
+#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lpthread")
+
+# add examples
 add_subdirectory(examples)
 
 # add tests

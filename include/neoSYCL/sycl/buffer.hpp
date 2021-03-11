@@ -34,8 +34,7 @@ public:
 } // namespace property
 
 
-
-template<typename T, int dimensions = 1, typename AllocatorT = buffer_allocator<T>>
+template<typename T, size_t dimensions = 1, typename AllocatorT = buffer_allocator<T>>
 class buffer {
   friend accessor<T, dimensions, access::mode::read, access::target::global_buffer>;
   friend accessor<T, dimensions, access::mode::read, access::target::host_buffer>;
@@ -124,6 +123,7 @@ public:
 
   template<access::mode mode, access::target target = access::target::global_buffer>
   accessor<T, dimensions, mode, target> get_access(handler &commandGroupHandler) {
+    commandGroupHandler.get_kernel()->args.push_back(detail::KernelArg(data, mode));
     return accessor<T, dimensions, mode, target>(*this);
   }
 
@@ -135,6 +135,7 @@ public:
   template<access::mode mode, access::target target = access::target::global_buffer>
   accessor<T, dimensions, mode, target> get_access(
       handler &commandGroupHandler, range<dimensions> accessRange, id<dimensions> accessOffset = {}) {
+    commandGroupHandler.get_kernel()->args.push_back(detail::KernelArg(data, mode));
     return accessor<T, dimensions, mode, target>
         (*this, commandGroupHandler, accessRange, accessOffset);
   }

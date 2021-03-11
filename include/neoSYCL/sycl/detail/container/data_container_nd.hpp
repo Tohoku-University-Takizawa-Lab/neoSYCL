@@ -6,6 +6,13 @@
 
 namespace neosycl::sycl::detail::container {
 
+/**
+ * Data container for SYCL buffer
+ *
+ * @tparam T DataType
+ * @tparam dimensions Buffer dimensions
+ * @tparam AllocatorT Buffer Allocator
+ */
 template<typename T, size_t dimensions, typename AllocatorT>
 class DataContainerD : public DataContainer {
 public:
@@ -149,6 +156,13 @@ public:
   }
 };
 
+/**
+ * Container access proxy, performs as 2-D array
+ * Only use in 3-D buffer
+ *
+ * @tparam T DataType
+ * @tparam dimensions Buffer dimensions
+ */
 template<typename T, size_t dimensions>
 struct AccessProxyND {};
 
