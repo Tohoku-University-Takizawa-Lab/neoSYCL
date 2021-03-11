@@ -79,7 +79,8 @@ public:
 
   /* Available only when: (accessMode == access::mode::write || accessMode == access::mode::read_write || accessMode == access::mode::discard_write || accessMode == access::mode::discard_read_write) && dimensions > 0) */
   template<access::mode Mode = accessMode, int D = dimensions, typename = std::enable_if_t<
-      ((Mode == access::mode::read_write) ||
+      ((Mode == access::mode::write) ||
+          (Mode == access::mode::read_write) ||
           (Mode == access::mode::discard_write) ||
           (Mode == access::mode::discard_read_write)) &&
           (D > 0)>>

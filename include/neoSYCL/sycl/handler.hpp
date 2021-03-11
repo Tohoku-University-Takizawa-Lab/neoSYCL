@@ -50,21 +50,33 @@ public:
     });
   }
 
-  template<typename KernelType, int dimensions>
+  template<typename KernelType>
   void submit_parallel_for(shared_ptr_class<detail::task_handler> handler,
-                           range<dimensions> numWorkItems,
-                           id<dimensions> offset,
+                           range<3> numWorkItems,
+                           id<3> offset,
                            KernelType kernelFunc) {
     submit_task([f = kernelFunc, n = numWorkItems, o = offset, h = std::move(handler), k = kernel]() {
-      switch (dimensions) {
-      case 1:h->parallel_for_1d(k, n, o, f);
-        break;
-      case 2:h->parallel_for_2d(k, n, o, f);
-        break;
-      case 3:h->parallel_for_3d(k, n, o, f);
-        break;
-      default:throw feature_not_supported("unsupported dimensions");
-      }
+      h->parallel_for_3d(k, n, f, o);
+    });
+  }
+
+  template<typename KernelType>
+  void submit_parallel_for(shared_ptr_class<detail::task_handler> handler,
+                           range<2> numWorkItems,
+                           id<2> offset,
+                           KernelType kernelFunc) {
+    submit_task([f = kernelFunc, n = numWorkItems, o = offset, h = std::move(handler), k = kernel]() {
+      h->parallel_for_2d(k, n, f, o);
+    });
+  }
+
+  template<typename KernelType>
+  void submit_parallel_for(shared_ptr_class<detail::task_handler> handler,
+                           range<1> numWorkItems,
+                           id<1> offset,
+                           KernelType kernelFunc) {
+    submit_task([f = kernelFunc, n = numWorkItems, o = offset, h = std::move(handler), k = kernel]() {
+      h->parallel_for_1d(k, n, f, o);
     });
   }
 
