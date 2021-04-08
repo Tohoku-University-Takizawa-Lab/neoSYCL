@@ -34,6 +34,9 @@
 #include "neoSYCL/sycl/nec/ve_kernel.hpp"
 #endif
 
+#ifdef BUILD_FPGA
+#endif
+
 namespace neosycl {
 
 using namespace neosycl::sycl;
