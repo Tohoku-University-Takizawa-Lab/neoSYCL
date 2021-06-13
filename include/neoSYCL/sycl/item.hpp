@@ -1,7 +1,7 @@
 #ifndef SYCL_INCLUDE_CL_SYCL_ITEM_HPP_
 #define SYCL_INCLUDE_CL_SYCL_ITEM_HPP_
 
-#include "detail/container/array_nd.hpp"
+#include "neoSYCL/sycl/detail/container/array_nd.hpp"
 
 #define DEFINE_ITEM_BY_VALUE_OP(cls)                                                                  \
 friend bool operator ==(const cls<dimensions> &lhs, const cls<dimensions> &rhs) {                     \

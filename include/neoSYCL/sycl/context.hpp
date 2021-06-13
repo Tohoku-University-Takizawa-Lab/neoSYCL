@@ -1,9 +1,9 @@
 #ifndef CUSTOM_SYCL_INCLUDE_SYCL_CONTEXT_HPP_
 #define CUSTOM_SYCL_INCLUDE_SYCL_CONTEXT_HPP_
 
-#include "exception.hpp"
-#include "info/context.hpp"
-#include "property_list.hpp"
+#include "neoSYCL/sycl/exception.hpp"
+#include "neoSYCL/sycl/info/context.hpp"
+#include "neoSYCL/sycl/property_list.hpp"
 
 namespace neosycl::sycl {
 

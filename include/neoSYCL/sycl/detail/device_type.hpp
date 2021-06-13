@@ -4,7 +4,8 @@
 namespace neosycl::sycl::detail {
 
 enum SUPPORT_PLATFORM_TYPE : int {
-  CPU
+  CPU,
+  SX_AURORA
 };
 
 }

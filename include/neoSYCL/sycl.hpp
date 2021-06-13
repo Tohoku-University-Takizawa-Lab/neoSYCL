@@ -27,17 +27,6 @@
 #include "sycl/queue.hpp"
 #include "sycl/handler.hpp"
 
-#ifdef BUILD_VE
-#include "neoSYCL/sycl/nec/ve_device.hpp"
-#include "neoSYCL/sycl/nec/ve_queue.hpp"
-#include "neoSYCL/sycl/nec/ve_task.hpp"
-#include "neoSYCL/sycl/nec/ve_kernel.hpp"
-#endif
-
-#ifdef BUILD_FPGA
-
-#endif
-
 namespace neosycl {
 
 using namespace neosycl::sycl;

@@ -3,15 +3,15 @@
 
 #include <utility>
 
-#include "exception.hpp"
-#include "types.hpp"
-#include "device_selector.hpp"
-#include "info/queue.hpp"
-#include "property_list.hpp"
-#include "handler.hpp"
-#include "platform.hpp"
-#include "context.hpp"
-#include "detail/task_counter.hpp"
+#include "neoSYCL/sycl/exception.hpp"
+#include "neoSYCL/sycl/types.hpp"
+#include "neoSYCL/sycl/device_selector.hpp"
+#include "neoSYCL/sycl/info/queue.hpp"
+#include "neoSYCL/sycl/property_list.hpp"
+#include "neoSYCL/sycl/handler.hpp"
+#include "neoSYCL/sycl/platform.hpp"
+#include "neoSYCL/sycl/context.hpp"
+#include "neoSYCL/sycl/detail/task_counter.hpp"
 
 namespace neosycl::sycl {
 

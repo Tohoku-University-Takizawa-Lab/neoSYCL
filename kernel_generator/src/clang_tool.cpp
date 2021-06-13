@@ -38,13 +38,13 @@ const static std::string DEFAULT_OUTPUT_NAME = "kernel";
 using namespace sycl;
 
 class SYCLVisitor : public clang::RecursiveASTVisitor<SYCLVisitor> {
- private:
+private:
   clang::Rewriter &rewriter;
   clang::SourceManager &manager;
   clang::CompilerInstance &instance;
   ProgramContext context;
 
- public:
+public:
   SYCLVisitor(clang::CompilerInstance &ci, clang::SourceManager &sm, clang::Rewriter &re)
       : instance(ci), rewriter(re), manager(sm) {
   }
@@ -95,14 +95,14 @@ class SYCLVisitor : public clang::RecursiveASTVisitor<SYCLVisitor> {
 };
 
 class SYCLASTConsumer : public clang::ASTConsumer {
- private:
+private:
   std::unique_ptr<SYCLVisitor> visitor;
   clang::Rewriter rewriter;
   clang::SourceManager &manager;
   clang::CompilerInstance &instance;
   VEKernelTranslator translator;
 
- public:
+public:
   explicit SYCLASTConsumer(clang::CompilerInstance &ci)
       : instance(ci),
         manager(ci.getSourceManager()),
@@ -150,7 +150,7 @@ class SYCLASTConsumer : public clang::ASTConsumer {
 };
 
 class SYCLFrontendAction : public clang::PluginASTAction {
- public:
+public:
   virtual std::unique_ptr<clang::ASTConsumer>
   CreateASTConsumer(clang::CompilerInstance &ci, llvm::StringRef file) {
     return std::make_unique<SYCLASTConsumer>(ci);
@@ -163,7 +163,8 @@ class SYCLFrontendAction : public clang::PluginASTAction {
 };
 
 int main(int argc, const char **argv) {
-  clang::tooling::CommonOptionsParser op(argc, argv, MyToolCategory);
-  clang::tooling::ClangTool tool(op.getCompilations(), op.getSourcePathList());
+  llvm::Expected<clang::tooling::CommonOptionsParser>
+      op = clang::tooling::CommonOptionsParser::create(argc, argv, MyToolCategory, llvm::cl::OneOrMore);
+  clang::tooling::ClangTool tool(op->getCompilations(), op->getSourcePathList());
   return tool.run(clang::tooling::newFrontendActionFactory<SYCLFrontendAction>().get());
 }

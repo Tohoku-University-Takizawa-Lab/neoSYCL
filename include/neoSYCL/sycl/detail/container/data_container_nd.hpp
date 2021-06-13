@@ -2,7 +2,7 @@
 #define SYCL_INCLUDE_CL_SYCL_BUFFER_DATA_CONTAINER_ND_HPP_
 
 #include <shared_mutex>
-#include "array_nd.hpp"
+#include "neoSYCL/sycl/detail/container/array_nd.hpp"
 
 namespace neosycl::sycl::detail::container {
 

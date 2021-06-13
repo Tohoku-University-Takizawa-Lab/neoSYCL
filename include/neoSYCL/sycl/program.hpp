@@ -1,8 +1,8 @@
 #ifndef NEOSYCL_INCLUDE_NEOSYCL_SYCL_PROGRAM_HPP_
 #define NEOSYCL_INCLUDE_NEOSYCL_SYCL_PROGRAM_HPP_
 
-#include "property_list.hpp"
-#include "info/program.hpp"
+#include "neoSYCL/sycl/property_list.hpp"
+#include "neoSYCL/sycl/info/program.hpp"
 
 namespace neosycl::sycl {
 

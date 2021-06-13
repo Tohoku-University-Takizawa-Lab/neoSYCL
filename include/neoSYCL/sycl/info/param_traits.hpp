@@ -1,8 +1,8 @@
 #ifndef CUSTOM_SYCL_INCLUDE_SYCL_INFO_PARAM_TRAITS_HPP_
 #define CUSTOM_SYCL_INCLUDE_SYCL_INFO_PARAM_TRAITS_HPP_
 
-#include "platform.hpp"
-#include "device.hpp"
+#include "neoSYCL/sycl/info/platform.hpp"
+#include "neoSYCL/sycl/info/device.hpp"
 
 namespace neosycl::sycl::info {
 

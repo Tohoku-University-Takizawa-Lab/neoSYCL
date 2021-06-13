@@ -1,7 +1,7 @@
 #ifndef NEOSYCL_INCLUDE_NEOSYCL_SYCL_ND_RANGE_HPP_
 #define NEOSYCL_INCLUDE_NEOSYCL_SYCL_ND_RANGE_HPP_
 
-#include "id.hpp"
+#include "neoSYCL/sycl/id.hpp"
 
 namespace neosycl::sycl {
 

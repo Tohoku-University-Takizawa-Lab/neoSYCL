@@ -1,7 +1,7 @@
 #ifndef SYCL_INCLUDE_CL_SYCL_PROPERTY_LIST_HPP_
 #define SYCL_INCLUDE_CL_SYCL_PROPERTY_LIST_HPP_
 
-#include "exception.hpp"
+#include "neoSYCL/sycl/exception.hpp"
 
 namespace neosycl::sycl {
 

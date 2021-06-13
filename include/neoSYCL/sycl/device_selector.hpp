@@ -1,8 +1,8 @@
 #ifndef CUSTOM_SYCL_INCLUDE_SYCL_DEVICE_SELECTOR_HPP_
 #define CUSTOM_SYCL_INCLUDE_SYCL_DEVICE_SELECTOR_HPP_
 
-#include "device.hpp"
-#include "detail/platform_info.hpp"
+#include "neoSYCL/sycl/device.hpp"
+#include "neoSYCL/sycl/detail/platform_info.hpp"
 
 namespace neosycl::sycl {
 

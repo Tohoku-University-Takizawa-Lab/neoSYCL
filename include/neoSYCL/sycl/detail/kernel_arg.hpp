@@ -1,8 +1,8 @@
 #ifndef SYCL_INCLUDE_CL_SYCL_KERNEL_KERNEL_ARG_HPP_
 #define SYCL_INCLUDE_CL_SYCL_KERNEL_KERNEL_ARG_HPP_
 
-#include "container/data_container.hpp"
-#include "../access.hpp"
+#include "neoSYCL/sycl/detail/container/data_container.hpp"
+#include "neoSYCL/sycl/access.hpp"
 
 namespace neosycl::sycl::detail {
 

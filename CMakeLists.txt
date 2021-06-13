@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 
 option(BUILD_KERNEL_GENERATOR "build sycl kernel generator" OFF)
-#option(BUILD_VE "Enable SX-Aurora support" OFF)
+option(BUILD_VE "Enable SX-Aurora support" OFF)
 #option(BUILD_TESTING "Enable build tests" OFF)
 
 
@@ -37,8 +37,7 @@ endif ()
 
 include_directories(include)
 
-# use pthread
-#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lpthread")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lpthread")
 
 # add examples
 add_subdirectory(examples)

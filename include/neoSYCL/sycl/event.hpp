@@ -1,8 +1,8 @@
 #ifndef CUSTOM_SYCL_INCLUDE_SYCL_EVENT_HPP_
 #define CUSTOM_SYCL_INCLUDE_SYCL_EVENT_HPP_
 
-#include "types.hpp"
-#include "exception.hpp"
+#include "neoSYCL/sycl/types.hpp"
+#include "neoSYCL/sycl/exception.hpp"
 
 namespace neosycl::sycl {
 

@@ -1,8 +1,8 @@
 #ifndef NEOSYCL_INCLUDE_NEOSYCL_SYCL_DETAIL_PLATFORM_INFO_HPP
 #define NEOSYCL_INCLUDE_NEOSYCL_SYCL_DETAIL_PLATFORM_INFO_HPP
 
-#include "device_info.hpp"
-#include "device_type.hpp"
+#include "neoSYCL/sycl/detail/device_info.hpp"
+#include "neoSYCL/sycl/detail/device_type.hpp"
 
 namespace neosycl::sycl::detail {
 

@@ -1,7 +1,7 @@
 #ifndef NEOSYCL_INCLUDE_NEOSYCL_SYCL_TASK_HANDLER_HPP
 #define NEOSYCL_INCLUDE_NEOSYCL_SYCL_TASK_HANDLER_HPP
 
-#include "kernel.hpp"
+#include "neoSYCL/sycl/detail/kernel.hpp"
 
 namespace neosycl::sycl::detail {
 

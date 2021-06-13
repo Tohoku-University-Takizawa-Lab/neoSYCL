@@ -15,8 +15,7 @@ To build examples, use following commands:
 
 ## Enable NEC SX-Aurora TSUBASA (SX-AT) support
 
-@TODO Current SX-AURORA version is under development, please check branch backup.
-
+@TODO Current SX-AURORA new version is under development, please check branch backup.
 
 We also need a `sycl-kernel-generator` to generate kernel codes, which is a module of neoSYCL project.
 

@@ -2,7 +2,7 @@
 #define SYCL_INCLUDE_CL_SYCL_KERNEL_KERNEL_HPP_
 
 #include <utility>
-#include "kernel_arg.hpp"
+#include "neoSYCL/sycl/detail/kernel_arg.hpp"
 
 namespace neosycl::sycl::detail {
 

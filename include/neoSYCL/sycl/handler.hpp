@@ -4,17 +4,17 @@
 #include <utility>
 #include <shared_mutex>
 
-#include "nd_range.hpp"
-#include "types.hpp"
-#include "event.hpp"
-#include "id.hpp"
-#include "allocator.hpp"
-#include "detail/highlight_func.hpp"
-#include "detail/kernel.hpp"
-#include "detail/task.hpp"
-#include "detail/task_handler.hpp"
-#include "detail/registered_platforms.hpp"
-#include "detail/task_counter.hpp"
+#include "neoSYCL/sycl/nd_range.hpp"
+#include "neoSYCL/sycl/types.hpp"
+#include "neoSYCL/sycl/event.hpp"
+#include "neoSYCL/sycl/id.hpp"
+#include "neoSYCL/sycl/allocator.hpp"
+#include "neoSYCL/sycl/detail/highlight_func.hpp"
+#include "neoSYCL/sycl/detail/kernel.hpp"
+#include "neoSYCL/sycl/detail/task.hpp"
+#include "neoSYCL/sycl/detail/task_handler.hpp"
+#include "neoSYCL/sycl/detail/registered_platforms.hpp"
+#include "neoSYCL/sycl/detail/task_counter.hpp"
 
 namespace neosycl::sycl {
 

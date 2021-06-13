@@ -24,6 +24,13 @@ target_link_libraries(clang_tool
         clangEdit
         clangLex
         clangTooling
+        clangASTMatchers
+        clangAnalysis
+        clangEdit
+        clangAST
+        clangLex
+        clangRewrite
+        clangToolingCore
 
         ${llvm_libs}
 

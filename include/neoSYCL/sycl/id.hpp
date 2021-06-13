@@ -1,11 +1,11 @@
 #ifndef SYCL_INCLUDE_CL_SYCL_ID_HPP_
 #define SYCL_INCLUDE_CL_SYCL_ID_HPP_
 
-#include "types.hpp"
-#include "range.hpp"
-#include "item.hpp"
-#include "op_def.hpp"
-#include "detail/container/array_nd.hpp"
+#include "neoSYCL/sycl/types.hpp"
+#include "neoSYCL/sycl/range.hpp"
+#include "neoSYCL/sycl/item.hpp"
+#include "neoSYCL/sycl/op_def.hpp"
+#include "neoSYCL/sycl/detail/container/array_nd.hpp"
 
 namespace neosycl::sycl {
 

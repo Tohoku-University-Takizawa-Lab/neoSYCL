@@ -1,13 +1,13 @@
 #ifndef CUSTOM_SYCL_INCLUDE_SYCL_DEVICE_HPP_
 #define CUSTOM_SYCL_INCLUDE_SYCL_DEVICE_HPP_
 
-#include "exception.hpp"
-#include "types.hpp"
-#include "platform.hpp"
-#include "info/device_type.hpp"
-#include "info/device.hpp"
-#include "info/param_traits.hpp"
-#include "detail/device_info.hpp"
+#include "neoSYCL/sycl/exception.hpp"
+#include "neoSYCL/sycl/types.hpp"
+#include "neoSYCL/sycl/platform.hpp"
+#include "neoSYCL/sycl/info/device_type.hpp"
+#include "neoSYCL/sycl/info/device.hpp"
+#include "neoSYCL/sycl/info/param_traits.hpp"
+#include "neoSYCL/sycl/detail/device_info.hpp"
 
 namespace neosycl::sycl {
 
