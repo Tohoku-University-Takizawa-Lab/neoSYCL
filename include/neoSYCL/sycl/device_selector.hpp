@@ -10,7 +10,6 @@ class device;
 
 class device_selector {
 public:
-
   device_selector() = default;
 
   device_selector(const device_selector &rhs) = default;
@@ -25,11 +24,11 @@ public:
   virtual int operator()(const device &device) const = 0;
 
   virtual shared_ptr_class<detail::platform_info> get_platform_info() const {
-    return shared_ptr_class<detail::platform_info>(new detail::cpu_platform_info);
+    return shared_ptr_class<detail::platform_info>(
+        new detail::cpu_platform_info);
   }
-
 };
 
-}
+} // namespace neosycl::sycl
 
-#endif //CUSTOM_SYCL_INCLUDE_SYCL_DEVICE_SELECTOR_HPP_
+#endif // CUSTOM_SYCL_INCLUDE_SYCL_DEVICE_SELECTOR_HPP_

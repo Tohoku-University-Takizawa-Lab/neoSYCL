@@ -8,18 +8,13 @@ namespace neosycl::sycl {
 
 class kernel;
 
-enum class program_state {
-  none,
-  compiled,
-  linked
-};
+enum class program_state { none, compiled, linked };
 
 class program {
- public:
+public:
   program() = delete;
 
-  explicit program(const context &context,
-                   const property_list &propList = {});
+  explicit program(const context &context, const property_list &propList = {});
 
   program(const context &context, vector_class<device> deviceList,
           const property_list &propList = {});
@@ -27,22 +22,21 @@ class program {
   program(vector_class<program> &programList,
           const property_list &propList = {});
 
-  program(vector_class<program> &programList,
-          string_class linkOptions,
+  program(vector_class<program> &programList, string_class linkOptions,
           const property_list &propList = {});
 
-//  program(const context &context, cl_program clProgram);
+  //  program(const context &context, cl_program clProgram);
 
-//  cl_program get() const;
+  //  cl_program get() const;
 
   bool is_host() const;
 
-  template<typename kernelT>
+  template <typename kernelT>
   void compile_with_kernel_type(string_class compileOptions = "");
 
   void compile_with_source(string_class kernelSource,
                            string_class compileOptions = "");
-  template<typename kernelT>
+  template <typename kernelT>
   void build_with_kernel_type(string_class buildOptions = "");
 
   void build_with_source(string_class kernelSource,
@@ -50,18 +44,19 @@ class program {
 
   void link(string_class linkOptions = "");
 
-//  template<typename kernelT>
-//  bool has_kernel<kernelT>() const;
+  //  template<typename kernelT>
+  //  bool has_kernel<kernelT>() const;
 
   bool has_kernel(string_class kernelName) const;
 
-//  template<typename kernelT>
-//  kernel get_kernel<kernelT>() const;
+  //  template<typename kernelT>
+  //  kernel get_kernel<kernelT>() const;
 
   kernel get_kernel(string_class kernelName) const;
 
-  template<info::program param>
-  typename info::param_traits<info::program, param>::return_type get_info() const;
+  template <info::program param>
+  typename info::param_traits<info::program, param>::return_type
+  get_info() const;
 
   vector_class<vector_class<char>> get_binaries() const;
 
@@ -78,6 +73,6 @@ class program {
   program_state get_state() const;
 };
 
-}
+} // namespace neosycl::sycl
 
-#endif //NEOSYCL_INCLUDE_NEOSYCL_SYCL_PROGRAM_HPP_
+#endif // NEOSYCL_INCLUDE_NEOSYCL_SYCL_PROGRAM_HPP_

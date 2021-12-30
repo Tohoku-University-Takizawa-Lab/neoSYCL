@@ -19,17 +19,11 @@ struct platform_info {
 
 struct cpu_platform_info : public platform_info {
 
-  bool is_host() override {
-    return true;
-  }
+  bool is_host() override { return true; }
 
-  SUPPORT_PLATFORM_TYPE type() override {
-    return SUPPORT_PLATFORM_TYPE::CPU;
-  }
+  SUPPORT_PLATFORM_TYPE type() override { return SUPPORT_PLATFORM_TYPE::CPU; }
 
-  bool has_extension(const string_class &extension) override {
-    return false;
-  }
+  bool has_extension(const string_class &extension) override { return false; }
 
   vector_class<shared_ptr_class<device_info>> list_devices() override {
     return {shared_ptr_class<device_info>(new cpu_device_info())};
@@ -38,6 +32,6 @@ struct cpu_platform_info : public platform_info {
 
 using default_platform_info = cpu_platform_info;
 
-}
+} // namespace neosycl::sycl::detail
 
-#endif //NEOSYCL_INCLUDE_NEOSYCL_SYCL_DETAIL_PLATFORM_INFO_HPP
+#endif // NEOSYCL_INCLUDE_NEOSYCL_SYCL_DETAIL_PLATFORM_INFO_HPP

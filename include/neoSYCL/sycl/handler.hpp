@@ -26,109 +26,103 @@ namespace detail {
  * @tparam KernelName class
  * @return str
  */
-template<typename KernelName>
-string_class get_kernel_name_from_class() {
+template <typename KernelName> string_class get_kernel_name_from_class() {
   KernelName *p;
   string_class in = typeid(p).name();
   return in;
 }
 
-}
+} // namespace detail
 
 class handler {
 public:
-  explicit handler(device dev,
-                   shared_ptr_class<detail::task_counter> counter) :
-      bind_device(std::move(dev)),
-      counter(std::move(counter)),
-      kernel(new detail::kernel()) {}
+  explicit handler(device dev, shared_ptr_class<detail::task_counter> counter)
+      : bind_device(std::move(dev)), counter(std::move(counter)),
+        kernel(new detail::kernel()) {}
 
-  template<typename KernelName, typename KernelType>
+  template <typename KernelName, typename KernelType>
   void single_task(KernelType kernelFunc) {
     kernel->name = detail::get_kernel_name_from_class<KernelName>();
-    shared_ptr_class<detail::task_handler> handler = detail::PLATFORM_HANDLER_MAP[bind_device.device_info->type()];
-    submit_task([f = kernelFunc, h = handler, k = kernel]() {
-      h->single_task(k, f);
-    });
+    shared_ptr_class<detail::task_handler> handler =
+        detail::PLATFORM_HANDLER_MAP[bind_device.device_info->type()];
+    submit_task(
+        [f = kernelFunc, h = handler, k = kernel]() { h->single_task(k, f); });
   }
 
-  template<typename KernelType>
+  template <typename KernelType>
   void submit_parallel_for(shared_ptr_class<detail::task_handler> handler,
-                           range<3> numWorkItems,
-                           id<3> offset,
+                           range<3> numWorkItems, id<3> offset,
                            KernelType kernelFunc) {
-    submit_task([f = kernelFunc, n = numWorkItems, o = offset, h = std::move(handler), k = kernel]() {
-      h->parallel_for_3d(k, n, f, o);
-    });
+    submit_task([f = kernelFunc, n = numWorkItems, o = offset,
+                 h = std::move(handler),
+                 k = kernel]() { h->parallel_for_3d(k, n, f, o); });
   }
 
-  template<typename KernelType>
+  template <typename KernelType>
   void submit_parallel_for(shared_ptr_class<detail::task_handler> handler,
-                           range<2> numWorkItems,
-                           id<2> offset,
+                           range<2> numWorkItems, id<2> offset,
                            KernelType kernelFunc) {
-    submit_task([f = kernelFunc, n = numWorkItems, o = offset, h = std::move(handler), k = kernel]() {
-      h->parallel_for_2d(k, n, f, o);
-    });
+    submit_task([f = kernelFunc, n = numWorkItems, o = offset,
+                 h = std::move(handler),
+                 k = kernel]() { h->parallel_for_2d(k, n, f, o); });
   }
 
-  template<typename KernelType>
+  template <typename KernelType>
   void submit_parallel_for(shared_ptr_class<detail::task_handler> handler,
-                           range<1> numWorkItems,
-                           id<1> offset,
+                           range<1> numWorkItems, id<1> offset,
                            KernelType kernelFunc) {
-    submit_task([f = kernelFunc, n = numWorkItems, o = offset, h = std::move(handler), k = kernel]() {
-      h->parallel_for_1d(k, n, f, o);
-    });
+    submit_task([f = kernelFunc, n = numWorkItems, o = offset,
+                 h = std::move(handler),
+                 k = kernel]() { h->parallel_for_1d(k, n, f, o); });
   }
 
-  template<typename KernelName, typename KernelType, size_t dimensions>
+  template <typename KernelName, typename KernelType, size_t dimensions>
   void parallel_for(range<dimensions> numWorkItems, KernelType kernelFunc) {
     kernel->name = detail::get_kernel_name_from_class<KernelName>();
-    shared_ptr_class<detail::task_handler> handler = detail::PLATFORM_HANDLER_MAP[bind_device.device_info->type()];
+    shared_ptr_class<detail::task_handler> handler =
+        detail::PLATFORM_HANDLER_MAP[bind_device.device_info->type()];
     submit_parallel_for(handler, numWorkItems, id<dimensions>(), kernelFunc);
   }
 
-  template<typename KernelName, typename KernelType, size_t dimensions>
-  void parallel_for(range<dimensions> numWorkItems, id<dimensions> workItemOffset, KernelType kernelFunc) {
+  template <typename KernelName, typename KernelType, size_t dimensions>
+  void parallel_for(range<dimensions> numWorkItems,
+                    id<dimensions> workItemOffset, KernelType kernelFunc) {
     kernel->name = detail::get_kernel_name_from_class<KernelName>();
-    shared_ptr_class<detail::task_handler> handler = detail::PLATFORM_HANDLER_MAP[bind_device.device_info->type()];
+    shared_ptr_class<detail::task_handler> handler =
+        detail::PLATFORM_HANDLER_MAP[bind_device.device_info->type()];
     submit_parallel_for(handler, numWorkItems, workItemOffset, kernelFunc);
   }
 
-//  template<typename KernelName, typename KernelType, int dimensions>
-//  void parallel_for(nd_range<dimensions> executionRange, KernelType kernelFunc);
+  //  template<typename KernelName, typename KernelType, int dimensions>
+  //  void parallel_for(nd_range<dimensions> executionRange, KernelType
+  //  kernelFunc);
 
-  template<typename KernelName, typename WorkgroupFunctionType, int dimensions>
-  void parallel_for_work_group(range<dimensions> numWorkGroups, WorkgroupFunctionType kernelFunc);
+  template <typename KernelName, typename WorkgroupFunctionType, int dimensions>
+  void parallel_for_work_group(range<dimensions> numWorkGroups,
+                               WorkgroupFunctionType kernelFunc);
 
-  template<typename KernelName, typename WorkgroupFunctionType, int dimensions>
+  template <typename KernelName, typename WorkgroupFunctionType, int dimensions>
   void parallel_for_work_group(range<dimensions> numWorkGroups,
                                range<dimensions> workGroupSize,
                                WorkgroupFunctionType kernelFunc);
 
   //----- OpenCL interoperability interface //
-  template<typename T>
-  void set_arg(int argIndex, T &&arg) {
+  template <typename T> void set_arg(int argIndex, T &&arg) {
     kernel->args.insert(argIndex, arg);
   }
 
-  template<typename... Ts>
-  void set_args(Ts &&... args) {
+  template <typename... Ts> void set_args(Ts &&...args) {
     kernel->args.push_back(args...);
   }
 
-  shared_ptr_class<detail::kernel> get_kernel() {
-    return kernel;
-  }
+  shared_ptr_class<detail::kernel> get_kernel() { return kernel; }
 
 private:
   shared_ptr_class<detail::kernel> kernel;
   device bind_device;
   shared_ptr_class<detail::task_counter> counter;
 
-  template<typename Func>
-  void submit_task(Func func) {
+  template <typename Func> void submit_task(Func func) {
     counter->incr();
     std::thread t([f = func, c = counter]() {
       try {
@@ -142,6 +136,6 @@ private:
   }
 };
 
-}
+} // namespace neosycl::sycl
 
-#endif //CUSTOM_SYCL_INCLUDE_SYCL_HANDLER_HPP_
+#endif // CUSTOM_SYCL_INCLUDE_SYCL_HANDLER_HPP_

@@ -10,15 +10,13 @@ struct VETask : public Task {
 
   VETask(const nec::VEProc &proc) : proc(proc) {}
 
-  bool is_cpu() override {
-    return false;
-  }
+  bool is_cpu() override { return false; }
 
   std::shared_ptr<Kernel> get_kernel(string_class name) override {
     return std::shared_ptr<Kernel>(new VEKernel(args, name, proc));
   }
 };
 
-}
+} // namespace neosycl::sycl::detail
 
-#endif //SYCL_INCLUDE_CL_SYCL_NEC_VE_TASK_HPP_
+#endif // SYCL_INCLUDE_CL_SYCL_NEC_VE_TASK_HPP_

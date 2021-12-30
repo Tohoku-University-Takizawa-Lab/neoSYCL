@@ -21,10 +21,10 @@ enum class platform : unsigned int {
   */
   version,
   /** Returns the name of the platform (as a string_class)
-  */
+   */
   name,
   /** Returns the string provided by the platform vendor (as a string_class)
-  */
+   */
   vendor,
   /** Returns a space-separated list of extension names supported by the
       platform (as a string_class)
@@ -32,6 +32,6 @@ enum class platform : unsigned int {
   extensions
 };
 
-}
+} // namespace neosycl::sycl::info
 
-#endif //CUSTOM_SYCL_INCLUDE_SYCL_INFO_PLATFORM_HPP_
+#endif // CUSTOM_SYCL_INCLUDE_SYCL_INFO_PLATFORM_HPP_

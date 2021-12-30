@@ -5,9 +5,8 @@
 
 namespace neosycl::sycl::extensions {
 
-const int DEFAULT_VE_NODE = 0;
+const int DEFAULT_VE_NODE         = 0;
 const string_class DEFAULT_VE_LIB = "./kernel.so";
-
 
 struct VEProc {
   struct veo_proc_handle *ve_proc;
@@ -17,6 +16,6 @@ struct VEProc {
 struct VEContext {
   struct veo_thr_ctxt *ve_ctx;
 };
-}
+} // namespace neosycl::sycl::extensions
 
-#endif //NEOSYCL_INCLUDE_CL_SYCL_NEC_VE_INFO_HPP_
+#endif // NEOSYCL_INCLUDE_CL_SYCL_NEC_VE_INFO_HPP_

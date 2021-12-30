@@ -15,7 +15,6 @@
 #include "sycl/device_selector.hpp"
 #include "sycl/device_selector/cpu_selector.hpp"
 
-
 // include platform headers
 #include "sycl/platform.hpp"
 
@@ -33,4 +32,4 @@ using namespace neosycl::sycl;
 
 }
 
-#endif //NEOSYCL_INCLUDE_NEOSYCL_SYCL_HPP_
+#endif // NEOSYCL_INCLUDE_NEOSYCL_SYCL_HPP_

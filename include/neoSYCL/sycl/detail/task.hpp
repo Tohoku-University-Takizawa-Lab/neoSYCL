@@ -9,9 +9,7 @@ private:
   std::condition_variable cond;
   std::mutex lock;
 
-  void start() {
-    waiting = true;
-  }
+  void start() { waiting = true; }
 
   void end() {
     std::unique_lock<std::mutex> ul{lock};
@@ -24,9 +22,8 @@ private:
     std::unique_lock<std::mutex> ul{lock};
     cond.wait(ul, [&] { return !waiting; });
   }
-
 };
 
-}
+} // namespace neosycl::sycl::detail
 
-#endif //NEOSYCL_INCLUDE_NEOSYCL_SYCL_DETAIL_TASK_HPP
+#endif // NEOSYCL_INCLUDE_NEOSYCL_SYCL_DETAIL_TASK_HPP

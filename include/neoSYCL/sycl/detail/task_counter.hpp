@@ -16,12 +16,9 @@ private:
   std::mutex lock;
 
 public:
-
   task_counter() : counter(0) {}
 
-  void incr() {
-    counter++;
-  }
+  void incr() { counter++; }
 
   void decr() {
     std::unique_lock<std::mutex> ul{lock};
@@ -35,9 +32,8 @@ public:
     std::unique_lock<std::mutex> ul{lock};
     cond.wait(ul, [&] { return counter == 0; });
   }
-
 };
 
-}
+} // namespace neosycl::sycl::detail
 
-#endif //SYCL_INCLUDE_CL_SYCL_QUEUE_QUEUE_HPP_
+#endif // SYCL_INCLUDE_CL_SYCL_QUEUE_QUEUE_HPP_

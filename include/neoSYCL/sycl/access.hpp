@@ -24,10 +24,7 @@ enum class mode {
   atomic
 };
 
-enum placeholder {
-  false_t,
-  true_t
-};
+enum placeholder { false_t, true_t };
 
 enum class address_space : int {
   global_space,
@@ -36,8 +33,8 @@ enum class address_space : int {
   private_space
 };
 
-}
+} // namespace access
 
-}
+} // namespace neosycl::sycl
 
-#endif //CUSTOM_SYCL_INCLUDE_SYCL_ACCESS_HPP_
+#endif // CUSTOM_SYCL_INCLUDE_SYCL_ACCESS_HPP_

@@ -11,6 +11,6 @@ struct kernel {
   string_class name;
 };
 
-}
+} // namespace neosycl::sycl::detail
 
-#endif //SYCL_INCLUDE_CL_SYCL_KERNEL_KERNEL_HPP_
+#endif // SYCL_INCLUDE_CL_SYCL_KERNEL_KERNEL_HPP_

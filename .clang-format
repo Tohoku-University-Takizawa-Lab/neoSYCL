@@ -1,0 +1,6 @@
+Language: Cpp
+BasedOnStyle: LLVM
+AlignConsecutiveAssignments: true
+AlignTrailingComments: true
+SortIncludes: false
+

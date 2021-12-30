@@ -13,31 +13,21 @@ private:
   mutable std::shared_mutex mtx;
 
 public:
+  void lock_read() const { mtx.lock_shared(); }
 
-  void lock_read() const {
-    mtx.lock_shared();
-  }
+  void unlock_read() const { mtx.unlock_shared(); }
 
-  void unlock_read() const {
-    mtx.unlock_shared();
-  }
+  void lock_write() const { mtx.lock(); }
 
-  void lock_write() const {
-    mtx.lock();
-  }
-
-  void unlock_write() const {
-    mtx.unlock();
-  }
+  void unlock_write() const { mtx.unlock(); }
 
   virtual void *get_raw_ptr() = 0;
 
   virtual size_t get_size() = 0;
 
   virtual size_t get_count() = 0;
-
 };
 
-}
+} // namespace neosycl::sycl::detail::container
 
-#endif //SYCL_INCLUDE_CL_SYCL_BUFFER_DATA_CONTAINER_HPP_
+#endif // SYCL_INCLUDE_CL_SYCL_BUFFER_DATA_CONTAINER_HPP_

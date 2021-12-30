@@ -13,7 +13,6 @@ enum class device_type : unsigned int {
   all
 };
 
-
 }
 
-#endif //CUSTOM_SYCL_INCLUDE_SYCL_INFO_DEVICE_TYPE_HPP_
+#endif // CUSTOM_SYCL_INCLUDE_SYCL_INFO_DEVICE_TYPE_HPP_
