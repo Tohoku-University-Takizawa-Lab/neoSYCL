@@ -5,7 +5,9 @@
 
 namespace neosycl::sycl::detail {
 
-struct task_handler {
+class task_handler {
+public:
+  explicit task_handler() {}
 
   virtual void single_task(shared_ptr_class<kernel> k,
                            const std::function<void(void)> &func) = 0;
@@ -25,7 +27,9 @@ struct task_handler {
   virtual SUPPORT_PLATFORM_TYPE type() = 0;
 };
 
-struct task_handler_cpu : public task_handler {
+class task_handler_cpu : public task_handler {
+public:
+  task_handler_cpu() {}
 
   void single_task(shared_ptr_class<kernel> k,
                    const std::function<void(void)> &func) override {

@@ -3,46 +3,40 @@
 
 #include <utility>
 
-#include "neoSYCL/sycl/exception.hpp"
-#include "neoSYCL/sycl/types.hpp"
-#include "neoSYCL/sycl/device_selector.hpp"
 #include "neoSYCL/sycl/info/queue.hpp"
-#include "neoSYCL/sycl/property_list.hpp"
-#include "neoSYCL/sycl/handler.hpp"
-#include "neoSYCL/sycl/platform.hpp"
-#include "neoSYCL/sycl/context.hpp"
 #include "neoSYCL/sycl/detail/task_counter.hpp"
-
 namespace neosycl::sycl {
 
 class queue {
 public:
   explicit queue(const property_list &propList = {})
-      : bind_device(), counter(new detail::task_counter()) {}
+      : bind_device(), counter(new detail::task_counter()), ctx(bind_device) {}
 
   explicit queue(const async_handler &asyncHandler,
                  const property_list &propList = {})
       : bind_device(), counter(new detail::task_counter()),
-        err_handler(asyncHandler) {}
+        err_handler(asyncHandler), ctx(bind_device) {}
 
   explicit queue(const device_selector &deviceSelector,
                  const property_list &propList = {})
       : bind_device(deviceSelector.select_device()),
-        counter(new detail::task_counter()) {}
+        counter(new detail::task_counter()), ctx(bind_device) {}
 
   explicit queue(const device_selector &deviceSelector,
                  const async_handler &asyncHandler,
                  const property_list &propList = {})
       : bind_device(deviceSelector.select_device()),
-        counter(new detail::task_counter()), err_handler(asyncHandler) {}
+        counter(new detail::task_counter()), err_handler(asyncHandler),
+        ctx(bind_device) {}
 
   explicit queue(const device &syclDevice, const property_list &propList = {})
-      : bind_device(syclDevice), counter(new detail::task_counter()) {}
+      : bind_device(syclDevice), counter(new detail::task_counter()),
+        ctx(bind_device) {}
 
   explicit queue(const device &syclDevice, const async_handler &asyncHandler,
                  const property_list &propList = {})
       : bind_device(syclDevice), counter(new detail::task_counter()),
-        err_handler(asyncHandler) {}
+        err_handler(asyncHandler), ctx(bind_device) {}
 
   explicit queue(const context &syclContext,
                  const device_selector &deviceSelector,
@@ -65,7 +59,7 @@ public:
 
   //  cl_command_queue get() const;
 
-  context get_context() const;
+  context get_context() const { return ctx; }
 
   device get_device() const { return bind_device; }
 
@@ -76,7 +70,7 @@ public:
 
   template <typename T> event submit(T cgf) {
     try {
-      handler command_group_handler(bind_device, counter);
+      handler command_group_handler(bind_device, counter, ctx);
       cgf(command_group_handler);
     } catch (...) {
       throw;
@@ -98,6 +92,7 @@ private:
   device bind_device;
   async_handler err_handler;
   shared_ptr_class<detail::task_counter> counter;
+  context ctx;
 };
 
 } // namespace neosycl::sycl

@@ -1,6 +1,7 @@
 #ifndef SYCL_INCLUDE_CL_SYCL_NEC_VE_QUEUE_HPP_
 #define SYCL_INCLUDE_CL_SYCL_NEC_VE_QUEUE_HPP_
-
+// obsolete
+#if 0
 #include "ve_offload.h"
 #include "CL/SYCL/nec/ve_task.hpp"
 
@@ -53,5 +54,5 @@ public:
 };
 
 } // namespace neosycl::sycl
-
+#endif
 #endif // SYCL_INCLUDE_CL_SYCL_NEC_VE_QUEUE_HPP_

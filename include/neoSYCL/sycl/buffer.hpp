@@ -1,14 +1,6 @@
 #ifndef CUSTOM_SYCL_INCLUDE_SYCL_BUFFER_HPP_
 #define CUSTOM_SYCL_INCLUDE_SYCL_BUFFER_HPP_
 
-#include "neoSYCL/sycl/types.hpp"
-#include "neoSYCL/sycl/range.hpp"
-#include "neoSYCL/sycl/access.hpp"
-#include "neoSYCL/sycl/accessor.hpp"
-#include "neoSYCL/sycl/allocator.hpp"
-#include "neoSYCL/sycl/handler.hpp"
-#include "neoSYCL/sycl/context.hpp"
-#include "neoSYCL/sycl/property_list.hpp"
 #include "neoSYCL/sycl/detail/container/data_container.hpp"
 #include "neoSYCL/sycl/detail/container/data_container_nd.hpp"
 

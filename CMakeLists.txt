@@ -33,6 +33,7 @@ if (CMAKE_BUILD_TYPE STREQUAL Debug)
     message(STATUS "Enable debug mode")
     ADD_DEFINITIONS(-DDEBUG)
     include_directories(third_party/fmt/include)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 endif ()
 
 include_directories(include)

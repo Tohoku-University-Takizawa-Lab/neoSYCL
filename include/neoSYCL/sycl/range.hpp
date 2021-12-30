@@ -2,7 +2,6 @@
 #define CUSTOM_SYCL_INCLUDE_SYCL_RANGE_H_
 
 #include "neoSYCL/sycl/detail/container/array_nd.hpp"
-#include "neoSYCL/sycl/op_def.hpp"
 
 namespace neosycl::sycl {
 

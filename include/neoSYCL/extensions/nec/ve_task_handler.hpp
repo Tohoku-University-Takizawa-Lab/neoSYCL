@@ -5,28 +5,12 @@
 #include "neoSYCL/sycl/detail/kernel_arg.hpp"
 #include "ve_offload.h"
 
-namespace neosycl::sycl::extensions {
+namespace neosycl::sycl::extensions::nec {
 
-struct task_handler_ve : public detail::task_handler {
+class task_handler_ve : public detail::task_handler {
 
 public:
-  task_handler_ve(const VEProc &proc) : proc(proc) { ctx = ctx_create(proc); }
-
-  VEContext ctx_create(VEProc proc) {
-    struct veo_thr_ctxt *ctx = veo_context_open(proc.ve_proc);
-    DEBUG_INFO("[VEContext] create ve context: {:#x}", (size_t)ctx);
-    return VEContext{ctx};
-  }
-
-  void free_ctx(VEContext ctx) {
-    DEBUG_INFO("[VEContext] release ve ctx: {:#x}", (size_t)ctx.ve_ctx);
-    int rt = veo_context_close(ctx.ve_ctx);
-    if (rt != veo_command_state::VEO_COMMAND_OK) {
-      DEBUG_INFO("[VEContext] release ve ctx: {:#x} failed, return code: {}",
-                 (size_t)ctx.ve_ctx, rt);
-      PRINT_ERR("[VEContext] release ve ctx failed");
-    }
-  }
+  task_handler_ve(const VEProc &p, const VEContext &c) : proc(p), ctx(c) {}
 
   struct veo_args *create_ve_args() {
     struct veo_args *argp = veo_args_alloc();
@@ -35,7 +19,7 @@ public:
     }
     return argp;
   }
-
+  
   vector_class<uint64_t> copy_in(struct veo_args *argp,
                                  shared_ptr_class<detail::kernel> k,
                                  VEProc proc) {
@@ -165,12 +149,12 @@ public:
     throw exception("not implemented");
   };
 
-  detail::SUPPORT_PLATFORM_TYPE type() override { return detail::SX_AURORA; }
+  detail::SUPPORT_PLATFORM_TYPE type() override { return detail::VE; }
 
 private:
   VEContext ctx;
   VEProc proc;
 };
 
-} // namespace neosycl::sycl::extensions
+} // namespace neosycl::sycl::extensions::nec
 #endif // NEOSYCL_INCLUDE_NEOSYCL_EXTENSIONS_NEC_VE_TASK_HANDLER_HPP

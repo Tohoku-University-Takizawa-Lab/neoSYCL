@@ -1,6 +1,7 @@
 #ifndef SYCL_INCLUDE_CL_SYCL_NEC_VE_DEVICE_HPP_
 #define SYCL_INCLUDE_CL_SYCL_NEC_VE_DEVICE_HPP_
-
+// obsolete
+#if 0
 #include "ve_offload.h"
 #include "neoSYCL/sycl/device.hpp"
 
@@ -21,5 +22,5 @@ public:
 };
 
 } // namespace neosycl::sycl
-
+#endif
 #endif // SYCL_INCLUDE_CL_SYCL_NEC_VE_DEVICE_HPP_

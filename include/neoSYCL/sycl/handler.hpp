@@ -15,6 +15,7 @@
 #include "neoSYCL/sycl/detail/task_handler.hpp"
 #include "neoSYCL/sycl/detail/registered_platforms.hpp"
 #include "neoSYCL/sycl/detail/task_counter.hpp"
+#include <cxxabi.h>
 
 namespace neosycl::sycl {
 
@@ -28,49 +29,57 @@ namespace detail {
  */
 template <typename KernelName> string_class get_kernel_name_from_class() {
   KernelName *p;
+#if 0
+  int status;
+  char *pc = abi::__cxa_demangle(typeid(p).name(), 0, 0, &status);
+  string_class in(pc);
+  free(pc);
+#else
   string_class in = typeid(p).name();
+#endif
   return in;
 }
 
 } // namespace detail
 
 class handler {
+  using handler_type = shared_ptr_class<detail::task_handler>;
+  using counter_type = shared_ptr_class<detail::task_counter>;
+  using kernel_type  = shared_ptr_class<detail::kernel>;
+
 public:
-  explicit handler(device dev, shared_ptr_class<detail::task_counter> counter)
+  explicit handler(device dev, counter_type counter, context c)
       : bind_device(std::move(dev)), counter(std::move(counter)),
-        kernel(new detail::kernel()) {}
+        kernel(new detail::kernel()), ctx(c) {}
 
   template <typename KernelName, typename KernelType>
   void single_task(KernelType kernelFunc) {
     kernel->name = detail::get_kernel_name_from_class<KernelName>();
-    shared_ptr_class<detail::task_handler> handler =
-        detail::PLATFORM_HANDLER_MAP[bind_device.device_info->type()];
-    submit_task(
-        [f = kernelFunc, h = handler, k = kernel]() { h->single_task(k, f); });
+    handler_type task_handler = ctx.get_context_info()->task_handler;
+    submit_task([f = kernelFunc, h = task_handler, k = kernel]() {
+      h->single_task(k, f);
+    });
   }
 
   template <typename KernelType>
-  void submit_parallel_for(shared_ptr_class<detail::task_handler> handler,
-                           range<3> numWorkItems, id<3> offset,
-                           KernelType kernelFunc) {
+  void submit_parallel_for(handler_type handler, range<3> numWorkItems,
+                           id<3> offset, KernelType kernelFunc) {
     submit_task([f = kernelFunc, n = numWorkItems, o = offset,
                  h = std::move(handler),
                  k = kernel]() { h->parallel_for_3d(k, n, f, o); });
   }
 
   template <typename KernelType>
-  void submit_parallel_for(shared_ptr_class<detail::task_handler> handler,
-                           range<2> numWorkItems, id<2> offset,
-                           KernelType kernelFunc) {
+  void submit_parallel_for(handler_type handler, range<2> numWorkItems,
+                           id<2> offset, KernelType kernelFunc) {
     submit_task([f = kernelFunc, n = numWorkItems, o = offset,
                  h = std::move(handler),
                  k = kernel]() { h->parallel_for_2d(k, n, f, o); });
   }
 
   template <typename KernelType>
-  void submit_parallel_for(shared_ptr_class<detail::task_handler> handler,
-                           range<1> numWorkItems, id<1> offset,
-                           KernelType kernelFunc) {
+  void submit_parallel_for(handler_type handler, range<1> numWorkItems,
+                           id<1> offset, KernelType kernelFunc) {
     submit_task([f = kernelFunc, n = numWorkItems, o = offset,
                  h = std::move(handler),
                  k = kernel]() { h->parallel_for_1d(k, n, f, o); });
@@ -79,18 +88,17 @@ public:
   template <typename KernelName, typename KernelType, size_t dimensions>
   void parallel_for(range<dimensions> numWorkItems, KernelType kernelFunc) {
     kernel->name = detail::get_kernel_name_from_class<KernelName>();
-    shared_ptr_class<detail::task_handler> handler =
-        detail::PLATFORM_HANDLER_MAP[bind_device.device_info->type()];
-    submit_parallel_for(handler, numWorkItems, id<dimensions>(), kernelFunc);
+    handler_type task_handler = ctx.get_context_info()->task_handler;
+    submit_parallel_for(task_handler, numWorkItems, id<dimensions>(),
+                        kernelFunc);
   }
 
   template <typename KernelName, typename KernelType, size_t dimensions>
   void parallel_for(range<dimensions> numWorkItems,
                     id<dimensions> workItemOffset, KernelType kernelFunc) {
     kernel->name = detail::get_kernel_name_from_class<KernelName>();
-    shared_ptr_class<detail::task_handler> handler =
-        detail::PLATFORM_HANDLER_MAP[bind_device.device_info->type()];
-    submit_parallel_for(handler, numWorkItems, workItemOffset, kernelFunc);
+    handler_type task_handler = ctx.get_context_info()->task_handler;
+    submit_parallel_for(task_handler, numWorkItems, workItemOffset, kernelFunc);
   }
 
   //  template<typename KernelName, typename KernelType, int dimensions>
@@ -115,12 +123,13 @@ public:
     kernel->args.push_back(args...);
   }
 
-  shared_ptr_class<detail::kernel> get_kernel() { return kernel; }
+  kernel_type get_kernel() { return kernel; }
 
 private:
-  shared_ptr_class<detail::kernel> kernel;
+  kernel_type kernel;
   device bind_device;
-  shared_ptr_class<detail::task_counter> counter;
+  counter_type counter;
+  context ctx;
 
   template <typename Func> void submit_task(Func func) {
     counter->incr();

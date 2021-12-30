@@ -1,6 +1,7 @@
 #ifndef SYCL_INCLUDE_CL_SYCL_NEC_VE_KERNEL_HPP_
 #define SYCL_INCLUDE_CL_SYCL_NEC_VE_KERNEL_HPP_
-
+// obsolete
+#if 0
 #include "ve_info.hpp"
 
 namespace neosycl::sycl::detail {
@@ -179,5 +180,5 @@ struct VEKernel : public Kernel {
 };
 
 } // namespace neosycl::sycl::detail
-
+#endif
 #endif // SYCL_INCLUDE_CL_SYCL_NEC_VE_KERNEL_HPP_

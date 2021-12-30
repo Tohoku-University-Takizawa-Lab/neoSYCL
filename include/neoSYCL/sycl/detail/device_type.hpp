@@ -3,7 +3,7 @@
 
 namespace neosycl::sycl::detail {
 
-enum SUPPORT_PLATFORM_TYPE : int { CPU, SX_AURORA };
+enum SUPPORT_PLATFORM_TYPE : int { CPU, VE };
 
 }
 

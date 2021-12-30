@@ -1,6 +1,7 @@
 #ifndef SYCL_INCLUDE_CL_SYCL_NEC_VE_TASK_HPP_
 #define SYCL_INCLUDE_CL_SYCL_NEC_VE_TASK_HPP_
-
+// obsolete
+#if 0
 #include "ve_kernel.hpp"
 
 namespace neosycl::sycl::detail {
@@ -18,5 +19,5 @@ struct VETask : public Task {
 };
 
 } // namespace neosycl::sycl::detail
-
+#endif
 #endif // SYCL_INCLUDE_CL_SYCL_NEC_VE_TASK_HPP_

@@ -1,9 +1,6 @@
 #ifndef CUSTOM_SYCL_INCLUDE_SYCL_DEVICE_HPP_
 #define CUSTOM_SYCL_INCLUDE_SYCL_DEVICE_HPP_
 
-#include "neoSYCL/sycl/exception.hpp"
-#include "neoSYCL/sycl/types.hpp"
-#include "neoSYCL/sycl/platform.hpp"
 #include "neoSYCL/sycl/info/device_type.hpp"
 #include "neoSYCL/sycl/info/device.hpp"
 #include "neoSYCL/sycl/info/param_traits.hpp"
@@ -13,6 +10,7 @@ namespace neosycl::sycl {
 
 class device {
   friend class handler;
+  friend class context;
 
 public:
   device() : device_info(new detail::default_device_info()){};
@@ -68,11 +66,11 @@ public:
     return ret;
   }
 
+  detail::SUPPORT_PLATFORM_TYPE type() const { return device_info->type(); }
+
 private:
   shared_ptr_class<detail::device_info> device_info;
 };
-
-device device_selector::select_device() const { return device(); }
 
 vector_class<device> platform::get_devices(info::device_type) const {
   vector_class<device> ret;

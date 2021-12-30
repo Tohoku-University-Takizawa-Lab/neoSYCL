@@ -1,9 +1,6 @@
 #ifndef NEOSYCL_INCLUDE_NEOSYCL_SYCL_ACCESSOR_HPP
 #define NEOSYCL_INCLUDE_NEOSYCL_SYCL_ACCESSOR_HPP
 
-#include "neoSYCL/sycl/id.hpp"
-#include "neoSYCL/sycl/property_list.hpp"
-#include "neoSYCL/sycl/handler.hpp"
 #include "neoSYCL/sycl/detail/container/data_container.hpp"
 #include "neoSYCL/sycl/detail/container/data_container_nd.hpp"
 

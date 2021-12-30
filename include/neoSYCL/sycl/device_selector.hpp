@@ -1,7 +1,6 @@
 #ifndef CUSTOM_SYCL_INCLUDE_SYCL_DEVICE_SELECTOR_HPP_
 #define CUSTOM_SYCL_INCLUDE_SYCL_DEVICE_SELECTOR_HPP_
 
-#include "neoSYCL/sycl/device.hpp"
 #include "neoSYCL/sycl/detail/platform_info.hpp"
 
 namespace neosycl::sycl {
@@ -18,8 +17,7 @@ public:
 
   virtual ~device_selector() = default;
 
-  // defined in device.hpp
-  device select_device() const;
+  virtual device select_device() const = 0;
 
   virtual int operator()(const device &device) const = 0;
 

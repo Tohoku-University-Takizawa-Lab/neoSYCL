@@ -3,28 +3,34 @@
 
 // debug headers
 #include "sycl/detail/debug.hpp"
+
 #include "sycl/types.hpp"
-
 #include "sycl/exception.hpp"
-
-// include device headers
+#include "sycl/op_def.hpp"
+#include "sycl/range.hpp"
+#include "sycl/item.hpp"
 #include "sycl/id.hpp"
+
+#include "sycl/device_selector.hpp"
+#include "sycl/platform.hpp"
 #include "sycl/device.hpp"
 
-// include device selector headers
-#include "sycl/device_selector.hpp"
 #include "sycl/device_selector/cpu_selector.hpp"
+#ifdef BUILD_VE
+#include "extensions/nec/ve_task_handler.hpp"
+#include "extensions/nec/ve_selector.hpp"
+#endif
 
-// include platform headers
-#include "sycl/platform.hpp"
+#include "sycl/property_list.hpp"
+#include "sycl/context.hpp"
+#include "sycl/handler.hpp"
+#include "sycl/queue.hpp"
 
 // include buffer headers
 #include "sycl/accessor.hpp"
-#include "sycl/accessor.hpp"
+#include "sycl/access.hpp"
+#include "sycl/allocator.hpp"
 #include "sycl/buffer.hpp"
-
-#include "sycl/queue.hpp"
-#include "sycl/handler.hpp"
 
 namespace neosycl {
 
