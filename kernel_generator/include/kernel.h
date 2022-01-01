@@ -45,22 +45,15 @@ struct KernelInfo {
   std::string index_name;
   bool parallel;
 
-  KernelInfo(std::vector<KernelArgument> params,
-             std::string kernel_name,
+  KernelInfo(std::vector<KernelArgument> params, std::string kernel_name,
              std::string kernel_body)
-      : params(std::move(params)),
-        kernel_name(std::move(kernel_name)),
-        kernel_body(std::move(kernel_body)),
-        parallel(false) {}
+      : params(std::move(params)), kernel_name(std::move(kernel_name)),
+        kernel_body(std::move(kernel_body)), parallel(false) {}
 
-  KernelInfo(std::vector<KernelArgument> params,
-             std::string kernel_name,
-             std::string kernel_body,
-             std::string index_name)
-      : params(std::move(params)),
-        kernel_name(std::move(kernel_name)),
-        kernel_body(std::move(kernel_body)),
-        index_name(std::move(index_name)),
+  KernelInfo(std::vector<KernelArgument> params, std::string kernel_name,
+             std::string kernel_body, std::string index_name)
+      : params(std::move(params)), kernel_name(std::move(kernel_name)),
+        kernel_body(std::move(kernel_body)), index_name(std::move(index_name)),
         parallel(true) {}
 };
 
@@ -69,10 +62,11 @@ struct ProgramContext {
   std::map<std::string, std::string> structs;
 };
 
-std::vector<KernelArgument> analyze_arguments_dependency(CompilerInstance &ci,
-                                                         const CXXRecordDecl *lambda_func_decl,
-                                                         ProgramContext &context);
+std::vector<KernelArgument>
+analyze_arguments_dependency(CompilerInstance &ci,
+                             const CXXRecordDecl *lambda_func_decl,
+                             ProgramContext &context);
 
-}
+} // namespace sycl
 
-#endif //CUSTOM_SYCL_RUNTIME_KERNEL_HPP_
+#endif // CUSTOM_SYCL_RUNTIME_KERNEL_HPP_

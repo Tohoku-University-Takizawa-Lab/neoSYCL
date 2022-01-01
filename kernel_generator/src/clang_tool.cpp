@@ -23,16 +23,21 @@
 #include "ve_kernel_translator.h"
 
 static llvm::cl::OptionCategory MyToolCategory("Additional options");
-static llvm::cl::opt<std::string> OutputNameOption("o",
-                                                   llvm::cl::desc("output filename"),
-                                                   llvm::cl::value_desc("filename"),
-                                                   llvm::cl::cat(MyToolCategory));
+static llvm::cl::opt<std::string>
+    OutputNameOption("o", llvm::cl::desc("output filename"),
+                     llvm::cl::value_desc("filename"),
+                     llvm::cl::cat(MyToolCategory));
 
-static llvm::cl::extrahelp CommonHelp(clang::tooling::CommonOptionsParser::HelpMessage);
+static llvm::cl::extrahelp
+    CommonHelp(clang::tooling::CommonOptionsParser::HelpMessage);
 static llvm::cl::extrahelp MoreHelp("SYCL Kernel generate tool");
 
-const static std::string KERNEL_HIGHLIGHT_SINGLE_TASK_FUNC_NAME = "HIGHLIGHT_KERNEL_SINGLE_TASK";
-const static std::string KERNEL_HIGHLIGHT_PARALLEL_FUNC_NAME = "HIGHLIGHT_KERNEL_PARALLEL";
+const static std::string KERNEL_HIGHLIGHT_SINGLE_TASK_FUNC_NAME =
+"single_task";
+    // "HIGHLIGHT_KERNEL_SINGLE_TASK";
+const static std::string KERNEL_HIGHLIGHT_PARALLEL_FUNC_NAME =
+"parallel_for";
+    //"HIGHLIGHT_KERNEL_PARALLEL";
 const static std::string DEFAULT_OUTPUT_NAME = "kernel";
 
 using namespace sycl;
@@ -45,9 +50,9 @@ private:
   ProgramContext context;
 
 public:
-  SYCLVisitor(clang::CompilerInstance &ci, clang::SourceManager &sm, clang::Rewriter &re)
-      : instance(ci), rewriter(re), manager(sm) {
-  }
+  SYCLVisitor(clang::CompilerInstance &ci, clang::SourceManager &sm,
+              clang::Rewriter &re)
+      : instance(ci), rewriter(re), manager(sm) {}
 
   virtual bool shouldVisitTemplateInstantiations() { return true; }
 
@@ -65,19 +70,25 @@ public:
     try {
 
       if (clang::isa<clang::CallExpr>(s)) {
-        clang::CallExpr *call_expr = clang::cast<clang::CallExpr>(s);
+        clang::CallExpr *call_expr  = clang::cast<clang::CallExpr>(s);
         clang::FunctionDecl *callee = call_expr->getDirectCallee();
         if (callee && callee->getIdentifier()) {
           // Get the func which name start with SYCL_PREFIX
-          if (callee->getName().compare(KERNEL_HIGHLIGHT_SINGLE_TASK_FUNC_NAME) == 0) {
-            KernelInfo info = parse_single_task_func(this->instance, callee, context);
+          if (callee->getName().compare(
+                  KERNEL_HIGHLIGHT_SINGLE_TASK_FUNC_NAME) == 0) {
+            KernelInfo info =
+                parse_single_task_func(this->instance, callee, context);
             if (context.kernels.count(info.kernel_name) == 0) {
-              context.kernels.insert(std::pair<std::string, KernelInfo>(info.kernel_name, info));
+              context.kernels.insert(
+                  std::pair<std::string, KernelInfo>(info.kernel_name, info));
             }
-          } else if (callee->getName().compare(KERNEL_HIGHLIGHT_PARALLEL_FUNC_NAME) == 0) {
-            KernelInfo info = parse_parallel_task_func(this->instance, callee, context);
+          } else if (callee->getName().compare(
+                         KERNEL_HIGHLIGHT_PARALLEL_FUNC_NAME) == 0) {
+            KernelInfo info =
+                parse_parallel_task_func(this->instance, callee, context);
             if (context.kernels.count(info.kernel_name) == 0) {
-              context.kernels.insert(std::pair<std::string, KernelInfo>(info.kernel_name, info));
+              context.kernels.insert(
+                  std::pair<std::string, KernelInfo>(info.kernel_name, info));
             }
           }
         }
@@ -89,9 +100,7 @@ public:
     return true;
   }
 
-  ProgramContext get_context() {
-    return context;
-  }
+  ProgramContext get_context() { return context; }
 };
 
 class SYCLASTConsumer : public clang::ASTConsumer {
@@ -104,9 +113,9 @@ private:
 
 public:
   explicit SYCLASTConsumer(clang::CompilerInstance &ci)
-      : instance(ci),
-        manager(ci.getSourceManager()),
-        visitor(std::make_unique<SYCLVisitor>(ci, ci.getSourceManager(), this->rewriter)) {
+      : instance(ci), manager(ci.getSourceManager()),
+        visitor(std::make_unique<SYCLVisitor>(ci, ci.getSourceManager(),
+                                              this->rewriter)) {
     this->rewriter.setSourceMgr(ci.getSourceManager(), ci.getLangOpts());
   }
   // Retrieve the AST analysis result
@@ -132,15 +141,18 @@ public:
 
     // Write include headers here
     std::string kernel_code;
-    kernel_code.append(translator.before_kernel(program_context)).append(LINE_BREAK);
+    kernel_code.append(translator.before_kernel(program_context))
+        .append(LINE_BREAK);
 
     // Output all kernels
     auto kernels = program_context.kernels;
     for (auto &kernel : kernels) {
-      std::string kernel_str = translator.body_to_decl_str(program_context, kernel.second);
+      std::string kernel_str =
+          translator.body_to_decl_str(program_context, kernel.second);
       kernel_code.append(kernel_str).append(LINE_BREAK);
     }
-    kernel_code.append(translator.after_kernel(program_context)).append(LINE_BREAK);
+    kernel_code.append(translator.after_kernel(program_context))
+        .append(LINE_BREAK);
 
     // write kernel code
     kernel_out << kernel_code << std::endl;
@@ -163,8 +175,11 @@ public:
 };
 
 int main(int argc, const char **argv) {
-  llvm::Expected<clang::tooling::CommonOptionsParser>
-      op = clang::tooling::CommonOptionsParser::create(argc, argv, MyToolCategory, llvm::cl::OneOrMore);
-  clang::tooling::ClangTool tool(op->getCompilations(), op->getSourcePathList());
-  return tool.run(clang::tooling::newFrontendActionFactory<SYCLFrontendAction>().get());
+  llvm::Expected<clang::tooling::CommonOptionsParser> op =
+      clang::tooling::CommonOptionsParser::create(argc, argv, MyToolCategory,
+                                                  llvm::cl::OneOrMore);
+  clang::tooling::ClangTool tool(op->getCompilations(),
+                                 op->getSourcePathList());
+  return tool.run(
+      clang::tooling::newFrontendActionFactory<SYCLFrontendAction>().get());
 }

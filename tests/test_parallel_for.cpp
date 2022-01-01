@@ -11,10 +11,12 @@ TEST(parallel_for, simple_test) {
   Vector b = {5, 6, 8};
   Vector c;
 
-  queue q;
+  queue q(ve_selector{});
 
-  buffer<float> A{std::begin(a), std::end(a)};
-  buffer<float> B{std::begin(b), std::end(b)};
+  buffer<float> A(a, range<1>(N));
+  buffer<float> B(b, range<1>(N));
+  //buffer<float> A{std::begin(a), std::end(a)}; // doesn't work for ve
+  //buffer<float> B{std::begin(b), std::end(b)}; // doesn't work for ve
 
   {
     buffer<float> C{c, N};

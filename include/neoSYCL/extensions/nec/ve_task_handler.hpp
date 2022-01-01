@@ -19,7 +19,7 @@ public:
     }
     return argp;
   }
-  
+
   vector_class<uint64_t> copy_in(struct veo_args *argp,
                                  shared_ptr_class<detail::kernel> k,
                                  VEProc proc) {
@@ -131,10 +131,48 @@ public:
     }
   }
 
+  void set_arg_for_range(const vector_class<detail::KernelArg> &args,
+                         struct veo_args *argp, const range<1> &r) {
+    int index = args.size();
+    veo_args_set_i64(argp, index, r.size());
+    veo_args_set_i64(argp, index + 1, 1);
+  }
+
   void parallel_for_1d(shared_ptr_class<detail::kernel> k, range<1> r,
                        const std::function<void(id<1>)> &func,
                        id<1> offset) override {
-    throw exception("not implemented");
+    for (const detail::KernelArg &arg : k->args) {
+      arg.acquire_access();
+    }
+    DEBUG_INFO("execute parallel<1> %d kernel, name: %s\n", type(),
+               k->name.c_str());
+
+    DEBUG_INFO("[VEKernel] parallel task: {}", k->name.c_str());
+
+    veo_args *argp = create_ve_args();
+    DEBUG_INFO("[VEKernel] create ve args: {:#x}", (size_t)argp);
+
+    try {
+
+      vector_class<uint64_t> ve_addr_list = copy_in(argp, k, proc);
+      set_arg_for_range(k->args, argp, r);
+      DEBUG_INFO("[VEKernel] invoke ve func: {}", k->name.c_str());
+      uint64_t id = veo_call_async_by_name(ctx.ve_ctx, proc.handle,
+                                           k->name.c_str(), argp);
+      uint64_t ret_val;
+      veo_call_wait_result(ctx.ve_ctx, id, &ret_val);
+      DEBUG_INFO("[VEKernel] ve func finished, id: {}, ret val: {}", id,
+                 ret_val);
+      copy_out(ve_addr_list, k, proc);
+
+    } catch (exception &e) {
+      std::cerr << "[VEKernel] kernel invoke failed, error message: "
+                << e.what() << std::endl;
+    }
+    veo_args_free(argp);
+    for (const detail::KernelArg &arg : k->args) {
+      arg.release_access();
+    }
   };
 
   void parallel_for_2d(shared_ptr_class<detail::kernel> k, range<2> r,

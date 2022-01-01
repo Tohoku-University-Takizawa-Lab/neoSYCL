@@ -3,7 +3,7 @@
 
 #include <utility>
 #include <shared_mutex>
-
+#include <regex>
 #include "neoSYCL/sycl/nd_range.hpp"
 #include "neoSYCL/sycl/types.hpp"
 #include "neoSYCL/sycl/event.hpp"
@@ -29,14 +29,16 @@ namespace detail {
  */
 template <typename KernelName> string_class get_kernel_name_from_class() {
   KernelName *p;
-#if 0
   int status;
   char *pc = abi::__cxa_demangle(typeid(p).name(), 0, 0, &status);
   string_class in(pc);
   free(pc);
-#else
-  string_class in = typeid(p).name();
-#endif
+  std::regex re("([^\\s\\:]+)\\*$");
+  std::smatch result;
+  if (std::regex_search(in, result, re)) {
+    in = result[1].str();
+  }
+
   return in;
 }
 
