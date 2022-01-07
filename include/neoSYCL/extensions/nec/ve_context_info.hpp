@@ -15,7 +15,7 @@ class ve_context_info : public detail::context_info {
     return VEContext{ctx};
   }
 
-  void free_ctx(VEContext ctx) {
+  void free_ctx() {
     DEBUG_INFO("[VEContext] release ve ctx: {:#x}", (size_t)ctx.ve_ctx);
     int rt = veo_context_close(ctx.ve_ctx);
     if (rt != veo_command_state::VEO_COMMAND_OK) {
@@ -38,7 +38,7 @@ class ve_context_info : public detail::context_info {
     return nec::VEProc{ve_proc, handle};
   }
 
-  void free_proc(VEProc proc) {
+  void free_proc() {
     DEBUG_INFO("[VEProc] release ve proc: {:#x}", (size_t)proc.ve_proc);
     int rt = veo_proc_destroy(proc.ve_proc);
     if (rt != veo_command_state::VEO_COMMAND_OK) {
@@ -53,7 +53,10 @@ public:
       : detail::context_info(), proc(create_proc()), ctx(create_ctx(proc)) {
     task_handler = handler_type(new task_handler_ve(proc, ctx));
   }
-  ~ve_context_info() { free_proc(proc); }
+  ~ve_context_info() {
+    free_ctx();
+    free_proc();
+  }
 };
 } // namespace neosycl::sycl::extensions::nec
 #endif

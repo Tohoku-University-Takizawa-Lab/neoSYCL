@@ -9,7 +9,7 @@
 #include "neoSYCL/sycl/event.hpp"
 #include "neoSYCL/sycl/id.hpp"
 #include "neoSYCL/sycl/allocator.hpp"
-#include "neoSYCL/sycl/detail/highlight_func.hpp"
+//#include "neoSYCL/sycl/detail/highlight_func.hpp"
 #include "neoSYCL/sycl/detail/kernel.hpp"
 #include "neoSYCL/sycl/detail/task.hpp"
 #include "neoSYCL/sycl/detail/task_handler.hpp"
@@ -126,6 +126,11 @@ public:
   }
 
   kernel_type get_kernel() { return kernel; }
+
+  template <typename T, size_t D, access::mode m, access::target t>
+  void require(sycl::accessor<T, D, m, t, access::placeholder::true_t> acc) {
+    kernel->args.push_back(detail::KernelArg(acc, m));
+  }
 
 private:
   kernel_type kernel;

@@ -7,8 +7,9 @@
 namespace neosycl::sycl::detail {
 
 struct KernelArg {
-  KernelArg(std::shared_ptr<detail::container::DataContainer> arg,
-            access::mode mode)
+  using container_type = std::shared_ptr<detail::container::DataContainer>;
+
+  KernelArg(container_type arg, access::mode mode)
       : container(std::move(arg)), mode(mode) {}
 
   void acquire_access() const {
@@ -35,7 +36,7 @@ struct KernelArg {
     }
   }
 
-  std::shared_ptr<detail::container::DataContainer> container;
+  container_type container;
   access::mode mode;
 };
 

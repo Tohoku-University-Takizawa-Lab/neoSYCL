@@ -8,6 +8,9 @@ namespace neosycl::sycl {
 
 template <typename T, size_t dimensions, typename AllocatorT> class buffer;
 
+// prototype decl
+class handler;
+
 template <typename dataT, size_t dimensions, access::mode accessMode,
           access::target accessTarget       = access::target::global_buffer,
           access::placeholder isPlaceholder = access::placeholder::false_t>
@@ -17,32 +20,33 @@ public:
   template <typename AllocatorT>
   accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
            const property_list &propList = {})
-      : data(bufferRef.data), accessRange(bufferRef.get_range()) {}
+      : data(bufferRef.data), accessRange(bufferRef.get_range()), devptr(0) {}
 
   template <typename AllocatorT>
   accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
            range<dimensions> accessRange, const property_list &propList = {})
-      : data(bufferRef.data), accessRange(accessRange) {}
+      : data(bufferRef.data), accessRange(accessRange), devptr(0) {}
 
   template <typename AllocatorT>
   accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
            range<dimensions> accessRange, id<dimensions> accessOffset,
            const property_list &propList = {})
       : data(bufferRef.data), accessRange(accessRange),
-        accessOffset(accessOffset) {}
+        accessOffset(accessOffset), devptr(0) {}
 
   template <typename AllocatorT>
   accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
            handler &commandGroupHandlerRef, range<dimensions> accessRange,
            const property_list &propList = {})
-      : data(bufferRef.data), accessRange(accessRange), accessOffset(0) {}
+      : data(bufferRef.data), accessRange(accessRange), accessOffset(0),
+        devptr(0) {}
 
   template <typename AllocatorT>
   accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
            handler &commandGroupHandlerRef, range<dimensions> accessRange,
            id<dimensions> accessOffset, const property_list &propList = {})
       : data(bufferRef.data), accessRange(accessRange),
-        accessOffset(accessOffset) {}
+        accessOffset(accessOffset), devptr(0) {}
 
   constexpr bool is_placeholder() const { return isPlaceholder; }
 
@@ -153,12 +157,25 @@ public:
       typename = std::enable_if_t<(Mode == access::mode::read) && (D == 0)>>
   operator dataT() const;
 
+  template <access::target T = accessTarget,
+            typename = std::enable_if_t<T == access::target::host_buffer>>
+  dataT *get_pointer() const {
+    return data.get();
+  }
+
+  template <access::target T = accessTarget,
+            typename = std::enable_if_t<(T == access::target::global_buffer) ||
+                                        (T == access::target::constant_buffer)>>
+  void *get_pointer() const {
+    return reinterpret_cast<void *>(devptr);
+  }
   ~accessor() = default;
 
 private:
   std::shared_ptr<detail::container::DataContainerND<dataT, dimensions>> data;
   range<dimensions> accessRange;
   id<dimensions> accessOffset;
+  void *devptr;
 
   size_t id2index(id<dimensions> index) const {
     size_t x = this->accessRange.get(0);
