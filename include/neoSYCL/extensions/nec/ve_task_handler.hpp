@@ -2,16 +2,22 @@
 #define NEOSYCL_INCLUDE_NEOSYCL_EXTENSIONS_NEC_VE_TASK_HANDLER_HPP
 
 #include "neoSYCL/extensions/nec/ve_info.hpp"
-#include "neoSYCL/sycl/detail/kernel_arg.hpp"
+#include "neoSYCL/sycl/detail/accessor_info.hpp"
 #include "ve_offload.h"
 
 namespace neosycl::sycl::extensions::nec {
 
 class task_handler_ve : public detail::task_handler {
-
+  struct buf_info{
+    detail::accessor_info arg;
+    uint64_t ptr;
+  };
+  using buffer_type = std::vector<struct buf_info>;
 public:
   task_handler_ve(const VEProc &p, const VEContext &c) : proc(p), ctx(c) {}
-
+  ~task_handler_ve(){
+   copy_out();
+  }
   struct veo_args *create_ve_args() {
     struct veo_args *argp = veo_args_alloc();
     if (!argp) {
@@ -20,13 +26,21 @@ public:
     return argp;
   }
 
-  vector_class<uint64_t> copy_in(struct veo_args *argp,
+  void copy_in(struct veo_args *argp,
                                  shared_ptr_class<detail::kernel> k,
                                  VEProc proc) {
-    vector_class<uint64_t> ve_addr_list;
+    int i, j;
 
-    for (int i = 0; i < k->args.size(); i++) {
-      detail::KernelArg arg = k->args[i];
+    for (i = 0; i < k->args.size(); i++) {
+      detail::accessor_info arg = k->args[i];
+      for(j = 0; j< bufs.size(); j++){
+        if(arg.container->get_raw_ptr() == bufs[j].arg.container->get_raw_ptr())
+          break;
+      }
+      if(j!=bufs.size()){
+        veo_args_set_i64(argp, i, bufs[j].ptr);
+        continue;
+      }
       size_t size_in_byte   = arg.container->get_size();
 
       uint64_t ve_addr_int;
@@ -38,7 +52,9 @@ public:
         PRINT_ERR("[VEProc] allocate VE memory failed");
         throw exception("VE allocate return error");
       }
-      ve_addr_list.push_back(ve_addr_int);
+      //ve_addr_list.push_back(ve_addr_int);
+      buf_info bi{arg,ve_addr_int};
+      bufs.push_back(bi);
 
       DEBUG_INFO("[VEKernel] allocate ve memory, size: {}, ve address: {:#x}",
                  size_in_byte, ve_addr_int);
@@ -60,15 +76,14 @@ public:
       }
       veo_args_set_i64(argp, i, ve_addr_int);
     }
-    return ve_addr_list;
+    return;
   }
 
-  void copy_out(vector_class<uint64_t> ve_addr_list,
-                shared_ptr_class<detail::kernel> k, VEProc proc) {
-    for (int i = 0; i < k->args.size(); i++) {
-      detail::KernelArg arg = k->args[i];
+  void copy_out() {
+    for (int i = 0; i < bufs.size(); i++) {
+      detail::accessor_info arg = bufs[i].arg;
       size_t size_in_byte   = arg.container->get_size();
-      uint64_t device_ptr   = ve_addr_list[i];
+      uint64_t device_ptr   = bufs[i].ptr;
       if (arg.mode != access::mode::read) {
         DEBUG_INFO("[VEKernel] copy from ve memory, device address: {:#x}, "
                    "size: {}, host address: {:#x}",
@@ -97,7 +112,7 @@ public:
 
   void single_task(shared_ptr_class<detail::kernel> k,
                    const std::function<void(void)> &func) override {
-    for (const detail::KernelArg &arg : k->args) {
+    for (const detail::accessor_info &arg : k->args) {
       arg.acquire_access();
     }
     DEBUG_INFO("execute single %d kernel, name: %s\n", type(), k->name.c_str());
@@ -109,7 +124,7 @@ public:
 
     try {
 
-      vector_class<uint64_t> ve_addr_list = copy_in(argp, k, proc);
+      copy_in(argp, k, proc);
       DEBUG_INFO("[VEKernel] invoke ve func: {}", k->name.c_str());
       uint64_t id = veo_call_async_by_name(ctx.ve_ctx, proc.handle,
                                            k->name.c_str(), argp);
@@ -117,7 +132,7 @@ public:
       veo_call_wait_result(ctx.ve_ctx, id, &ret_val);
       DEBUG_INFO("[VEKernel] ve func finished, id: {}, ret val: {}", id,
                  ret_val);
-      copy_out(ve_addr_list, k, proc);
+      //copy_out(ve_addr_list, k, proc);
 
     } catch (exception &e) {
       std::cerr << "[VEKernel] kernel invoke failed, error message: "
@@ -126,12 +141,12 @@ public:
 
     veo_args_free(argp);
 
-    for (const detail::KernelArg &arg : k->args) {
+    for (const detail::accessor_info &arg : k->args) {
       arg.release_access();
     }
   }
 
-  void set_arg_for_range(const vector_class<detail::KernelArg> &args,
+  void set_arg_for_range(const vector_class<detail::accessor_info> &args,
                          struct veo_args *argp, const range<1> &r) {
     int index = args.size();
     veo_args_set_i64(argp, index, r.size());
@@ -141,7 +156,7 @@ public:
   void parallel_for_1d(shared_ptr_class<detail::kernel> k, range<1> r,
                        const std::function<void(id<1>)> &func,
                        id<1> offset) override {
-    for (const detail::KernelArg &arg : k->args) {
+    for (const detail::accessor_info &arg : k->args) {
       arg.acquire_access();
     }
     DEBUG_INFO("execute parallel<1> %d kernel, name: %s\n", type(),
@@ -154,7 +169,7 @@ public:
 
     try {
 
-      vector_class<uint64_t> ve_addr_list = copy_in(argp, k, proc);
+      copy_in(argp, k, proc);
       set_arg_for_range(k->args, argp, r);
       DEBUG_INFO("[VEKernel] invoke ve func: {}", k->name.c_str());
       uint64_t id = veo_call_async_by_name(ctx.ve_ctx, proc.handle,
@@ -163,14 +178,14 @@ public:
       veo_call_wait_result(ctx.ve_ctx, id, &ret_val);
       DEBUG_INFO("[VEKernel] ve func finished, id: {}, ret val: {}", id,
                  ret_val);
-      copy_out(ve_addr_list, k, proc);
+      //copy_out(ve_addr_list, k, proc);
 
     } catch (exception &e) {
       std::cerr << "[VEKernel] kernel invoke failed, error message: "
                 << e.what() << std::endl;
     }
     veo_args_free(argp);
-    for (const detail::KernelArg &arg : k->args) {
+    for (const detail::accessor_info &arg : k->args) {
       arg.release_access();
     }
   };
@@ -192,6 +207,7 @@ public:
 private:
   VEContext ctx;
   VEProc proc;
+  buffer_type bufs;
 };
 
 } // namespace neosycl::sycl::extensions::nec

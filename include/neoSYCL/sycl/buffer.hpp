@@ -130,7 +130,7 @@ public:
   accessor<T, dimensions, mode, target>
   get_access(handler &commandGroupHandler) {
     commandGroupHandler.get_kernel()->args.push_back(
-        detail::KernelArg(data, mode));
+        detail::accessor_info(data, mode));
     return accessor<T, dimensions, mode, target>(*this);
   }
 
@@ -145,7 +145,7 @@ public:
   get_access(handler &commandGroupHandler, range<dimensions> accessRange,
              id<dimensions> accessOffset = {}) {
     commandGroupHandler.get_kernel()->args.push_back(
-        detail::KernelArg(data, mode));
+        detail::accessor_info(data, mode));
     return accessor<T, dimensions, mode, target>(*this, commandGroupHandler,
                                                  accessRange, accessOffset);
   }

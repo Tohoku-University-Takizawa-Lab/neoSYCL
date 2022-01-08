@@ -129,7 +129,8 @@ public:
 
   template <typename T, size_t D, access::mode m, access::target t>
   void require(sycl::accessor<T, D, m, t, access::placeholder::true_t> acc) {
-    kernel->args.push_back(detail::KernelArg(acc, m));
+    acc.handler_ = this;
+    kernel->args.push_back(detail::accessor_info(acc, m));
   }
 
 private:
