@@ -133,6 +133,14 @@ public:
     kernel->args.push_back(detail::accessor_info(acc, m));
   }
 
+  template <typename T, size_t D, access::mode m, access::target t,
+            access::placeholder p>
+  T *get_pointer(sycl::accessor<T, D, m, t, p> acc) {
+    return ctx.get_context_info()->get_pointer(acc.data);
+  }
+
+  context get_context() { return ctx; }
+
 private:
   kernel_type kernel;
   device bind_device;

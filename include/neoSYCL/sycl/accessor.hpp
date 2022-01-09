@@ -20,33 +20,36 @@ public:
   template <typename AllocatorT>
   accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
            const property_list &propList = {})
-      : data(bufferRef.data), accessRange(bufferRef.get_range()), handler_(0) {}
+      : data(bufferRef.data), accessRange(bufferRef.get_range()) {}
 
   template <typename AllocatorT>
   accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
            range<dimensions> accessRange, const property_list &propList = {})
-      : data(bufferRef.data), accessRange(accessRange), handler_(0) {}
+      : data(bufferRef.data), accessRange(accessRange) {}
 
   template <typename AllocatorT>
   accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
            range<dimensions> accessRange, id<dimensions> accessOffset,
            const property_list &propList = {})
       : data(bufferRef.data), accessRange(accessRange),
-        accessOffset(accessOffset), handler_(0) {}
+        accessOffset(accessOffset) {}
 
   template <typename AllocatorT>
   accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
            handler &commandGroupHandlerRef, range<dimensions> accessRange,
            const property_list &propList = {})
-      : data(bufferRef.data), accessRange(accessRange), accessOffset(0),
-        handler_(&commandGroupHandlerRef) {}
+      : data(bufferRef.data), accessRange(accessRange), accessOffset(0) {
+    bufferRef.push_context(commandGroupHandlerRef, accessMode);
+  }
 
   template <typename AllocatorT>
   accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
            handler &commandGroupHandlerRef, range<dimensions> accessRange,
            id<dimensions> accessOffset, const property_list &propList = {})
       : data(bufferRef.data), accessRange(accessRange),
-        accessOffset(accessOffset), handler_(&commandGroupHandlerRef) {}
+        accessOffset(accessOffset) {
+    bufferRef.push_context(commandGroupHandlerRef, accessMode);
+  }
 
   constexpr bool is_placeholder() const { return isPlaceholder; }
 
@@ -167,13 +170,13 @@ public:
             typename = std::enable_if_t<(T == access::target::global_buffer) ||
                                         (T == access::target::constant_buffer)>>
   void *get_pointer() const;
+
   ~accessor() = default;
 
 private:
   std::shared_ptr<detail::container::DataContainerND<dataT, dimensions>> data;
   range<dimensions> accessRange;
   id<dimensions> accessOffset;
-  handler* handler_;
 
   size_t id2index(id<dimensions> index) const {
     size_t x = this->accessRange.get(0);

@@ -28,6 +28,7 @@ public:
 template <typename T, size_t dimensions = 1,
           typename AllocatorT = buffer_allocator<T>>
 class buffer {
+  friend class handler;
   friend accessor<T, dimensions, access::mode::read,
                   access::target::global_buffer>;
   friend accessor<T, dimensions, access::mode::read,
@@ -129,6 +130,7 @@ public:
             access::target target = access::target::global_buffer>
   accessor<T, dimensions, mode, target>
   get_access(handler &commandGroupHandler) {
+    push_context(commandGroupHandler.get_context(), mode);
     commandGroupHandler.get_kernel()->args.push_back(
         detail::accessor_info(data, mode));
     return accessor<T, dimensions, mode, target>(*this);
@@ -144,6 +146,7 @@ public:
   accessor<T, dimensions, mode, target>
   get_access(handler &commandGroupHandler, range<dimensions> accessRange,
              id<dimensions> accessOffset = {}) {
+    push_context(commandGroupHandler.get_context(), mode);
     commandGroupHandler.get_kernel()->args.push_back(
         detail::accessor_info(data, mode));
     return accessor<T, dimensions, mode, target>(*this, commandGroupHandler,
@@ -182,11 +185,24 @@ public:
     bufferRange = rhs.bufferRange;
   }
 
-  ~buffer() = default;
+  ~buffer() {
+    for (auto &it : ctx_) {
+      it.get_context_info()->free_mem(data);
+    }
+  }
 
 private:
   std::shared_ptr<detail::container::DataContainerND<T, dimensions>> data;
   range<dimensions> bufferRange;
+  std::vector<context> ctx_;
+
+  void push_context(context c, access::mode m = access::mode::read) {
+    c.get_context_info()->alloc_mem(data, m);
+    ctx_.push_back(c);
+  }
+  void push_context(handler h, access::mode m = access::mode::read) {
+    push_context(h.get_context());
+  }
 };
 } // namespace neosycl::sycl
 

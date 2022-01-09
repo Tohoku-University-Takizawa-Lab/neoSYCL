@@ -6,6 +6,9 @@
 namespace neosycl::sycl::detail {
 
 class task_handler {
+protected:
+  using container_type = std::shared_ptr<detail::container::DataContainer>;
+
 public:
   explicit task_handler() {}
 
@@ -25,6 +28,12 @@ public:
                                id<3> offset) = 0;
 
   virtual SUPPORT_PLATFORM_TYPE type() = 0;
+
+  virtual void *get_pointer(container_type)                  = 0;
+  virtual void *alloc_mem(container_type,
+                          access::mode = access::mode::read) = 0;
+  virtual void free_mem(container_type)                      = 0;
+  virtual void copy_back()                                   = 0;
 };
 
 class task_handler_cpu : public task_handler {
@@ -92,6 +101,13 @@ public:
   };
 
   SUPPORT_PLATFORM_TYPE type() override { return CPU; }
+
+  void *get_pointer(container_type p) { return p->get_raw_ptr(); }
+  void *alloc_mem(container_type p, access::mode = access::mode::read) {
+    return p->get_raw_ptr();
+  }
+  void free_mem(container_type) {}
+  void copy_back() {}
 };
 
 } // namespace neosycl::sycl::detail

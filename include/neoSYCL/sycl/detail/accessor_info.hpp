@@ -41,4 +41,4 @@ struct accessor_info {
 
 } // namespace neosycl::sycl::detail
 
-#endif //SYCL_INCLUDE_CL_SYCL_ACCESSOR_INFO_HPP_
+#endif // SYCL_INCLUDE_CL_SYCL_ACCESSOR_INFO_HPP_

@@ -23,12 +23,12 @@
 
 #include "sycl/property_list.hpp"
 #include "sycl/context.hpp"
+#include "sycl/access.hpp"
 #include "sycl/accessor.hpp"
 #include "sycl/handler.hpp"
 #include "sycl/queue.hpp"
 
 // include buffer headers
-// #include "sycl/access.hpp"
 #include "sycl/allocator.hpp"
 #include "sycl/buffer.hpp"
 
