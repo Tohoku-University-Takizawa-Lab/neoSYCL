@@ -10,9 +10,9 @@ class ve_context_info : public detail::context_info {
   VEContext ctx;
 
   VEContext create_ctx(VEProc proc) {
-    struct veo_thr_ctxt *ctx = veo_context_open(proc.ve_proc);
-    DEBUG_INFO("[VEContext] create ve context: {:#x}", (size_t)ctx);
-    return VEContext{ctx};
+    struct veo_thr_ctxt *c = veo_context_open(proc.ve_proc);
+    DEBUG_INFO("[VEContext] create ve context: {:#x}", (size_t)c);
+    return VEContext{c};
   }
 
   void free_ctx() {

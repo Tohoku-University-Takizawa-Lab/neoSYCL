@@ -9,7 +9,7 @@ protected:
   context_info() {}
 
 public:
-  ~context_info() = default;
+  virtual ~context_info() = default;
   void *get_pointer(container_type c) const {
     return task_handler->get_pointer(c);
   }

@@ -11,6 +11,8 @@ class context {
 public:
   explicit context(const property_list &propList = {}) { init(device()); }
 
+  ~context() = default;
+
   context(async_handler asyncHandler, const property_list &propList = {});
 
   context(const device &dev, const property_list &propList = {}) { init(dev); }
