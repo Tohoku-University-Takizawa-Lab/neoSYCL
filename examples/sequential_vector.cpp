@@ -41,7 +41,7 @@ int main() {
         }
       });
     }); // End of our commands for this queue
-
+    myQueue.wait();
   } // End scope, so we wait for the queue to complete
 
   std::cout << "Result:" << std::endl;

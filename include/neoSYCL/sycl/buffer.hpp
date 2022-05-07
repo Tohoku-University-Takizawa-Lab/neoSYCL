@@ -201,7 +201,7 @@ private:
     ctx_.push_back(c);
   }
   void push_context(handler h, access::mode m = access::mode::read) {
-    push_context(h.get_context());
+    push_context(h.get_context(), m);
   }
 };
 } // namespace neosycl::sycl

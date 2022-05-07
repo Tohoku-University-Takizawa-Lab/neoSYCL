@@ -6,9 +6,9 @@
 
 namespace neosycl::sycl::extensions::nec {
 
-const int DEFAULT_VE_NODE         = 0;
+const int DEFAULT_VE_NODE         = -1;
 const string_class DEFAULT_VE_LIB = "./kernel.so";
-
+const char* ENV_VE_KERNEL = "NEOSYCL_VE_KERNEL";
 struct VEProc {
   struct veo_proc_handle *ve_proc;
   uint64_t handle;

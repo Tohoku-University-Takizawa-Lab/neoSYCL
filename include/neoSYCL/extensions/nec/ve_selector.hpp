@@ -1,6 +1,8 @@
 #ifndef SYCL_INCLUDE_CL_SYCL_NEC_VE_SELECTOR_HPP_
 #define SYCL_INCLUDE_CL_SYCL_NEC_VE_SELECTOR_HPP_
 
+#include "neoSYCL/extensions/nec/ve_info.hpp"
+#include "neoSYCL/extensions/nec/ve_task_handler.hpp"
 #include "neoSYCL/extensions/nec/ve_device_info.hpp"
 #include "neoSYCL/sycl/detail/context_info.hpp"
 #include "neoSYCL/extensions/nec/ve_context_info.hpp"

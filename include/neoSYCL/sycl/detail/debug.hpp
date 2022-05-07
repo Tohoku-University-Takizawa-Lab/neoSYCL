@@ -4,7 +4,7 @@
 #ifdef DEBUG
 #include <iostream>
 #define DEBUG_INFO(...)                                                        \
-  std::cerr << "[DEBUG] " << printf(__VA_ARGS__) << std::endl
+  std::cerr << "[DEBUG] " << printf(__VA_ARGS__) << "\n";
 #else
 #define DEBUG_INFO(format, ...)
 #endif

@@ -1,12 +1,7 @@
 #ifndef NEOSYCL_INCLUDE_NEOSYCL_EXTENSIONS_NEC_VE_TASK_HANDLER_HPP
 #define NEOSYCL_INCLUDE_NEOSYCL_EXTENSIONS_NEC_VE_TASK_HANDLER_HPP
 
-#include "neoSYCL/extensions/nec/ve_info.hpp"
-#include "neoSYCL/sycl/detail/accessor_info.hpp"
-#include "ve_offload.h"
-
 namespace neosycl::sycl::extensions::nec {
-
 class task_handler_ve : public detail::task_handler {
   struct buf_info {
     container_type buf;
@@ -17,7 +12,22 @@ class task_handler_ve : public detail::task_handler {
 
 public:
   task_handler_ve(const VEProc &p, const VEContext &c) : proc_(p), ctx_(c) {}
-  ~task_handler_ve() { free_mem(); }
+  ~task_handler_ve() { /* do nothing */ }
+
+  void set_capture(const char *name, void *p, size_t sz) override {
+    uint64_t devptr = veo_get_sym(proc_.ve_proc, proc_.handle, name);
+    if (devptr == 0) {
+      throw exception("ve_get_sym return 0");
+    }
+
+    int rt = veo_write_mem(proc_.ve_proc, devptr, p, sz);
+    if (rt != VEO_COMMAND_OK) {
+      DEBUG_INFO("setup kernel \"%s\" failed, size: %lu, return code: %d", name,
+                 sz, rt);
+      PRINT_ERR("setup kernel failed");
+      throw exception("setup kernel return error");
+    }
+  }
 
   struct veo_args *alloc_veo_args() {
     struct veo_args *argp = veo_args_alloc();
@@ -28,28 +38,16 @@ public:
     return argp;
   }
 
-  struct veo_args *create_ve_args(shared_ptr_class<detail::kernel> k) {
-    struct veo_args *argp = alloc_veo_args();
-
-    for (int i = 0; i < k->args.size(); i++) {
-      detail::accessor_info acc = k->args[i];
-
-      void *ve_addr        = alloc_mem(acc.container, acc.mode);
-      uint64_t ve_addr_int = reinterpret_cast<uint64_t>(ve_addr);
-      veo_args_set_i64(argp, i, ve_addr_int);
-    }
-    return argp;
-  }
-
   void single_task(shared_ptr_class<detail::kernel> k,
                    const std::function<void(void)> &func) override {
     for (const detail::accessor_info &acc : k->args) {
       acc.acquire_access();
+      alloc_mem(acc.container, acc.mode);
     }
     DEBUG_INFO("execute single %d kernel, name: %s\n", type(), k->name.c_str());
     DEBUG_INFO("[VEKernel] single task: %s", k->name.c_str());
     try {
-      struct veo_args *argp = create_ve_args(k);
+      struct veo_args *argp = alloc_veo_args();
       DEBUG_INFO("[VEKernel] invoke ve func: %s", k->name.c_str());
       uint64_t id = veo_call_async_by_name(ctx_.ve_ctx, proc_.handle,
                                            k->name.c_str(), argp);
@@ -68,26 +66,29 @@ public:
     }
   }
 
+#if 0
   void set_arg_for_range(const vector_class<detail::accessor_info> &args,
                          struct veo_args *argp, const range<1> &r) {
     int index = args.size();
     veo_args_set_i64(argp, index, r.size());
     veo_args_set_i64(argp, index + 1, 1);
   }
+#endif
 
   void parallel_for_1d(shared_ptr_class<detail::kernel> k, range<1> r,
                        const std::function<void(id<1>)> &func,
                        id<1> offset) override {
-    for (const detail::accessor_info &arg : k->args) {
-      arg.acquire_access();
+    for (const detail::accessor_info &acc : k->args) {
+      acc.acquire_access();
+      alloc_mem(acc.container, acc.mode);
     }
     DEBUG_INFO("execute parallel<1> %d kernel, name: %s\n", type(),
                k->name.c_str());
     DEBUG_INFO("[VEKernel] parallel task: %s", k->name.c_str());
     try {
-      struct veo_args *argp = create_ve_args(k);
+      struct veo_args *argp = alloc_veo_args();
       DEBUG_INFO("[VEKernel] create ve args: %#x", (size_t)argp);
-      set_arg_for_range(k->args, argp, r);
+      //set_arg_for_range(k->args, argp, r);
       DEBUG_INFO("[VEKernel] invoke ve func: %s", k->name.c_str());
       uint64_t id = veo_call_async_by_name(ctx_.ve_ctx, proc_.handle,
                                            k->name.c_str(), argp);

@@ -17,7 +17,6 @@
 
 #include "sycl/device_selector/cpu_selector.hpp"
 #ifdef BUILD_VE
-#include "extensions/nec/ve_task_handler.hpp"
 #include "extensions/nec/ve_selector.hpp"
 #endif
 

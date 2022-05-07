@@ -32,9 +32,11 @@ class ve_context_info : public detail::context_info {
       DEBUG_INFO("[VEProc] create ve proc on node: %d failed..", ve_node);
       throw ve_exception("[VEProc] create ve proc failed.");
     }
-    uint64_t handle = veo_load_library(ve_proc, lib_path.c_str());
+    const char* env = getenv(ENV_VE_KERNEL);
+    string_class fn(env?env:lib_path);
+    uint64_t handle = veo_load_library(ve_proc, fn.c_str());
     DEBUG_INFO("[VEProc] create ve proc: %#x and load lib: %s on node: %d",
-               (size_t)ve_proc, lib_path.c_str(), ve_node);
+               (size_t)ve_proc, fn.c_str(), ve_node);
     return nec::VEProc{ve_proc, handle};
   }
 

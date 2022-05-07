@@ -34,6 +34,7 @@ public:
                           access::mode = access::mode::read) = 0;
   virtual void free_mem(container_type)                      = 0;
   virtual void copy_back()                                   = 0;
+  virtual void set_capture(const char* name, void* p, size_t sz) {}
 };
 
 class task_handler_cpu : public task_handler {

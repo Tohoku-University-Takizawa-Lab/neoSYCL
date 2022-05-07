@@ -15,7 +15,8 @@ template <typename dataT, size_t dimensions, access::mode accessMode,
           access::target accessTarget       = access::target::global_buffer,
           access::placeholder isPlaceholder = access::placeholder::false_t>
 class accessor {
-
+  friend class handler;
+  
 public:
   template <typename AllocatorT>
   accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,

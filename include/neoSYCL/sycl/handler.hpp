@@ -54,6 +54,12 @@ public:
       : bind_device(std::move(dev)), counter(std::move(counter)),
         kernel(new detail::kernel()), ctx(c) {}
 
+  template <typename KernelName>
+  void set_capture(void* p, size_t sz){
+    const char* name = ("__"+detail::get_kernel_name_from_class<KernelName>()+"_obj__").c_str();
+    ctx.get_context_info()->task_handler->set_capture(name,p,sz);
+  }
+
   template <typename KernelName, typename KernelType>
   void single_task(KernelType kernelFunc) {
     kernel->name = detail::get_kernel_name_from_class<KernelName>();
@@ -136,7 +142,7 @@ public:
   template <typename T, size_t D, access::mode m, access::target t,
             access::placeholder p>
   T *get_pointer(sycl::accessor<T, D, m, t, p> acc) {
-    return ctx.get_context_info()->get_pointer(acc.data);
+    return (T*)ctx.get_context_info()->get_pointer(acc.data);
   }
 
   context get_context() { return ctx; }
