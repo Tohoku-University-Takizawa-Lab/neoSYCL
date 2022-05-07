@@ -11,15 +11,15 @@ class ve_context_info : public detail::context_info {
 
   VEContext create_ctx(VEProc proc) {
     struct veo_thr_ctxt *c = veo_context_open(proc.ve_proc);
-    DEBUG_INFO("[VEContext] create ve context: {:#x}", (size_t)c);
+    DEBUG_INFO("[VEContext] create ve context: %#x", (size_t)c);
     return VEContext{c};
   }
 
   void free_ctx() {
-    DEBUG_INFO("[VEContext] release ve ctx: {:#x}", (size_t)ctx.ve_ctx);
+    DEBUG_INFO("[VEContext] release ve ctx: %#x", (size_t)ctx.ve_ctx);
     int rt = veo_context_close(ctx.ve_ctx);
     if (rt != veo_command_state::VEO_COMMAND_OK) {
-      DEBUG_INFO("[VEContext] release ve ctx: {:#x} failed, return code: {}",
+      DEBUG_INFO("[VEContext] release ve ctx: %#x failed, return code: %d",
                  (size_t)ctx.ve_ctx, rt);
       PRINT_ERR("[VEContext] release ve ctx failed");
     }
@@ -33,16 +33,16 @@ class ve_context_info : public detail::context_info {
       throw ve_exception("[VEProc] create ve proc failed.");
     }
     uint64_t handle = veo_load_library(ve_proc, lib_path.c_str());
-    DEBUG_INFO("[VEProc] create ve proc: {:#x} and load lib: {} on node: {}",
-               (size_t)ve_proc, lib_path, ve_node);
+    DEBUG_INFO("[VEProc] create ve proc: %#x and load lib: %s on node: %d",
+               (size_t)ve_proc, lib_path.c_str(), ve_node);
     return nec::VEProc{ve_proc, handle};
   }
 
   void free_proc() {
-    DEBUG_INFO("[VEProc] release ve proc: {:#x}", (size_t)proc.ve_proc);
+    DEBUG_INFO("[VEProc] release ve proc: %#x", (size_t)proc.ve_proc);
     int rt = veo_proc_destroy(proc.ve_proc);
     if (rt != veo_command_state::VEO_COMMAND_OK) {
-      DEBUG_INFO("[VEProc] release ve proc: {:#x} failed, return code: {}",
+      DEBUG_INFO("[VEProc] release ve proc: %#x failed, return code: %d",
                  (size_t)proc.ve_proc, rt);
       PRINT_ERR("[VEProc] release ve proc failed");
     }

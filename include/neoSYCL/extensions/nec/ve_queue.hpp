@@ -19,16 +19,16 @@ private:
                              std::to_string(ve_node) + " failed..");
     }
     uint64_t handle = veo_load_library(ve_proc, lib_path.c_str());
-    DEBUG_INFO("[VEProc] create ve proc: {:#x} and load lib: {} on node: {}",
-               (size_t)ve_proc, lib_path, ve_node);
+    DEBUG_INFO("[VEProc] create ve proc: %#x and load lib: %s on node: %d",
+               (size_t)ve_proc, lib_path.c_str(), ve_node);
     return nec::VEProc{ve_proc, handle};
   }
 
   void free_proc(nec::VEProc proc) {
-    DEBUG_INFO("[VEProc] release ve proc: {:#x}", (size_t)proc.ve_proc);
+    DEBUG_INFO("[VEProc] release ve proc: %#x", (size_t)proc.ve_proc);
     int rt = veo_proc_destroy(proc.ve_proc);
     if (rt != veo_command_state::VEO_COMMAND_OK) {
-      DEBUG_INFO("[VEProc] release ve proc: {:#x} failed, return code: {}",
+      DEBUG_INFO("[VEProc] release ve proc: %#x failed, return code: %d",
                  (size_t)proc.ve_proc, rt);
       PRINT_ERR("[VEProc] release ve proc failed");
     }

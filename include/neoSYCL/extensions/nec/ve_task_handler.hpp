@@ -24,7 +24,7 @@ public:
     if (!argp) {
       throw exception("ve args return nullptr");
     }
-    DEBUG_INFO("[VEKernel] create ve args: {:#x}", (size_t)argp);
+    DEBUG_INFO("[VEKernel] create ve args: %#x", (size_t)argp);
     return argp;
   }
 
@@ -47,15 +47,15 @@ public:
       acc.acquire_access();
     }
     DEBUG_INFO("execute single %d kernel, name: %s\n", type(), k->name.c_str());
-    DEBUG_INFO("[VEKernel] single task: {}", k->name.c_str());
+    DEBUG_INFO("[VEKernel] single task: %s", k->name.c_str());
     try {
       struct veo_args *argp = create_ve_args(k);
-      DEBUG_INFO("[VEKernel] invoke ve func: {}", k->name.c_str());
+      DEBUG_INFO("[VEKernel] invoke ve func: %s", k->name.c_str());
       uint64_t id = veo_call_async_by_name(ctx_.ve_ctx, proc_.handle,
                                            k->name.c_str(), argp);
       uint64_t ret_val;
       veo_call_wait_result(ctx_.ve_ctx, id, &ret_val);
-      DEBUG_INFO("[VEKernel] ve func finished, id: {}, ret val: {}", id,
+      DEBUG_INFO("[VEKernel] ve func finished, id: %lu, ret val: %lu", id,
                  ret_val);
       // copy_out(ve_addr_list, k, proc);
       veo_args_free(argp);
@@ -83,23 +83,23 @@ public:
     }
     DEBUG_INFO("execute parallel<1> %d kernel, name: %s\n", type(),
                k->name.c_str());
-    DEBUG_INFO("[VEKernel] parallel task: {}", k->name.c_str());
+    DEBUG_INFO("[VEKernel] parallel task: %s", k->name.c_str());
     try {
       struct veo_args *argp = create_ve_args(k);
-      DEBUG_INFO("[VEKernel] create ve args: {:#x}", (size_t)argp);
+      DEBUG_INFO("[VEKernel] create ve args: %#x", (size_t)argp);
       set_arg_for_range(k->args, argp, r);
-      DEBUG_INFO("[VEKernel] invoke ve func: {}", k->name.c_str());
+      DEBUG_INFO("[VEKernel] invoke ve func: %s", k->name.c_str());
       uint64_t id = veo_call_async_by_name(ctx_.ve_ctx, proc_.handle,
                                            k->name.c_str(), argp);
       uint64_t ret_val;
       veo_call_wait_result(ctx_.ve_ctx, id, &ret_val);
-      DEBUG_INFO("[VEKernel] ve func finished, id: {}, ret val: {}", id,
+      DEBUG_INFO("[VEKernel] ve func finished, id: %lu, ret val: %lu", id,
                  ret_val);
       // copy_out(ve_addr_list, k, proc);
       veo_args_free(argp);
     } catch (exception &e) {
-      std::cerr << "[VEKernel] kernel invoke failed, error message: "
-                << e.what() << std::endl;
+      PRINT_ERR("[VEKernel] kernel invoke failed");
+      throw exception("kernel invocation error");
     }
 
     for (const detail::accessor_info &acc : k->args) {
@@ -145,7 +145,7 @@ public:
 
     int rt = veo_free_mem(proc_.ve_proc, device_ptr);
     if (rt != VEO_COMMAND_OK) {
-      DEBUG_INFO("[VEProc] free ve memory failed, size: {}, return code: {}",
+      DEBUG_INFO("[VEProc] free ve memory failed, size: %lu, return code: %d",
                  bufs_[index].buf->get_size(), rt);
       PRINT_ERR("[VEProc] free ve memory failed");
       throw exception("VE free memory return error");
@@ -166,12 +166,12 @@ public:
 
     int rt = veo_alloc_mem(proc_.ve_proc, &ve_addr_int, size_in_byte);
     if (rt != VEO_COMMAND_OK) {
-      DEBUG_INFO("[VEProc] allocate VE memory size: {} failed, return code: {}",
+      DEBUG_INFO("[VEProc] allocate VE memory size: %lu failed, return code: %d",
                  size_in_byte, rt);
       PRINT_ERR("[VEProc] allocate VE memory failed");
       throw exception("VE allocate return error");
     }
-    DEBUG_INFO("[VEKernel] allocate ve memory, size: {}, ve address: {:#x}",
+    DEBUG_INFO("[VEKernel] allocate ve memory, size: %lu, ve address: %#x",
                size_in_byte, ve_addr_int);
     buf_info bi{d, ve_addr_int, to_be_updated};
     bufs_.push_back(bi);
@@ -179,13 +179,13 @@ public:
     if (mode != access::mode::discard_write &&
         mode != access::mode::discard_read_write) {
       DEBUG_INFO("[VEKernel] do copy to ve memory for arg, device address: "
-                 "{:#x}, size: {}, host address: {:#x}",
+                 "%#x, size: %lu, host address: %#x",
                  (size_t)ve_addr_int, size_in_byte, (size_t)d->get_raw_ptr());
       rt = veo_write_mem(proc_.ve_proc, ve_addr_int, d->get_raw_ptr(),
                          size_in_byte);
       if (rt != VEO_COMMAND_OK) {
         DEBUG_INFO(
-            "[VEProc] copy to ve memory failed, size: {}, return code: {}",
+            "[VEProc] copy to ve memory failed, size: %lu, return code: %d",
             size_in_byte, rt);
         PRINT_ERR("[VEProc] copy to ve memory failed");
         throw exception("VE copy return error");
@@ -206,8 +206,8 @@ public:
     if (bi.updated) {
       size_t size_in_byte = bi.buf->get_size();
       uint64_t device_ptr = bi.ptr;
-      DEBUG_INFO("[VEKernel] copy from ve memory, device address: {:#x}, "
-                 "size: {}, host address: {:#x}",
+      DEBUG_INFO("[VEKernel] copy from ve memory, device address: %#x, "
+                 "size: %lu, host address: %#x",
                  (size_t)device_ptr, size_in_byte,
                  (size_t)bi.buf->get_raw_ptr());
       // do copy
@@ -215,7 +215,7 @@ public:
                             size_in_byte);
       if (rt != veo_command_state::VEO_COMMAND_OK) {
         DEBUG_INFO(
-            "[VEProc] copy from ve memory failed, size: {}, return code: {}",
+            "[VEProc] copy from ve memory failed, size: %lu, return code: %d",
             size_in_byte, rt);
         PRINT_ERR("[VEProc] copy from ve memory failed");
         throw exception("VE copy return error");
