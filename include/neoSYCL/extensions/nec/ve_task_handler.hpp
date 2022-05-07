@@ -137,7 +137,7 @@ public:
     }
   }
 
-  void free_mem(container_type d) {
+  void free_mem(container_type d) override {
     int index = find_buf(d);
     if (index < 0)
       return;
@@ -154,7 +154,7 @@ public:
     bufs_.erase(bufs_.begin() + index);
   }
 
-  void *alloc_mem(container_type d, access::mode mode = access::mode::read) {
+  void *alloc_mem(container_type d, access::mode mode = access::mode::read) override {
     int index          = find_buf(d);
     bool to_be_updated = (mode != access::mode::read);
     if (index >= 0) {
@@ -196,7 +196,7 @@ public:
     return reinterpret_cast<void *>(bi.ptr);
   }
 
-  void *get_pointer(container_type d) {
+  void *get_pointer(container_type d) override {
     int index = find_buf(d);
     if (index < 0)
       return nullptr;
@@ -225,7 +225,7 @@ public:
     }
   }
 
-  void copy_back() {
+  void copy_back() override {
     for (int i = 0; i < bufs_.size(); i++) {
       copy_back(bufs_[i]);
     }
