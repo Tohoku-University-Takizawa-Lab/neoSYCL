@@ -55,9 +55,16 @@ public:
         kernel(new detail::kernel()), ctx(c) {}
 
   template <typename KernelName>
-  void set_capture(void* p, size_t sz){
+  void copy_capture(KernelName* p){
     const char* name = ("__"+detail::get_kernel_name_from_class<KernelName>()+"_obj__").c_str();
-    ctx.get_context_info()->task_handler->set_capture(name,p,sz);
+    ctx.get_context_info()->task_handler->set_capture(name,p,sizeof(KernelName));
+  }
+
+  template <typename KernelName, typename KernelType>
+  void set_capture(KernelType kernelFunc){
+    if(bind_device.type() != detail::VE)
+      return;
+    kernelFunc();
   }
 
   template <typename KernelName, typename KernelType>
