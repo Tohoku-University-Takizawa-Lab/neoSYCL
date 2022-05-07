@@ -102,12 +102,12 @@ public:
 
   SUPPORT_PLATFORM_TYPE type() override { return CPU; }
 
-  void *get_pointer(container_type p) { return p->get_raw_ptr(); }
-  void *alloc_mem(container_type p, access::mode = access::mode::read) {
+  void *get_pointer(container_type p) override { return p->get_raw_ptr(); }
+  void *alloc_mem(container_type p, access::mode = access::mode::read) override {
     return p->get_raw_ptr();
   }
-  void free_mem(container_type) {}
-  void copy_back() {}
+  void free_mem(container_type) override {}
+  void copy_back() override {}
 };
 
 } // namespace neosycl::sycl::detail

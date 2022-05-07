@@ -32,9 +32,9 @@ TEST(parallel_for, simple_test) {
         kc[index] = ka[index] + kb[index];
       });
     });
+    q.wait();
   }
 
-  q.wait();
 
   std::cout << std::endl << "Result:" << std::endl;
   for (auto e : c)
