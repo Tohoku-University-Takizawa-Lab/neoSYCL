@@ -46,7 +46,7 @@ public:
     for (const accessor_info &arg : k->args) {
       arg.acquire_access();
     }
-    DEBUG_INFO("execute single %d kernel, name: %s\n", type(), k->name.c_str());
+    DEBUG_INFO("single_task(): %s\n", k->name.c_str());
     func();
     for (const accessor_info &arg : k->args) {
       arg.release_access();
@@ -59,6 +59,7 @@ public:
     for (const accessor_info &arg : k->args) {
       arg.acquire_access();
     }
+    DEBUG_INFO("parallel_for_1d(): %s\n", k->name.c_str());
     for (size_t x = offset.get(0); x < r.get(0); x++) {
       func(id<1>(x));
     }
@@ -73,6 +74,7 @@ public:
     for (const accessor_info &arg : k->args) {
       arg.acquire_access();
     }
+    DEBUG_INFO("parallel_for_2d(): %s\n", k->name.c_str());
     for (size_t x = offset.get(0); x < r.get(0); x++) {
       for (size_t y = offset.get(1); y < r.get(1); y++) {
         func(id<2>(x, y));
@@ -89,6 +91,7 @@ public:
     for (const accessor_info &arg : k->args) {
       arg.acquire_access();
     }
+    DEBUG_INFO("parallel_for_3d(): %s\n", k->name.c_str());
     for (size_t x = offset.get(0); x < r.get(0); x++) {
       for (size_t y = offset.get(1); y < r.get(1); y++) {
         for (size_t z = offset.get(2); z < r.get(2); z++) {

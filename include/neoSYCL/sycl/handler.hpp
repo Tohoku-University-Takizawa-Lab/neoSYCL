@@ -56,8 +56,13 @@ public:
 
   template <typename KernelName>
   void copy_capture(KernelName* p){
-    const char* name = ("__"+detail::get_kernel_name_from_class<KernelName>()+"_obj__").c_str();
-    ctx.get_context_info()->task_handler->set_capture(name,p,sizeof(KernelName));
+    string_class name = detail::get_kernel_name_from_class<KernelName>();
+    DEBUG_INFO("kernel class: %s", name.c_str());
+    name = "__" + name + "_obj__";
+    DEBUG_INFO("kernel object: %s %#x %lu", name.c_str(), (size_t)p,
+               sizeof(KernelName));
+    ctx.get_context_info()->task_handler->set_capture(name.c_str(), p,
+                                                      sizeof(KernelName));
   }
 
   template <typename KernelName, typename KernelType>

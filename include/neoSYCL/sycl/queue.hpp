@@ -72,7 +72,12 @@ public:
     try {
       handler command_group_handler(bind_device, counter, ctx);
       cgf(command_group_handler);
-    } catch (...) {
+    } catch (std::exception& e) {
+      PRINT_ERR("%s",e.what());
+      throw;
+    }
+    catch (...) {
+      PRINT_ERR("unknown exception");
       throw;
     }
     return event();

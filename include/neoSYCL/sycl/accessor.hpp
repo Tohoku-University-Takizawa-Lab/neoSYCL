@@ -83,7 +83,7 @@ public:
                                  (D > 0)>>
   dataT &operator[](id<dimensions> index) const {
     size_t index_val = id2index(index);
-    DEBUG_INFO("[Accessor] access with index: %d", index_val);
+    DEBUG_INFO("access with index: %d", index_val);
     return (*data).get(index_val);
   }
 
@@ -92,7 +92,7 @@ public:
       typename = std::enable_if_t<(Mode == access::mode::read) && (D > 0)>>
   dataT operator[](id<dimensions> index) const {
     size_t index_val = id2index(index);
-    DEBUG_INFO("[Accessor] read access with index: %d", index_val);
+    DEBUG_INFO("read access with index: %d", index_val);
     return (*data).get(index_val);
   }
 

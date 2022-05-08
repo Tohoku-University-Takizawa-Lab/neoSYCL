@@ -11,17 +11,16 @@ class ve_context_info : public detail::context_info {
 
   VEContext create_ctx(VEProc proc) {
     struct veo_thr_ctxt *c = veo_context_open(proc.ve_proc);
-    DEBUG_INFO("[VEContext] create ve context: %#x", (size_t)c);
+    DEBUG_INFO("veo_ctxt created: %#x", (size_t)c);
     return VEContext{c};
   }
 
   void free_ctx() {
-    DEBUG_INFO("[VEContext] release ve ctx: %#x", (size_t)ctx.ve_ctx);
+    DEBUG_INFO("veo_ctxt released: %#x", (size_t)ctx.ve_ctx);
     int rt = veo_context_close(ctx.ve_ctx);
     if (rt != veo_command_state::VEO_COMMAND_OK) {
-      DEBUG_INFO("[VEContext] release ve ctx: %#x failed, return code: %d",
-                 (size_t)ctx.ve_ctx, rt);
-      PRINT_ERR("[VEContext] release ve ctx failed");
+      PRINT_ERR("veo_context_close() failed: %#x, retval=%d",
+                (size_t)ctx.ve_ctx, rt);
     }
   }
 
@@ -29,24 +28,23 @@ class ve_context_info : public detail::context_info {
                      int ve_node                  = DEFAULT_VE_NODE) {
     struct veo_proc_handle *ve_proc = veo_proc_create(ve_node);
     if (!ve_proc) {
-      DEBUG_INFO("[VEProc] create ve proc on node: %d failed..", ve_node);
-      throw ve_exception("[VEProc] create ve proc failed.");
+      PRINT_ERR("veo_proc_create(%d) failed", ve_node);
+      throw ve_exception("create_proc() failed");
     }
+    DEBUG_INFO("veo_proc created: %#x", (size_t)ve_proc);
+
     const char* env = getenv(ENV_VE_KERNEL);
     string_class fn(env?env:lib_path);
     uint64_t handle = veo_load_library(ve_proc, fn.c_str());
-    DEBUG_INFO("[VEProc] create ve proc: %#x and load lib: %s on node: %d",
-               (size_t)ve_proc, fn.c_str(), ve_node);
+    DEBUG_INFO("kernel lib loaded: %#x, %s", (size_t)ve_proc, fn.c_str());
     return nec::VEProc{ve_proc, handle};
   }
 
   void free_proc() {
-    DEBUG_INFO("[VEProc] release ve proc: %#x", (size_t)proc.ve_proc);
+    DEBUG_INFO("veo_proc released: %#x", (size_t)proc.ve_proc);
     int rt = veo_proc_destroy(proc.ve_proc);
     if (rt != veo_command_state::VEO_COMMAND_OK) {
-      DEBUG_INFO("[VEProc] release ve proc: %#x failed, return code: %d",
-                 (size_t)proc.ve_proc, rt);
-      PRINT_ERR("[VEProc] release ve proc failed");
+      PRINT_ERR("veo_proc_destroy() failed");
     }
   }
 
