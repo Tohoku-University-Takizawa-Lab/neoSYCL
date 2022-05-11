@@ -11,6 +11,7 @@
 #include "sycl/item.hpp"
 #include "sycl/id.hpp"
 
+#ifndef ___NEOSYCL_KERNEL_RUNTIME_ONLY___
 #include "sycl/device_selector.hpp"
 #include "sycl/platform.hpp"
 #include "sycl/device.hpp"
@@ -30,6 +31,8 @@
 // include buffer headers
 #include "sycl/allocator.hpp"
 #include "sycl/buffer.hpp"
+
+#endif
 
 namespace neosycl {
 
