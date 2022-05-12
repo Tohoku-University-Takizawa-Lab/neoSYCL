@@ -30,6 +30,48 @@ public:
     }
   }
 
+  void set_range(const char* name, range<1>& d) override {
+    size_t r[3] = { d[0],1,1 };
+    set_range_offset(name, r);
+  }
+  void set_range(const char* name, range<2>& d) override {
+    size_t r[3] = { d[0],d[1],1 };
+    set_range_offset(name, r);
+  }
+  void set_range(const char* name, range<3>& d) override {
+    size_t r[3] = { d[0],d[1],d[2] };
+    set_range_offset(name, r);
+  }
+
+  void set_offset(const char* name, id<1>& i) override {
+    size_t o[3] = { i[0],1,1 };
+    set_range_offset(name, o);
+  }
+  void set_offset(const char* name, id<2>& i) override {
+    size_t o[3] = { i[0],i[1],1 };
+    set_range_offset(name, o);
+  }
+  void set_offset(const char* name, id<3>& i) override {
+    size_t o[3] = { i[0],i[1], i[2] };
+    set_range_offset(name, o);
+  }
+
+  void set_range_offset (const char* name, size_t r[3]) {
+    DEBUG_INFO("set range/offset: %s %lu %lu %lu", name, r[0], r[1], r[2]);
+    uint64_t devptr = veo_get_sym(proc_.ve_proc, proc_.handle, name);
+    if (devptr == 0) {
+      PRINT_ERR("veo_get_sym() failed: %s", name);
+      throw exception("setup_range_offset() failed");
+    }
+
+    int rt = veo_write_mem(proc_.ve_proc, devptr, r, sizeof(size_t)*3);
+    if (rt != VEO_COMMAND_OK) {
+      PRINT_ERR("veo_write_mem() failed: %s", name);
+      throw exception("setup_range_offset() failed");
+    }
+  }
+
+
   struct veo_args *alloc_veo_args() {
     struct veo_args *argp = veo_args_alloc();
     if (!argp) {
