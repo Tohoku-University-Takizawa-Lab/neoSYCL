@@ -31,7 +31,10 @@
 // include buffer headers
 #include "sycl/allocator.hpp"
 #include "sycl/buffer.hpp"
+#endif // ___NEOSYCL_KERNEL_RUNTIME_ONLY___
 
+#ifdef BUILD_VE
+#include "extensions/nec/rt_acc.hpp"
 #endif
 
 namespace neosycl {

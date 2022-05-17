@@ -9,27 +9,27 @@ namespace neosycl::sycl {
 class context {
 
 public:
-  explicit context(const property_list &propList = {}) { init(device()); }
+  explicit context(const property_list& propList = {}) { init(device()); }
 
   ~context() = default;
 
-  context(async_handler asyncHandler, const property_list &propList = {});
+  context(async_handler asyncHandler, const property_list& propList = {});
 
-  context(const device &dev, const property_list &propList = {}) { init(dev); }
+  context(const device& dev, const property_list& propList = {}) { init(dev); }
 
-  context(const device &dev, async_handler asyncHandler,
-          const property_list &propList = {});
+  context(const device& dev, async_handler asyncHandler,
+          const property_list& propList = {});
 
-  context(const platform &plt, const property_list &propList = {});
+  context(const platform& plt, const property_list& propList = {});
 
-  context(const platform &plt, async_handler asyncHandler,
-          const property_list &propList = {});
+  context(const platform& plt, async_handler asyncHandler,
+          const property_list& propList = {});
 
-  context(const vector_class<device> &deviceList,
-          const property_list &propList = {});
+  context(const vector_class<device>& deviceList,
+          const property_list& propList = {});
 
-  context(const vector_class<device> &deviceList, async_handler asyncHandler,
-          const property_list &propList = {});
+  context(const vector_class<device>& deviceList, async_handler asyncHandler,
+          const property_list& propList = {});
 
   //  context(cl_context clContext, async_handler asyncHandler = {});
 
@@ -37,10 +37,10 @@ public:
   typename info::param_traits<info::context, param>::return_type
   get_info() const;
 
-  shared_ptr_class<detail::context_info> get_context_info() { return ctx_info; }
+  detail::context_info* get_context_info() { return ctx_info.get(); }
 
 private:
-  void init(const device &dev) {
+  void init(const device& dev) {
     ctx_info = shared_ptr_class<detail::context_info>(
         dev.device_info->create_context_info());
   }
