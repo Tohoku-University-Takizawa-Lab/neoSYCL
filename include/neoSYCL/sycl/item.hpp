@@ -30,9 +30,9 @@ template <size_t dimensions = 1, bool with_offset = true> struct item {
 
   id<dimensions> get_id() const { return id<dimensions>(this); };
 
-  size_t get_id(int dimension) const { return this->index[dimension]; };
+  size_t get_id(int dimension) const { return this->data[dimension]; };
 
-  size_t operator[](int dimension) const { return this->index[dimension]; }
+  size_t operator[](int dimension) const { return this->data[dimension]; }
 
   range<dimensions> get_range() const { return this->max_range; }
 
