@@ -29,6 +29,31 @@ public:
       : bind_device_(std::move(dev)), counter_(std::move(counter)),
         kernel_(nullptr), ctx_(c) {}
 
+  template <typename KernelName, typename KernelType, size_t dimensions>
+  void run(range<dimensions> r, KernelType kernelFunc) {
+    detail::context_info* cinfo = ctx_.get_context_info();
+    handler_type task_handler   = cinfo->task_handler;
+    kernel_                     = cinfo->get_kernel<KernelName>();
+    kernel_->get_acc().clear();
+    task_handler->set_range(kernel_, r);
+
+    kernelFunc();
+
+    submit_task([h = task_handler, k = kernel_]() { h->run(k); });
+  }
+
+  template <typename KernelName, typename KernelType>
+  void run(KernelType kernelFunc) {
+    detail::context_info* cinfo = ctx_.get_context_info();
+    handler_type task_handler   = cinfo->task_handler;
+    kernel_                     = cinfo->get_kernel<KernelName>();
+    kernel_->get_acc().clear();
+
+    kernelFunc();
+
+    submit_task([h = task_handler, k = kernel_]() { h->run(k); });
+  }
+
   template <typename KernelName> void copy_capture(KernelName* p) {
     detail::context_info* cinfo = ctx_.get_context_info();
 
@@ -36,70 +61,45 @@ public:
   }
 
   template <typename KernelName, typename KernelType>
-  void set_kernel(KernelType kernelFunc) {
-    detail::context_info* cinfo = ctx_.get_context_info();
-
-    kernel_ = cinfo->get_kernel<KernelName>();
-    // kernel_->name = detail::get_kernel_name_from_class<KernelName>();
-    if (bind_device_.type() != detail::VE)
-      return;
-    kernelFunc();
-  }
-
-  template <typename KernelName, typename KernelType>
   void single_task(KernelType kernelFunc) {
+    PRINT_ERR("This code is not converted yet.")
+    abort();
+#if 0
     handler_type task_handler = ctx_.get_context_info()->task_handler;
     submit_task([f = kernelFunc, h = task_handler, k = kernel_]() {
       h->single_task(k, f);
     });
-  }
-
-  template <typename KernelType>
-  void submit_parallel_for(handler_type handler, range<3> numWorkItems,
-                           id<3> offset, KernelType kernelFunc) {
-    submit_task([f = kernelFunc, n = numWorkItems, o = offset,
-                 h = std::move(handler),
-                 k = kernel_]() { h->parallel_for_3d(k, n, f, o); });
-  }
-
-  template <typename KernelType>
-  void submit_parallel_for(handler_type handler, range<2> numWorkItems,
-                           id<2> offset, KernelType kernelFunc) {
-    submit_task([f = kernelFunc, n = numWorkItems, o = offset,
-                 h = std::move(handler),
-                 k = kernel_]() { h->parallel_for_2d(k, n, f, o); });
-  }
-
-  template <typename KernelType>
-  void submit_parallel_for(handler_type handler, range<1> numWorkItems,
-                           id<1> offset, KernelType kernelFunc) {
-    submit_task([f = kernelFunc, n = numWorkItems, o = offset,
-                 h = std::move(handler),
-                 k = kernel_]() { h->parallel_for_1d(k, n, f, o); });
+#endif
   }
 
   template <typename KernelName, typename KernelType, size_t dimensions>
   void parallel_for(range<dimensions> numWorkItems, KernelType kernelFunc) {
+    PRINT_ERR("This code is not converted yet.")
+    abort();
+#if 0
     handler_type task_handler = ctx_.get_context_info()->task_handler;
 
     task_handler->set_range(kernel_, numWorkItems);
     submit_parallel_for(task_handler, numWorkItems, id<dimensions>(),
                         kernelFunc);
+#endif
   }
 
   template <typename KernelName, typename KernelType, size_t dimensions>
   void parallel_for(range<dimensions> numWorkItems,
                     id<dimensions> workItemOffset, KernelType kernelFunc) {
+    PRINT_ERR("This code is not converted yet.")
+    abort();
+#if 0
     handler_type task_handler = ctx_.get_context_info()->task_handler;
 
     task_handler->set_range(kernel_, numWorkItems, workItemOffset);
-#if 0
       string_class range_obj = "__" + kernel_->get_name() + "_range__";
       task_handler->set_range(range_obj.c_str(), numWorkItems);
       string_class offset_obj = "__" + kernel_->get_name() + "_offset__";
       task_handler->set_range(offset_obj.c_str(), workItemOffset);
-#endif
     submit_parallel_for(task_handler, numWorkItems, workItemOffset, kernelFunc);
+#endif
   }
 
   //  template<typename KernelName, typename KernelType, int dimensions>
@@ -136,10 +136,22 @@ public:
 
   accessor_list& get_acc_() { return acc_; }
 
+  template <typename T, size_t D, access::mode m, access::target t,
+            access::placeholder p>
+  neosycl::sycl::rt::acc_<T> map_(sycl::accessor<T, D, m, t, p> acc) {
+    size_t sz[6] = {1, 1, 1, 0, 0, 0};
+
+    kernel_->get_acc().push_back(detail::accessor_info(acc.data, m));
+    std::memcpy(sz + 0, &acc.get_range()[0], sizeof(size_t) * D);
+    std::memcpy(sz + 3, &acc.get_offset()[0], sizeof(size_t) * D);
+    return neosycl::sycl::rt::acc_<T>{
+        get_pointer(acc), {sz[0], sz[1], sz[2], sz[3], sz[4], sz[5]}};
+  }
+
 private:
-  kernel_type kernel_;
   device bind_device_;
   counter_type counter_;
+  kernel_type kernel_;
   context ctx_;
   accessor_list acc_;
 

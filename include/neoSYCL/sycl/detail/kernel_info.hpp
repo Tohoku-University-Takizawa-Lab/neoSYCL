@@ -3,6 +3,7 @@
 
 #include <utility>
 #include "neoSYCL/sycl/detail/accessor_info.hpp"
+#include <dlfcn.h>
 
 namespace neosycl::sycl::detail {
 
@@ -15,7 +16,15 @@ protected:
 };
 
 struct kernel_info_cpu : public kernel_info {
-  kernel_info_cpu(const char* c) : kernel_info(c) {}
+  int (*func_)();
+  void* capt_;
+  void* rnge_;
+
+  kernel_info_cpu(const char* c) : kernel_info(c) {
+    func_ = nullptr;
+    capt_ = nullptr;
+    rnge_ = nullptr;
+  }
 };
 
 } // namespace neosycl::sycl::detail

@@ -131,7 +131,7 @@ public:
   accessor<T, dimensions, mode, target>
   get_access(handler& commandGroupHandler) {
     push_context(commandGroupHandler.get_context(), mode);
-    commandGroupHandler.get_acc_().push_back(detail::accessor_info(data, mode));
+    //commandGroupHandler.get_acc_().push_back(detail::accessor_info(data, mode));
     return accessor<T, dimensions, mode, target>(*this);
   }
 
@@ -146,7 +146,7 @@ public:
   get_access(handler& commandGroupHandler, range<dimensions> accessRange,
              id<dimensions> accessOffset = {}) {
     push_context(commandGroupHandler.get_context(), mode);
-    commandGroupHandler.get_acc_().push_back(detail::accessor_info(data, mode));
+    //commandGroupHandler.get_acc_().push_back(detail::accessor_info(data, mode));
     return accessor<T, dimensions, mode, target>(*this, commandGroupHandler,
                                                  accessRange, accessOffset);
   }
@@ -190,8 +190,8 @@ public:
   }
 
 private:
-  std::shared_ptr<detail::container::DataContainerND<T, dimensions>> data;
   range<dimensions> bufferRange;
+  std::shared_ptr<detail::container::DataContainerND<T, dimensions>> data;
   std::vector<context> ctx_;
 
   void push_context(context c, access::mode m = access::mode::read) {

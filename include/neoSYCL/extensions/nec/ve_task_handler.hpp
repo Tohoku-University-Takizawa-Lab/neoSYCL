@@ -16,6 +16,11 @@ public:
   }
   ~task_handler_ve() { veo_args_free(argp_); }
 
+  void run(shared_ptr_class<kernel> k) override {
+    DEBUG_INFO("run(): %s", k->get_name());
+    call_kernel_func(k);
+  }
+
   kernel* create_kernel(const char* s) override {
     kernel_info_ve* ki = new kernel_info_ve(s);
 
@@ -32,18 +37,18 @@ public:
   }
 
   void set_capture(shared_ptr_class<kernel> k, void* p, size_t sz) override {
-    DEBUG_INFO("set capture: %s %#x %#x", k->get_name(), (size_t)proc_.ve_proc,
+    DEBUG_INFO("set capture: %s %lx %lx", k->get_name(), (size_t)proc_.ve_proc,
                (size_t)proc_.handle);
 
     kernel::info_type ki = k->get_kernel_info();
     shared_ptr_class<kernel_info_ve> kiv =
         std::dynamic_pointer_cast<kernel_info_ve>(ki);
     if (kiv == nullptr) {
-      PRINT_ERR("invalid kernel_info: %#x", ki.get());
+      PRINT_ERR("invalid kernel_info: %lx", (size_t)ki.get());
       throw exception("set_capture() failed");
     }
 
-    DEBUG_INFO("set capture: %#x %#x %#x", (size_t)proc_.ve_proc, (size_t)p,
+    DEBUG_INFO("set capture: %lx %lx %lx", (size_t)proc_.ve_proc, (size_t)p,
                sz);
     int rt = veo_write_mem(proc_.ve_proc, kiv->capt_, p, sz);
     if (rt != VEO_COMMAND_OK) {
@@ -57,7 +62,7 @@ public:
     shared_ptr_class<kernel_info_ve> kiv =
         std::dynamic_pointer_cast<kernel_info_ve>(ki);
     if (kiv == nullptr) {
-      PRINT_ERR("invalid kernel_info: %#x", ki.get());
+      PRINT_ERR("invalid kernel_info: %lx", (size_t)ki.get());
       throw exception("set_range() failed");
     }
     DEBUG_INFO("range : %s %lu %lu %lu", k->get_name(), r[0], r[1], r[2]);
@@ -90,6 +95,7 @@ public:
     return argp;
   }
 
+#if 0
   void single_task(shared_ptr_class<kernel> k,
                    const std::function<void(void)>& func) override {
     DEBUG_INFO("single_task(): %s", k->get_name());
@@ -116,11 +122,12 @@ public:
     DEBUG_INFO("parallel_for_3d(): %s", k->get_name());
     call_kernel_func(k);
   }
+#endif
 
   detail::SUPPORT_PLATFORM_TYPE type() override { return detail::VE; }
 
   int find_buf(container_type d) {
-    for (int j = 0; j < bufs_.size(); j++) {
+    for (size_t j = 0; j < bufs_.size(); j++) {
       if (d->get_raw_ptr() == bufs_[j].buf->get_raw_ptr()) {
         return j;
       }
@@ -168,7 +175,7 @@ public:
       throw exception("alloc_mem() failed");
     }
 
-    DEBUG_INFO("memory alloc: vaddr=%#x, size=%lu", ve_addr_int, size_in_byte);
+    DEBUG_INFO("memory alloc: vaddr=%lx, size=%lu", ve_addr_int, size_in_byte);
     buf_info bi{d, ve_addr_int, to_be_updated};
     bufs_.push_back(bi);
 
@@ -176,7 +183,7 @@ public:
         mode != access::mode::discard_read_write)
     {
       DEBUG_INFO("memory copy (h2v): "
-                 "vaddr=%#x, haddr=%#x, size=%lu",
+                 "vaddr=%lx, haddr=%lx, size=%lu",
                  (size_t)ve_addr_int, (size_t)d->get_raw_ptr(), size_in_byte);
       rt = veo_write_mem(proc_.ve_proc, ve_addr_int, d->get_raw_ptr(),
                          size_in_byte);
@@ -201,7 +208,7 @@ public:
       size_t size_in_byte = bi.buf->get_size();
       uint64_t device_ptr = bi.ptr;
       DEBUG_INFO("memory copy (v2h): "
-                 "vaddr=%#x, haddr=%#x, size=%lu",
+                 "vaddr=%lx, haddr=%lx, size=%lu",
                  (size_t)device_ptr, (size_t)bi.buf->get_raw_ptr(),
                  size_in_byte);
       // do copy
@@ -215,14 +222,14 @@ public:
   }
 
   void copy_back() override {
-    for (int i = 0; i < bufs_.size(); i++) {
+    for (size_t i = 0; i < bufs_.size(); i++) {
       copy_back(bufs_[i]);
     }
   }
 
 private:
-  VEContext ctx_;
   VEProc proc_;
+  VEContext ctx_;
   buffer_type bufs_;
   struct veo_args* argp_;
 
@@ -231,7 +238,7 @@ private:
     shared_ptr_class<kernel_info_ve> kiv =
         std::dynamic_pointer_cast<kernel_info_ve>(ki);
     if (kiv == nullptr) {
-      PRINT_ERR("invalid kernel_info: %#x", ki.get());
+      PRINT_ERR("invalid kernel_info: %lx", (size_t)ki.get());
       throw exception("set_capture() failed");
     }
 

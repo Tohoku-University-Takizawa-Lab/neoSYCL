@@ -11,6 +11,8 @@
 #include "sycl/item.hpp"
 #include "sycl/id.hpp"
 
+#include "sycl/runtime/acc.hpp"
+
 #ifndef ___NEOSYCL_KERNEL_RUNTIME_ONLY___
 #include "sycl/device_selector.hpp"
 #include "sycl/platform.hpp"
@@ -32,10 +34,6 @@
 #include "sycl/allocator.hpp"
 #include "sycl/buffer.hpp"
 #endif // ___NEOSYCL_KERNEL_RUNTIME_ONLY___
-
-#ifdef BUILD_VE
-#include "extensions/nec/rt_acc.hpp"
-#endif
 
 namespace neosycl {
 

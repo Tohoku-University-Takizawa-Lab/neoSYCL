@@ -95,8 +95,8 @@ public:
 
 private:
   device bind_device;
-  async_handler err_handler;
   shared_ptr_class<detail::task_counter> counter;
+  async_handler err_handler;
   context ctx;
 };
 

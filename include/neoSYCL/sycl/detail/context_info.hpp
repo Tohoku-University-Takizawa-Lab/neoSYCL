@@ -4,6 +4,9 @@
 #include <cxxabi.h>
 
 namespace neosycl::sycl::detail {
+const char* DEFAULT_LIB = "./kernel.so";
+const char* ENV_KERNEL  = "NEOSYCL_KERNEL";
+
 inline string_class get_kernel_name_from_class(const std::type_info& ti) {
   // KernelName* p;
   int status;
@@ -41,14 +44,13 @@ public:
     task_handler->set_capture(k, p, sz);
   }
 
-  template <typename KernelName>
-  shared_ptr_class<kernel> get_kernel() {
+  template <typename KernelName> shared_ptr_class<kernel> get_kernel() {
     const std::type_info& tinfo = typeid(KernelName*);
 
-    if(kernels_.count(tinfo.hash_code()))
+    if (kernels_.count(tinfo.hash_code()))
       return kernels_.at(tinfo.hash_code());
 
-    string_class name  = get_kernel_name_from_class(tinfo);
+    string_class name = get_kernel_name_from_class(tinfo);
     DEBUG_INFO("kernel class: %s", name.c_str());
     kernel* k = task_handler->create_kernel(name.c_str());
     shared_ptr_class<kernel> p(std::move(k));
@@ -61,10 +63,20 @@ public:
 };
 
 class cpu_context_info : public context_info {
+  void* dll_;
+
 public:
   cpu_context_info() : context_info() {
-    task_handler = handler_type(new task_handler_cpu());
+    const char* env = getenv(ENV_KERNEL);
+    string_class fn(env ? env : DEFAULT_LIB);
+    dll_ = dlopen(fn.c_str(), RTLD_LAZY);
+    if (!dll_) {
+      PRINT_ERR("dlopen failed: %s", dlerror());
+      throw exception("cpu_context_info() failed");
+    }
+    DEBUG_INFO("kernel lib loaded: %lx, %s", (size_t)dll_, fn.c_str());
+    task_handler = handler_type(new task_handler_cpu(dll_));
   }
-  ~cpu_context_info() = default;
+  ~cpu_context_info() { dlclose(dll_); }
 };
 } // namespace neosycl::sycl::detail

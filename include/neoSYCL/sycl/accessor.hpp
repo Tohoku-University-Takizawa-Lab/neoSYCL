@@ -16,37 +16,36 @@ template <typename dataT, size_t dimensions, access::mode accessMode,
           access::placeholder isPlaceholder = access::placeholder::false_t>
 class accessor {
   friend class handler;
-  
 public:
   template <typename AllocatorT>
-  accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
-           const property_list &propList = {})
+  accessor(buffer<dataT, dimensions, AllocatorT>& bufferRef,
+           const property_list& propList = {})
       : data(bufferRef.data), accessRange(bufferRef.get_range()) {}
 
   template <typename AllocatorT>
-  accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
-           range<dimensions> accessRange, const property_list &propList = {})
+  accessor(buffer<dataT, dimensions, AllocatorT>& bufferRef,
+           range<dimensions> accessRange, const property_list& propList = {})
       : data(bufferRef.data), accessRange(accessRange) {}
 
   template <typename AllocatorT>
-  accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
+  accessor(buffer<dataT, dimensions, AllocatorT>& bufferRef,
            range<dimensions> accessRange, id<dimensions> accessOffset,
-           const property_list &propList = {})
+           const property_list& propList = {})
       : data(bufferRef.data), accessRange(accessRange),
         accessOffset(accessOffset) {}
 
   template <typename AllocatorT>
-  accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
-           handler &commandGroupHandlerRef, range<dimensions> accessRange,
-           const property_list &propList = {})
+  accessor(buffer<dataT, dimensions, AllocatorT>& bufferRef,
+           handler& commandGroupHandlerRef, range<dimensions> accessRange,
+           const property_list& propList = {})
       : data(bufferRef.data), accessRange(accessRange), accessOffset(0) {
     bufferRef.push_context(commandGroupHandlerRef, accessMode);
   }
 
   template <typename AllocatorT>
-  accessor(buffer<dataT, dimensions, AllocatorT> &bufferRef,
-           handler &commandGroupHandlerRef, range<dimensions> accessRange,
-           id<dimensions> accessOffset, const property_list &propList = {})
+  accessor(buffer<dataT, dimensions, AllocatorT>& bufferRef,
+           handler& commandGroupHandlerRef, range<dimensions> accessRange,
+           id<dimensions> accessOffset, const property_list& propList = {})
       : data(bufferRef.data), accessRange(accessRange),
         accessOffset(accessOffset) {
     bufferRef.push_context(commandGroupHandlerRef, accessMode);
@@ -69,7 +68,7 @@ public:
                 std::enable_if_t<((Mode == access::mode::read_write) ||
                                   (Mode == access::mode::discard_read_write)) &&
                                  (D == 0)>>
-  operator dataT &() const;
+  operator dataT&() const;
 
   /* Available only when: (accessMode == access::mode::write || accessMode ==
    * access::mode::read_write || accessMode == access::mode::discard_write ||
@@ -81,7 +80,7 @@ public:
                                   (Mode == access::mode::discard_write) ||
                                   (Mode == access::mode::discard_read_write)) &&
                                  (D > 0)>>
-  dataT &operator[](id<dimensions> index) const {
+  dataT& operator[](id<dimensions> index) const {
     size_t index_val = id2index(index);
     DEBUG_INFO("access with index: %d", index_val);
     return (*data).get(index_val);
@@ -106,7 +105,7 @@ public:
                                   (Mode == access::mode::discard_write) ||
                                   (Mode == access::mode::discard_read_write)) &&
                                  (D == 1)>>
-  dataT &operator[](size_t index) const {
+  dataT& operator[](size_t index) const {
     return (*data)[index];
   }
 
@@ -125,14 +124,14 @@ public:
                                   (Mode == access::mode::discard_write) ||
                                   (Mode == access::mode::discard_read_write)) &&
                                  (D == 2)>>
-  dataT *operator[](size_t index) const {
+  dataT* operator[](size_t index) const {
     return (*data)[index];
   }
 
   template <
       access::mode Mode = accessMode, int D = dimensions,
       typename = std::enable_if_t<(Mode == access::mode::read) && (D == 2)>>
-  const dataT *operator[](size_t index) const {
+  const dataT* operator[](size_t index) const {
     return (*data)[index];
   }
 
@@ -151,7 +150,7 @@ public:
   template <
       access::mode Mode = accessMode, int D = dimensions,
       typename = std::enable_if_t<(Mode == access::mode::read) && (D == 3)>>
-  const dataT **operator[](size_t index) const {
+  const dataT** operator[](size_t index) const {
     return (*data)[index];
   }
 
@@ -163,14 +162,14 @@ public:
 
   template <access::target T = accessTarget,
             typename = std::enable_if_t<T == access::target::host_buffer>>
-  dataT *get_pointer() const {
+  dataT* get_pointer() const {
     return data.get();
   }
 
   template <access::target T = accessTarget,
             typename = std::enable_if_t<(T == access::target::global_buffer) ||
                                         (T == access::target::constant_buffer)>>
-  void *get_pointer() const;
+  void* get_pointer() const;
 
   ~accessor() = default;
 
@@ -183,9 +182,10 @@ private:
     size_t x = this->accessRange.get(0);
     size_t y = this->accessRange.get(1);
     if (dimensions == 2) {
-      return x * index[0] + index[1];
-    } else if (dimensions == 3) {
-      return x * index[0] + y * index[1] + index[2];
+      return index[0] + x*index[1];
+    }
+    else if (dimensions == 3) {
+      return index[0] + x * (index[1] + y * index[2]);
     }
     return index[0];
   }

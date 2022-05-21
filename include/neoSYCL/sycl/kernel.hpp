@@ -20,8 +20,8 @@ public:
   const char* get_name() const { return info_->name.c_str(); }
 
 private:
-  info_type info_;
   accessor_list acc_;
+  info_type info_;
 };
 
 } // namespace neosycl::sycl

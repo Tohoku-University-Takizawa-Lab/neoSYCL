@@ -5,13 +5,12 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 
-option(BUILD_KERNEL_GENERATOR "build sycl kernel generator" OFF)
+option(BUILD_KERNEL_OUTLINER "build sycl kernel outliner" ON)
 option(BUILD_VE "Enable SX-Aurora support" OFF)
-#option(BUILD_TESTING "Enable build tests" OFF)
 
 
-if (BUILD_KERNEL_GENERATOR)
-    add_subdirectory(kernel_generator)
+if (BUILD_KERNEL_OUTLINER)
+    add_subdirectory(src)
 endif ()
 
 
@@ -24,7 +23,7 @@ if (BUILD_VE)
     message(STATUS "Use veo headers path: ${VEO_HEADER_PATH}")
     message(STATUS "Use veo libs path:  ${VEO_LIB_PATH}")
 
-    include_directories(${VEO_HEADER_PATH})
+    include_directories(${VEO_HEADER_PATH} ${CMAKE_SOURCE_DIR}/include/neoSYCL/)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L${VEO_LIB_PATH} -Wl,-rpath=${VEO_LIB_PATH} -lveo")
 endif ()
 
@@ -32,16 +31,9 @@ endif ()
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
     message(STATUS "Enable debug mode")
     ADD_DEFINITIONS(-DDEBUG)
-    include_directories(third_party/fmt/include)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 endif ()
 
 include_directories(include)
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lpthread")
-
-# add examples
-add_subdirectory(examples)
-
-# add tests
-add_subdirectory(tests)
