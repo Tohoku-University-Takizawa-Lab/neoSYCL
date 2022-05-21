@@ -4,13 +4,13 @@
 #include "neoSYCL/sycl/detail/container/array_nd.hpp"
 
 #define DEFINE_ITEM_BY_VALUE_OP(cls)                                           \
-  friend bool operator==(const cls<dimensions> &lhs,                           \
-                         const cls<dimensions> &rhs) {                         \
+  friend bool operator==(const cls<dimensions>& lhs,                           \
+                         const cls<dimensions>& rhs) {                         \
     return (lhs.data == rhs.data) && (lhs.max_range == rhs.max_range) &&       \
            (lhs.offset == rhs.offset);                                         \
   }                                                                            \
-  friend bool operator!=(const cls<dimensions> &lhs,                           \
-                         const cls<dimensions> &rhs) {                         \
+  friend bool operator!=(const cls<dimensions>& lhs,                           \
+                         const cls<dimensions>& rhs) {                         \
     return (lhs.data != rhs.data) || (lhs.max_range != rhs.max_range) ||       \
            (lhs.offset != rhs.offset);                                         \
   }
@@ -22,10 +22,10 @@ template <std::size_t dimensions> struct id;
 template <size_t dimensions = 1, bool with_offset = true> struct item {
   item() = delete;
 
-  template <int D = dimensions, typename = std::enable_if_t<D == 1>>
-  item(const range<dimensions> &r,
-       const detail::container::ArrayND<dimensions> &index,
-       const detail::container::ArrayND<dimensions> &offsets)
+  template <int D = dimensions>
+  item(const range<dimensions>& r,
+       const detail::container::ArrayND<dimensions>& index,
+       const detail::container::ArrayND<dimensions>& offsets)
       : max_range(r), data{index}, offset{offsets} {}
 
   id<dimensions> get_id() const { return id<dimensions>(this); };

@@ -124,6 +124,17 @@ void printLoop(str& st, CXXMethodDecl* func, Decl* d,
     else if (dim == 3)
       st << "{ cl::sycl::id<3> " << vname << "(i0_,i1_,i2_);\n";
   }
+  else if (vtype == "item") {
+    if (dim == 1)
+      st << "{ cl::sycl::item<1> " << vname
+         << "= cl::sycl::rt::id2item(r_,i0_);\n";
+    else if (dim == 2)
+      st << "{ cl::sycl::item<2> " << vname
+         << "= cl::sycl::rt::id2item(r_,i0_,i1_);\n";
+    else if (dim == 3)
+      st << "{ cl::sycl::item<3> " << vname
+         << "= cl::sycl::rt::id2item(r_,i0_,i1_,i2_);\n";
+  }
   else {
     cerr << "unknown index class\n";
     abort();
