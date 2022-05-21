@@ -7,7 +7,7 @@ bool VarDeclFinder::VisitDecl(Decl* d) {
 
 bool VarDeclFinder::VisitDeclRefExpr(DeclRefExpr* e) {
   NamedDecl* d = e->getFoundDecl();
-  //cerr << d->getDeclKindName() << " " << d->getNameAsString() << endl;
+  // cerr << d->getDeclKindName() << " " << d->getNameAsString() << endl;
   if (isInList(decl_list, d) == true) {
     return true; // declared in the kernel func
   }
@@ -76,7 +76,7 @@ bool VarDeclFinder::VisitMemberExpr(MemberExpr* e) {
     return true;
   }
 #endif
-  //auto* nd = dyn_cast<NamedDecl>(d);
+  // auto* nd = dyn_cast<NamedDecl>(d);
   if (d && d->getIdentifier()) {
 #if 0
     QualType t = d->getType();

@@ -5,20 +5,28 @@
 
 class KoutVisitor : public RecursiveASTVisitor<KoutVisitor> {
 public:
+  struct KoutData {
+    string handler;
+    string kernel;
+    string range;
+    string offset;
+    string func;
+    string var;
+    size_t dim;
+    PrintingPolicy policy;
+    KoutPrinterHelper helper;
+
+    KoutData(PrintingPolicy p, ASTContext& ast)
+        : dim(0), policy(p), helper(ast) {}
+  };
+
   KoutVisitor(Rewriter& R, ASTContext& ast)
       : TheRewriter(R), kernCode(kcode_), ast_(ast) {}
 
   bool shouldVisitTemplateInstantiations() { return true; }
 
-  void printAccessor(llvm::raw_string_ostream& st, Decl* d);
-  void printVar(llvm::raw_string_ostream& st, Decl* d);
-  void printLoop(llvm::raw_string_ostream& st, CXXMethodDecl* func, Decl* d,
-                 int dim);
-
-  void checkSingleTaskFunc(CXXMemberCallExpr* ce, CXXMethodDecl* callee,
-                           std::string& text);
-  void checkParallelForFunc(CXXMemberCallExpr* ce, CXXMethodDecl* callee,
-                            std::string& text);
+  void checkCXXMCallExpr(bool is_single, CXXMemberCallExpr* ce,
+                         CXXMethodDecl* callee, std::string& text);
 
   bool VisitCXXMemberCallExpr(CXXMemberCallExpr* ce);
 
