@@ -7,6 +7,21 @@ This software is released under the MIT License, see LICENSE.txt.
 #include "VarDeclFinder.hpp"
 #include "KoutVisitor.hpp"
 
+static cl::OptionCategory KoutOptionCategory("More Options");
+
+static cl::opt<string> hfile("host", cl::desc("Output host code"),
+                             cl::value_desc("filename"), cl::init("-"),
+                             cl::cat(KoutOptionCategory));
+static cl::opt<string> dfile("device", cl::desc("Output device code"),
+                             cl::value_desc("filename"), cl::init("-"),
+                             cl::cat(KoutOptionCategory));
+
+class KoutOptionsParser : public CommonOptionsParser {
+public:
+  KoutOptionsParser(int argc, const char** argv, cl::OptionCategory c)
+      : CommonOptionsParser(argc, argv, c) {}
+};
+
 class KoutASTConsumer : public ASTConsumer {
 public:
   KoutASTConsumer(CompilerInstance& ci)
@@ -18,13 +33,31 @@ public:
 
     const RewriteBuffer* buf =
         rew_.getRewriteBufferFor(rew_.getSourceMgr().getMainFileID());
-    if (buf)
-      llvm::outs() << std::string(buf->begin(), buf->end());
+
+    ostream* os = nullptr;
+    if (buf) {
+      ofstream fs;
+      if (hfile == "-")
+        os = &cout;
+      else {
+        fs.open(hfile, ios::out | ios::trunc);
+        os = &fs;
+      }
+      *os << std::string(buf->begin(), buf->end());
+    }
 
     string& dev = vis_.getDeviceCode();
     if (dev.size() > 0) {
-      llvm::errs() << "#define ___NEOSYCL_KERNEL_RUNTIME_ONLY___\n";
-      llvm::errs() << "#include \"CL/sycl.hpp\"\n\n" << dev << "\n";
+      ofstream fs;
+      if (dfile == "-") {
+        os = &cout;
+      }
+      else {
+        fs.open(dfile, ios::out | ios::trunc);
+        os = &fs;
+      }
+      *os << "#define ___NEOSYCL_KERNEL_RUNTIME_ONLY___\n";
+      *os << "#include \"CL/sycl.hpp\"\n\n" << dev << "\n";
     }
   }
 
@@ -39,14 +72,6 @@ class KoutFrontendAction : public SyntaxOnlyAction /*ASTFrontendAction*/
                                                     StringRef file) {
     return make_unique<KoutASTConsumer>(ci);
   }
-};
-
-static cl::OptionCategory KoutOptionCategory("More Options");
-
-class KoutOptionsParser : public CommonOptionsParser {
-public:
-  KoutOptionsParser(int argc, const char** argv, cl::OptionCategory c)
-      : CommonOptionsParser(argc, argv, c) {}
 };
 
 int main(int argc, const char** argv) {
