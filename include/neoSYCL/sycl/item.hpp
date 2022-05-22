@@ -28,7 +28,7 @@ template <size_t dimensions = 1, bool with_offset = true> struct item {
        const detail::container::ArrayND<dimensions>& offsets)
       : max_range(r), data{index}, offset{offsets} {}
 
-  id<dimensions> get_id() const { return id<dimensions>(this); };
+  id<dimensions> get_id() const { return id<dimensions>(*this); };
 
   size_t get_id(int dimension) const { return this->data[dimension]; };
 
