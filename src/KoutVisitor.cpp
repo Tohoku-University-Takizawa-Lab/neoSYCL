@@ -1,6 +1,7 @@
 #include "KoutVisitor.hpp"
 
-using str = raw_string_ostream;
+using str  = raw_string_ostream;
+using Data = KoutVisitor::KoutData;
 
 static void printAccessor(str& st, Decl* d) {
   auto vd = dyn_cast_or_null<VarDecl>(d);
@@ -29,69 +30,38 @@ static void printVar(str& st, Decl* d) {
   st << " " << vd->getNameAsString() << ";\n";
 }
 
-static void writeDevCode(str& os, KoutVisitor::KoutData& data) {
-  string& cls = data.kernel;
-  if (data.dim != 0) {
-    os << "size_t  __" << cls << "_range__[6]={1,1,1,0,0,0};\n";
-  }
-
-  os << "class " << cls << " {\n";
-  os << "public:\n";
-  os << data.func << "\n";
-  os << data.var << "\n";
-  os << "} __" << cls << "_obj__;\n\n";
-
-  os << "extern \"C\" {\n";
-  os << "int " << cls << "() {\n";
-  os << "__" << cls << "_obj__.run(";
-  os << ");\n";
-  os << "return 0;\n}\n";
-  os << "}\n\n";
-}
-
-static void writeHostCode(str& os, KoutVisitor::KoutData& data,
+static void printVarDecls(CXXRecordDecl* functor_decl, Data& data,
                           VarDeclFinder& finder) {
-  string& cls = data.kernel;
-  os << data.handler << ".run<class " << cls << ">(";
-  if (data.dim > 0 && data.range.empty() == false) {
-    os << data.range << ",";
-    if (data.offset.empty() == false)
-      os << data.offset << ",";
+  str st(data.var);
+  // print this->members and functions
+  for (const auto& it : finder.vlist) {
+    printVar(st, it);
   }
-  os << "[&](){\n";
-  os << "class " << cls << " {\n";
-  os << "public:\n";
-  os << data.var << "\n";
-  os << "} __" << cls << "_obj__";
 
-  os << " {\n";
-  bool first = true;
-  for (int i = 0; i < finder.vlist.size(); i++) {
-    auto* nd = dyn_cast<NamedDecl>(finder.vlist[i]);
-    if (nd && nd->getIdentifier()) {
-      if (first == false)
-        os << ",";
-      first = false;
-      os << nd->getIdentifier()->getName();
+  // print captured variables
+  for (auto& i : functor_decl->captures()) {
+    if (i.capturesVariable() == false) {
+      continue; // ignore "this" is captured.
+    }
+    VarDecl* decl = i.getCapturedVar();
+    if (decl) {
+      QualType t = decl->getType();
+      auto ti    = t.getBaseTypeIdentifier();
+      if (ti && ti->getNameStart() == string("accessor"))
+        data.alist.push_back(&i);
+      else
+        data.vlist.push_back(&i);
     }
   }
-  for (int i = 0; i < finder.alist.size(); i++) {
-    auto* vd = dyn_cast<ValueDecl>(finder.alist[i]);
-    if (vd && vd->getIdentifier()) {
-      if (first == false)
-        os << ",";
-      first = false;
-      os << data.handler << ".map_(";
-      os << vd->getIdentifier()->getName();
-      os << ")";
-    }
+  for (const auto& i : data.vlist) {
+    printVar(st, i->getCapturedVar());
   }
-  os << "};\n";
-  os << data.handler << ".copy_capture(&__" << cls << "_obj__);\n});\n";
+  for (const auto& i : data.alist) {
+    printAccessor(st, i->getCapturedVar());
+  }
 }
 
-void printLoop(str& st, CXXMethodDecl* func, Decl* d,
-               KoutVisitor::KoutData& data) {
+static void printLoop(str& st, CXXMethodDecl* func, Decl* d, Data& data) {
   const char* pragma_omp_parallel_for = "#pragma omp parallel for\n";
   const char* pragma_NEC_ivdep        = "#pragma _NEC ivdep\n";
 
@@ -144,6 +114,93 @@ void printLoop(str& st, CXXMethodDecl* func, Decl* d,
   st << "}";
 }
 
+static void printRunFunc(CXXMethodDecl* functor_op, Data& data) {
+  str st(data.func);
+  st << "void run()\n";
+  if (data.dim == 0) {
+    assert(functor_op->getBody() != nullptr);
+    functor_op->getBody()->printPretty(st, &data.helper, data.policy);
+  }
+  else {
+    st << "{ size_t* r_ = __" << data.kernel << "_range__\n;";
+    assert(functor_op->getNumParams() > 0);
+    printLoop(st, functor_op, functor_op->getParamDecl(0), data);
+    st << "}\n";
+  }
+}
+
+static void writeDevCode(str& os, Data& data) {
+  string& cls = data.kernel;
+  if (data.dim != 0) {
+    os << "size_t  __" << cls << "_range__[6]={1,1,1,0,0,0};\n";
+  }
+
+  os << "class " << cls << " {\n";
+  os << "public:\n";
+  os << data.func << "\n";
+  os << data.var << "\n";
+  os << "} __" << cls << "_obj__;\n\n";
+
+  os << "extern \"C\" {\n";
+  os << "int " << cls << "() {\n";
+  os << "__" << cls << "_obj__.run(";
+  os << ");\n";
+  os << "return 0;\n}\n";
+  os << "}\n\n";
+}
+
+static void writeHostCode(str& os, Data& data, VarDeclFinder& finder) {
+  string& cls = data.kernel;
+  os << data.handler << ".run<class " << cls << ">(";
+  if (data.dim > 0 && data.range.empty() == false) {
+    os << data.range << ",";
+    if (data.offset.empty() == false)
+      os << data.offset << ",";
+  }
+  os << "[&](){\n";
+  os << "class " << cls << " {\n";
+  os << "public:\n";
+  os << data.var << "\n";
+  os << "} __" << cls << "_obj__";
+
+  os << " {\n";
+  bool first = true;
+  for (int i = 0; i < finder.vlist.size(); i++) {
+   auto* nd = dyn_cast<NamedDecl>(finder.vlist[i]);
+    if (nd && nd->getIdentifier()) {
+      if (first == false)
+        os << ",";
+      first = false;
+      os << nd->getIdentifier()->getName();
+    }
+  }
+  for (int i = 0; i < data.vlist.size(); i++) {
+    if (data.vlist[i]->capturesVariable() == false) {
+      continue; // ignore "this" is captured.
+    }
+    if (first == false)
+      os << ",";
+    first = false;
+    auto d = data.vlist[i]->getCapturedVar();
+    if (data.vlist[i]->isExplicit() && d->hasInit()) {
+      d->getInit()->printPretty(os, &data.helper, data.policy);
+    }
+    else
+      os << d->getNameAsString();
+  }
+  for (int i = 0; i < data.alist.size(); i++) {
+    if (first == false)
+      os << ",";
+    first    = false;
+    auto* vd = data.alist[i]->getCapturedVar();
+    os << data.handler << ".map_(";
+    os << vd->getIdentifier()->getName();
+    os << ")";
+  }
+  os << "};\n";
+  os << data.handler << ".copy_capture(&__" << cls << "_obj__);\n});\n";
+}
+
 #if 0
 /* The following functions are assumed */
 template <typename KernelName, typename KernelType>
@@ -178,8 +235,6 @@ void KoutVisitor::checkCXXMCallExpr(bool is_single, CXXMemberCallExpr* ce,
       return;
   }
 
-  KoutData data(PrintingPolicy(TheRewriter.getLangOpts()), ast_);
-
   /* 2 template args of typename: KernelName and KernelType */
   const TemplateArgument& a0 = template_args->get(0);
   const TemplateArgument& a1 = template_args->get(1);
@@ -193,52 +248,47 @@ void KoutVisitor::checkCXXMCallExpr(bool is_single, CXXMemberCallExpr* ce,
   CXXMethodDecl* functor_op   = functor_decl->getLambdaCallOperator();
 
   /* the last template arg of parallel_for */
-  data.dim = 0;
+  int dim = 0;
   if (!is_single) {
     const TemplateArgument& a2 = template_args->get(2);
     if (a2.getKind() != TemplateArgument::ArgKind::Integral)
       return;
-    data.dim = a2.getAsIntegral().getExtValue();
+    dim = a2.getAsIntegral().getExtValue();
   }
 
+  KoutData data(PrintingPolicy(TheRewriter.getLangOpts()), ast_);
+
+  data.dim    = dim;
   data.kernel = kernel_name.getAsString();
   if (kernel_name.getBaseTypeIdentifier()) // this should be true
     data.kernel = kernel_name.getBaseTypeIdentifier()->getNameStart();
+  if (ce->getImplicitObjectArgument()) { // this should be true
+    str cghs(data.handler);
+    ce->getImplicitObjectArgument()->printPretty(cghs, NULL, data.policy);
+  }
+  else {
+    cerr << "Handler identifier not found." << endl;
+    abort();
+  }
 
-  // for(auto& i:functor_decl->captures()){
-  //   cerr << i.getCapturedVar()->getNameAsString() << endl;
-  // }
   VarDeclFinder finder;
   if (functor_op->getBody()) {
+    for (auto& i : functor_decl->captures()) {
+      if (i.capturesVariable() == true)
+        finder.decl_list.push_back(i.getCapturedVar());
+    }
     finder.TraverseStmt(functor_op->getBody());
-    if (finder.vlist.empty() == false || finder.alist.empty() == false) {
-      str st(data.var);
-      for (const auto& it : finder.vlist) {
-        printVar(st, it);
-      }
-      for (const auto& it : finder.alist) {
-        printAccessor(st, it);
-      }
-    }
-
-    str st(data.func);
-    st << "void run()\n";
-    if (is_single) {
-      functor_op->getBody()->printPretty(st, &data.helper, data.policy);
-    }
-    else {
-      st << "{ size_t* r_ = __" << data.kernel << "_range__\n;";
-      printLoop(st, functor_op, finder.parm_list[0], data);
-      st << "}\n";
-    }
   }
   else {
     cerr << "No function body\n";
     return;
   }
 
-  str cghs(data.handler);
-  ce->getImplicitObjectArgument()->printPretty(cghs, NULL, data.policy);
+  // print variable decls in the class
+  printVarDecls(functor_decl, data, finder);
+
+  // print the run function in the class
+  printRunFunc(functor_op, data);
 
   if (is_single == false) {
     str rngs(data.range);

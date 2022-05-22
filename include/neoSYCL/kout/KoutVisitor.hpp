@@ -15,13 +15,14 @@ public:
     size_t dim;
     PrintingPolicy policy;
     KoutPrinterHelper helper;
-
+    vector<const LambdaCapture*> vlist;
+    vector<const LambdaCapture*> alist;
     KoutData(PrintingPolicy p, ASTContext& ast)
         : dim(0), policy(p), helper(ast) {}
   };
 
   KoutVisitor(Rewriter& R, ASTContext& ast)
-      : TheRewriter(R), kernCode(kcode_), ast_(ast) {}
+      : TheRewriter(R), kcode_(), kernCode(kcode_), ast_(ast) {}
 
   bool shouldVisitTemplateInstantiations() { return true; }
 
