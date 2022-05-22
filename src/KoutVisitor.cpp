@@ -205,6 +205,9 @@ void KoutVisitor::checkCXXMCallExpr(bool is_single, CXXMemberCallExpr* ce,
   if (kernel_name.getBaseTypeIdentifier()) // this should be true
     data.kernel = kernel_name.getBaseTypeIdentifier()->getNameStart();
 
+  // for(auto& i:functor_decl->captures()){
+  //   cerr << i.getCapturedVar()->getNameAsString() << endl;
+  // }
   VarDeclFinder finder;
   if (functor_op->getBody()) {
     finder.TraverseStmt(functor_op->getBody());
@@ -280,5 +283,21 @@ bool KoutVisitor::VisitCXXMemberCallExpr(CXXMemberCallExpr* ce) {
     TheRewriter.ReplaceText(ce->getSourceRange(), class_def);
   }
 
+  return true;
+}
+
+bool KoutVisitor::VisitTypeAliasDecl(TypeAliasDecl* d) {
+  PrintingPolicy policy(TheRewriter.getLangOpts());
+  SourceManager& smgr = ast_.getSourceManager();
+
+  // now only global declaratios are considered
+  if (d->getParentFunctionOrMethod() != nullptr)
+    return true;
+  // TODO: non-global ones
+
+  if (d && smgr.isInMainFile(smgr.getExpansionLoc(d->getLocation()))) {
+    d->print(kernCode, policy);
+    kernCode << ";\n";
+  }
   return true;
 }

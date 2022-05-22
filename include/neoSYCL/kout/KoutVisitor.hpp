@@ -32,6 +32,8 @@ public:
 
   string& getDeviceCode() { return kcode_; }
 
+  bool VisitTypeAliasDecl(TypeAliasDecl* d);
+
 private:
   Rewriter& TheRewriter;
   string kcode_;
