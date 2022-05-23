@@ -13,6 +13,8 @@
 
 #include "sycl/runtime/acc.hpp"
 
+#include "sycl/builtin/builtin.hpp"
+
 #ifndef ___NEOSYCL_KERNEL_RUNTIME_ONLY___
 #include "sycl/device_selector.hpp"
 #include "sycl/platform.hpp"
