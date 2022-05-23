@@ -15,10 +15,11 @@ public:
     size_t dim;
     PrintingPolicy policy;
     KoutPrinterHelper helper;
+    SourceManager& smgr;
     vector<const LambdaCapture*> vlist;
     vector<const LambdaCapture*> alist;
     KoutData(PrintingPolicy p, ASTContext& ast)
-        : dim(0), policy(p), helper(ast) {}
+        : dim(0), policy(p), helper(ast), smgr(ast.getSourceManager()) {}
   };
 
   KoutVisitor(Rewriter& R, ASTContext& ast)

@@ -3,6 +3,17 @@
 using str  = raw_string_ostream;
 using Data = KoutVisitor::KoutData;
 
+static bool isInMainFile(Decl* d, SourceManager& smgr) {
+  // if (d && smgr.isInMainFile(smgr.getExpansionLoc(d->getLocation())))
+  if (d && smgr.isInMainFile(d->getBeginLoc()))
+    return true;
+  return false;
+}
+
+static bool isInMainFile(Decl* d, Data& data) {
+  return isInMainFile(d, data.smgr);
+}
+
 static void printAccessor(str& st, Decl* d) {
   auto vd = dyn_cast_or_null<VarDecl>(d);
   if (vd == nullptr || vd->getIdentifier() == nullptr)
@@ -19,15 +30,33 @@ static void printAccessor(str& st, Decl* d) {
   st << "> " << vd->getIdentifier()->getName() << ";\n";
 }
 
-static void printVar(str& st, Decl* d) {
+static void printVar(str& st, Decl* d, Data& data) {
+  auto fd = dyn_cast_or_null<FunctionDecl>(d);
+  if (fd) {
+    if (isInMainFile(fd, data) && fd->isInlined() == false)
+      d->print(st, data.policy);
+    return;
+  }
   auto vd = dyn_cast_or_null<ValueDecl>(d);
   if (vd == nullptr || vd->getIdentifier() == nullptr)
     return;
-
   QualType t = vd->getType();
-  t.removeLocalCVRQualifiers(Qualifiers::CVRMask);
-  st << t.getAsString();
-  st << " " << vd->getNameAsString() << ";\n";
+
+  auto ty = dyn_cast<ConstantArrayType>(t.getTypePtr());
+  if (ty == nullptr) {
+    t.removeLocalCVRQualifiers(Qualifiers::CVRMask);
+    st << t.getAsString();
+    st << " " << vd->getNameAsString() << ";\n";
+  }
+  else {
+    QualType et = ty->getElementType();
+    et.removeLocalCVRQualifiers(Qualifiers::CVRMask);
+    st << et.getAsString();
+    st << " " << vd->getNameAsString();
+    st << "[";
+    ty->getSize().print(st, false);
+    st << "];\n";
+  }
 }
 
 static void printVarDecls(CXXRecordDecl* functor_decl, Data& data,
@@ -35,7 +64,7 @@ static void printVarDecls(CXXRecordDecl* functor_decl, Data& data,
   str st(data.var);
   // print this->members and functions
   for (const auto& it : finder.vlist) {
-    printVar(st, it);
+    printVar(st, it, data);
   }
 
   // print captured variables
@@ -54,7 +83,7 @@ static void printVarDecls(CXXRecordDecl* functor_decl, Data& data,
     }
   }
   for (const auto& i : data.vlist) {
-    printVar(st, i->getCapturedVar());
+    printVar(st, i->getCapturedVar(), data);
   }
   for (const auto& i : data.alist) {
     printAccessor(st, i->getCapturedVar());
@@ -166,7 +195,10 @@ static void writeHostCode(str& os, Data& data, VarDeclFinder& finder) {
   os << " {\n";
   bool first = true;
   for (int i = 0; i < finder.vlist.size(); i++) {
-   auto* nd = dyn_cast<NamedDecl>(finder.vlist[i]);
+    auto* fd = dyn_cast_or_null<FunctionDecl>(finder.vlist[i]);
+    if (fd) // ignore functions
+      continue;
+    auto* nd = dyn_cast_or_null<NamedDecl>(finder.vlist[i]);
     if (nd && nd->getIdentifier()) {
       if (first == false)
         os << ",";
@@ -180,7 +212,7 @@ static void writeHostCode(str& os, Data& data, VarDeclFinder& finder) {
     }
     if (first == false)
       os << ",";
-    first = false;
+    first  = false;
     auto d = data.vlist[i]->getCapturedVar();
     if (data.vlist[i]->isExplicit() && d->hasInit()) {
       d->getInit()->printPretty(os, &data.helper, data.policy);
@@ -345,7 +377,7 @@ bool KoutVisitor::VisitTypeAliasDecl(TypeAliasDecl* d) {
     return true;
   // TODO: non-global ones
 
-  if (d && smgr.isInMainFile(smgr.getExpansionLoc(d->getLocation()))) {
+  if (isInMainFile(d, smgr)) {
     d->print(kernCode, policy);
     kernCode << ";\n";
   }
