@@ -10,11 +10,11 @@ template <typename T> struct acc_ {
   size_t r_[6];
 
   inline T& operator[](size_t i) { return p_[i]; }
-  inline T operator[](const id<3>& i) {
+  inline T& operator[](const id<3> i) {
     return p_[(i[2] * r_[1] + i[1]) * r_[0] + i[0]];
   }
-  inline T& operator[](const id<2>& i) { return p_[i[1] * r_[0] + i[0]]; }
-  inline T& operator[](const id<1>& i) { return p_[i[0]]; }
+  inline T& operator[](const id<2> i) { return p_[i[1] * r_[0] + i[0]]; }
+  inline T& operator[](const id<1> i) { return p_[i[0]]; }
 
   template <size_t dimensions> T& operator[](item<dimensions>& i) {
     return this->operator[](i.get_id());

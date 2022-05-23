@@ -30,6 +30,19 @@ public:
         kernel_(nullptr), ctx_(c) {}
 
   template <typename KernelName, typename KernelType, size_t dimensions>
+  void run(range<dimensions> r, id<dimensions> o, KernelType kernelFunc) {
+    detail::context_info* cinfo = ctx_.get_context_info();
+    handler_type task_handler   = cinfo->task_handler;
+    kernel_                     = cinfo->get_kernel<KernelName>();
+    kernel_->get_acc().clear();
+    task_handler->set_range(kernel_, r, o);
+
+    kernelFunc();
+
+    submit_task([h = task_handler, k = kernel_]() { h->run(k); });
+  }
+
+  template <typename KernelName, typename KernelType, size_t dimensions>
   void run(range<dimensions> r, KernelType kernelFunc) {
     detail::context_info* cinfo = ctx_.get_context_info();
     handler_type task_handler   = cinfo->task_handler;
