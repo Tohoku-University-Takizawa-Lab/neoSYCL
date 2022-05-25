@@ -47,8 +47,11 @@ public:
   template <typename KernelName> shared_ptr_class<kernel> get_kernel() {
     const std::type_info& tinfo = typeid(KernelName*);
 
-    if (kernels_.count(tinfo.hash_code()))
+    if (kernels_.count(tinfo.hash_code())) {
+      DEBUG_INFO("kernel found: %s",
+                 kernels_.at(tinfo.hash_code())->get_name());
       return kernels_.at(tinfo.hash_code());
+    }
 
     string_class name = get_kernel_name_from_class(tinfo);
     DEBUG_INFO("kernel class: %s", name.c_str());

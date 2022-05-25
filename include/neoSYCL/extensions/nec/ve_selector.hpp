@@ -20,11 +20,12 @@ public:
     return false;
   }
   device select_device() const override {
-    return device(shared_ptr_class<detail::device_info>(new ve_device_info()));
+    return device(
+        shared_ptr_class<detail::device_info>(new detail::ve_device_info()));
   }
 };
 
-detail::context_info *ve_device_info::create_context_info() const {
+detail::context_info* detail::ve_device_info::create_context_info() const {
   return new extensions::nec::ve_context_info();
 }
 

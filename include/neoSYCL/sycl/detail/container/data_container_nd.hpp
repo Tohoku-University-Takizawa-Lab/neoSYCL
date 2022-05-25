@@ -31,7 +31,7 @@ public:
       : range(r), ptr(data), allocate_ptr(nullptr) {}
 
   DataContainerD(T* data, ArrayND<dimensions> r, AllocatorT allocatorT)
-      : ptr(data), alloc(allocatorT), range(r), allocate_ptr(nullptr) {}
+      : alloc(allocatorT), range(r), ptr(data), allocate_ptr(nullptr) {}
 
   size_t get_size() override { return sizeof(T) * range.get_liner(); }
 
@@ -52,15 +52,15 @@ public:
   ArrayND<dimensions> get_range() const { return range; }
 
   DataContainerD(const DataContainerD& rhs)
-      : range(rhs.range), alloc(rhs.alloc) {
+      : alloc(rhs.alloc), range(rhs.range) {
     allocate_ptr = shared_ptr_class<T>(alloc.allocate(range.get_liner()));
     ptr          = allocate_ptr.get();
     memcpy(ptr, rhs.ptr, sizeof(T) * range.get_liner());
   }
 
   DataContainerD(DataContainerD&& rhs)
-      : range(rhs.range), alloc(rhs.alloc), allocate_ptr(rhs.allocate_ptr),
-        ptr(rhs.ptr) {}
+      : alloc(rhs.alloc), range(rhs.range), ptr(rhs.ptr),
+        allocate_ptr(rhs.allocate_ptr) {}
 
   DataContainerD& operator=(const DataContainerD& rhs) {
     range        = rhs.range;

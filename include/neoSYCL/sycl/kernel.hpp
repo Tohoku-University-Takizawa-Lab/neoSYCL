@@ -12,12 +12,15 @@ public:
   using accessor_list = vector_class<detail::accessor_info>;
 
   kernel(detail::kernel_info* info) : acc_(), info_(std::move(info)) {}
+  kernel(const kernel& k) : acc_(k.acc_), info_(k.info_) {}
 
   void set_acc(accessor_list& acc) { acc_ = acc; }
   accessor_list& get_acc() { return acc_; }
   info_type get_kernel_info() { return info_; }
   // string_class get_name() { return info_->name; }
   const char* get_name() const { return info_->name.c_str(); }
+
+  ~kernel() = default;
 
 private:
   accessor_list acc_;

@@ -126,7 +126,7 @@ public:
     kernel::info_type ki = k->get_kernel_info();
     shared_ptr_class<kernel_info_cpu> kic =
         std::dynamic_pointer_cast<kernel_info_cpu>(ki);
-    if (kic == nullptr) {
+    if (kic.get() == nullptr) {
       PRINT_ERR("invalid kernel_info: %lx", (size_t)ki.get());
       throw exception("set_capture() failed");
     }
@@ -143,6 +143,7 @@ public:
     }
     catch (exception& e) {
       PRINT_ERR("kernel execution failed: %s", e.what());
+      throw;
     }
     for (const detail::accessor_info& acc : k->get_acc()) {
       acc.release_access();
@@ -176,9 +177,10 @@ public:
 
   kernel* create_kernel(const char* s) override {
     auto inf          = new detail::kernel_info_cpu(s);
-    inf->func_        = reinterpret_cast<int (*)()>(dlsym(dll_, s));
     string_class capt = string_class("__") + s + "_obj__";
     string_class rnge = string_class("__") + s + "_range__";
+    auto f            = dlsym(dll_, s);
+    inf->func_        = reinterpret_cast<int (*)()>(f);
     inf->capt_        = dlsym(dll_, capt.c_str());
     inf->rnge_        = dlsym(dll_, rnge.c_str());
     if (!inf->func_) {

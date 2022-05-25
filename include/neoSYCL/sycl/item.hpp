@@ -51,8 +51,14 @@ template <size_t dimensions = 1, bool with_offset = true> struct item {
   DEFINE_ITEM_BY_VALUE_OP(item);
 
   range<dimensions> max_range;
-  detail::container::ArrayND<dimensions> offset;
   detail::container::ArrayND<dimensions> data;
+  detail::container::ArrayND<dimensions> offset;
+};
+
+// experimental impl just for testing
+template <size_t dimensions = 1, bool with_offset = true>
+struct nd_item : public neosycl::sycl::item<dimensions, with_offset> {
+  size_t get_global_linear_id() { return 0; }
 };
 
 } // namespace neosycl::sycl

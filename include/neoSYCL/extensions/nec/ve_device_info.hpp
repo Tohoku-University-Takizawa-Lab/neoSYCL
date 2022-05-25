@@ -1,7 +1,7 @@
 #ifndef SYCL_INCLUDE_CL_SYCL_NEC_VE_DEVICE_INFO_HPP_
 #define SYCL_INCLUDE_CL_SYCL_NEC_VE_DEVICE_INFO_HPP_
 
-namespace neosycl::sycl {
+namespace neosycl::sycl::detail {
 
 struct ve_device_info : public detail::device_info {
   bool is_host() override { return false; }
