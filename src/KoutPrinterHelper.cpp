@@ -56,3 +56,12 @@ bool KoutPrinterHelper::Visit(CXXOperatorCallExpr* op, llvm::raw_ostream& os) {
   }
   return false;
 }
+
+bool KoutPrinterHelper::Visit(ReturnStmt* s, llvm::raw_ostream& os) {
+  if (s == nullptr)
+    return false;
+  if (s->getRetValue())
+    std::cerr << "[WARN] return value ignored\n";
+  os << "continue;\n";
+  return true;
+}

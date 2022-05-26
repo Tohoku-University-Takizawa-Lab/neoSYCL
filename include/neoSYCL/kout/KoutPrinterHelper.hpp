@@ -8,6 +8,7 @@ public:
 
   bool Visit(CXXOperatorCallExpr*, llvm::raw_ostream&);
   bool Visit(DeclRefExpr*, llvm::raw_ostream&);
+  bool Visit(ReturnStmt*, llvm::raw_ostream&);
 
   bool handledStmt(Stmt* s, llvm::raw_ostream& os) {
     // cerr << s->getStmtClassName() << endl;
@@ -18,6 +19,10 @@ public:
     auto var = dyn_cast<DeclRefExpr>(s);
     if (var)
       return Visit(var, os);
+
+    auto ret = dyn_cast<ReturnStmt>(s);
+    if (ret)
+      return Visit(ret, os);
 
     return false;
   }
