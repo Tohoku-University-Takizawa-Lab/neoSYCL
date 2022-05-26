@@ -7,6 +7,8 @@ This software is released under the MIT License, see LICENSE.txt.
 #include "VarDeclFinder.hpp"
 #include "KoutVisitor.hpp"
 
+static string inputfile;
+
 static cl::OptionCategory KoutOptionCategory("More Options");
 
 static cl::opt<string> hfile("host", cl::desc("Output host code"),
@@ -35,7 +37,7 @@ public:
         rew_.getRewriteBufferFor(rew_.getSourceMgr().getMainFileID());
 
     ostream* os = nullptr;
-    if (buf) {
+    {
       ofstream fs;
       if (hfile == "-")
         os = &cout;
@@ -43,7 +45,17 @@ public:
         fs.open(hfile, ios::out | ios::trunc);
         os = &fs;
       }
-      *os << std::string(buf->begin(), buf->end());
+      if (buf)
+        *os << std::string(buf->begin(), buf->end());
+      else if (inputfile.size() > 0) {
+        string tmpbuf;
+        ifstream ifs(inputfile, ios::in);
+        if (ifs) {
+          os = &fs;
+          while (getline(ifs, tmpbuf))
+            *os << tmpbuf << endl;
+        }
+      }
     }
 
     string& dev = vis_.getDeviceCode();
@@ -78,6 +90,8 @@ int main(int argc, const char** argv) {
   KoutOptionsParser op(argc, argv, KoutOptionCategory);
   ClangTool tool(op.getCompilations(), op.getSourcePathList());
 
+  if (op.getSourcePathList().size() > 0)
+    inputfile = op.getSourcePathList()[0];
   //  tool.clearArgumentsAdjusters();
   tool.appendArgumentsAdjuster(getClangSyntaxOnlyAdjuster());
   tool.appendArgumentsAdjuster(getInsertArgumentAdjuster(
