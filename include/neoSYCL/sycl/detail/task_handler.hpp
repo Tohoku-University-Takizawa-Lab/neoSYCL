@@ -137,7 +137,11 @@ public:
     }
     DEBUG_INFO("-- KENREL EXEC BEGIN --");
     try {
+#ifdef DEBUG
       int ret_val = kic->func_();
+#else
+      kic->func_();
+#endif
       DEBUG_INFO("-- KERNEL EXEC END (ret=%d) --", ret_val);
       // copy_out(ve_addr_list, k, proc);
     }
