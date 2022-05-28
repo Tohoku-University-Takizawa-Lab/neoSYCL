@@ -28,6 +28,7 @@
 #include "sycl/property_list.hpp"
 #include "sycl/context.hpp"
 #include "sycl/access.hpp"
+#include "sycl/atomic.hpp"
 #include "sycl/accessor.hpp"
 #include "sycl/handler.hpp"
 #include "sycl/queue.hpp"
