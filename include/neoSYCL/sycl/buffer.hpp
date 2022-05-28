@@ -25,6 +25,7 @@ public:
 } // namespace buffer
 } // namespace property
 
+///////////////////////////////////////////////////////////////////////////////
 template <typename T, size_t dimensions = 1,
           typename AllocatorT = buffer_allocator<T>>
 class buffer {
@@ -55,6 +56,24 @@ public:
   using reference       = value_type&;
   using const_reference = const value_type&;
   using allocator_type  = AllocatorT;
+
+  buffer(const buffer& rhs) = default;
+  buffer(buffer&& rhs)      = default;
+  ~buffer() {
+    for (auto& it : ctx_) {
+      it.get_context_info()->free_mem(data);
+    }
+  }
+
+  buffer& operator=(const buffer& rhs) = default;
+  buffer& operator=(buffer&& rhs) = default;
+
+  template <typename Ty, size_t D, typename A>
+  friend bool operator==(const buffer<Ty, D, A>& lhs,
+                         const buffer<Ty, D, A>& rhs);
+  template <typename Ty, size_t D, typename A>
+  friend bool operator!=(const buffer<Ty, D, A>& lhs,
+                         const buffer<Ty, D, A>& rhs);
 
   buffer(const range<dimensions>& bufferRange,
          const property_list& propList = {})
@@ -139,8 +158,6 @@ public:
   accessor<T, dimensions, mode, target>
   get_access(handler& commandGroupHandler) {
     push_context(commandGroupHandler.get_context(), mode);
-    // commandGroupHandler.get_acc_().push_back(detail::accessor_info(data,
-    // mode));
     return accessor<T, dimensions, mode, target>(*this);
   }
 
@@ -155,8 +172,6 @@ public:
   get_access(handler& commandGroupHandler, range<dimensions> accessRange,
              id<dimensions> accessOffset = {}) {
     push_context(commandGroupHandler.get_context(), mode);
-    // commandGroupHandler.get_acc_().push_back(detail::accessor_info(data,
-    // mode));
     return accessor<T, dimensions, mode, target>(*this, commandGroupHandler,
                                                  accessRange, accessOffset);
   }
@@ -173,30 +188,22 @@ public:
 
   void set_write_back(bool flag = true);
 
-  bool is_sub_buffer() const;
+  /* TODO: sub-buffer is not supported yet */
+  bool is_sub_buffer() const { return false; }
 
   template <typename ReinterpretT, int ReinterpretDim>
   buffer<ReinterpretT, ReinterpretDim, AllocatorT>
-  reinterpret(range<ReinterpretDim> reinterpretRange) const;
-
-  buffer(const buffer& rhs) : data(rhs.data), bufferRange(rhs.bufferRange) {}
-
-  buffer(buffer&& rhs) : data(rhs.data), bufferRange(rhs.bufferRange) {}
-
-  buffer& operator=(const buffer& rhs) {
-    data        = rhs.data;
-    bufferRange = rhs.bufferRange;
-  }
-
-  buffer& operator=(buffer&& rhs) {
-    data        = rhs.data;
-    bufferRange = rhs.bufferRange;
-  }
-
-  ~buffer() {
-    for (auto& it : ctx_) {
-      it.get_context_info()->free_mem(data);
+  reinterpret(range<ReinterpretDim> reinterpretRange) const {
+    buffer<ReinterpretT, ReinterpretDim, AllocatorT> r(*this);
+    if (ReinterpretDim > get_count())
+      throw sycl::invalid_object_error("invalid dimensions");
+    for (size_t i(0); i < ReinterpretDim; i++) {
+      if (r.bufferRage[i] >= reinterpretRange[i])
+        r.bufferRage[i] = reinterpretRange[i];
+      else
+        throw sycl::invalid_object_error("invalid range");
     }
+    return r;
   }
 
 private:
@@ -212,6 +219,16 @@ private:
     push_context(h.get_context(), m);
   }
 };
+
+template <typename Ty, size_t D, typename A>
+bool operator==(const buffer<Ty, D, A>& lhs, const buffer<Ty, D, A>& rhs) {
+  return lhs.data == rhs.data;
+}
+template <typename Ty, size_t D, typename A>
+bool operator!=(const buffer<Ty, D, A>& lhs, const buffer<Ty, D, A>& rhs) {
+  return !(lhs == rhs);
+}
+
 } // namespace neosycl::sycl
 
 #endif // CUSTOM_SYCL_INCLUDE_SYCL_BUFFER_HPP_
