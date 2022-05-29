@@ -53,8 +53,8 @@ class ve_context_info : public detail::context_info {
   }
 
 public:
-  ve_context_info()
-      : detail::context_info(), proc(create_proc()), ctx(create_ctx(proc)) {
+  ve_context_info(device d)
+      : detail::context_info(d), proc(create_proc()), ctx(create_ctx(proc)) {
     task_handler = handler_type(new task_handler_ve(proc, ctx));
   }
   ~ve_context_info() {

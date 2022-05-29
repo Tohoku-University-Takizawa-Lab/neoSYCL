@@ -11,7 +11,7 @@ struct ve_device_info : public device_info {
 
   info::device_type type() override { return info::device_type::accelerator; }
 
-  context_info* create_context_info() const override;
+  context_info* create_context_info(device d) const override;
 };
 
 } // namespace neosycl::sycl::detail

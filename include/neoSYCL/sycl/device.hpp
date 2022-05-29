@@ -85,7 +85,7 @@ public:
   info::device_type type() const { return info_->type(); }
 
   detail::context_info* create_context_info() const {
-    return info_->create_context_info();
+    return info_->create_context_info(*this);
   }
 private:
   void set_platform(platform p) { plt_ = p; }
@@ -93,6 +93,11 @@ private:
   shared_ptr_class<detail::device_info> info_;
   platform plt_;
 };
+
+bool operator==(const device& lhs, const device& rhs) {
+  return (lhs.info_ == rhs.info_ && lhs.plt_ == rhs.plt_);
+}
+bool operator!=(const device& lhs, const device& rhs) { return !(lhs == rhs); }
 
 vector_class<device> platform::get_devices(info::device_type t) const {
   vector_class<device> ret;

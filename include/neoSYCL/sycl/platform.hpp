@@ -63,6 +63,13 @@ private:
   static vector_class<platform> REGISTERED;
 };
 
+bool operator==(const platform& lhs, const platform& rhs) {
+  return lhs.info_ == rhs.info_;
+}
+bool operator!=(const platform& lhs, const platform& rhs) {
+  return !(lhs == rhs);
+}
+
 vector_class<platform> platform::REGISTERED = {
     platform::register_all_devices()};
 

@@ -16,7 +16,7 @@ struct device_info {
 
   virtual info::device_type type() = 0;
 
-  virtual context_info* create_context_info() const = 0;
+  virtual context_info* create_context_info(device d) const = 0;
 };
 
 struct cpu_device_info : public device_info {
@@ -28,7 +28,7 @@ struct cpu_device_info : public device_info {
 
   info::device_type type() override { return info::device_type::cpu; }
 
-  context_info* create_context_info() const override;
+  context_info* create_context_info(device d) const override;
 };
 
 using default_device_info = cpu_device_info;

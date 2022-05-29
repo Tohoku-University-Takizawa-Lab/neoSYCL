@@ -29,8 +29,10 @@ public:
 using default_selector = cpu_selector;
 using host_selector    = cpu_selector;
 
-detail::context_info* detail::cpu_device_info::create_context_info() const {
-  return new detail::cpu_context_info();
+namespace detail {
+context_info* cpu_device_info::create_context_info(device d) const {
+  return new cpu_context_info(d);
 }
+} // namespace detail
 
 } // namespace neosycl::sycl

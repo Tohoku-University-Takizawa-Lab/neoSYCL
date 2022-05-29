@@ -22,15 +22,15 @@ inline string_class get_kernel_name_from_class(const std::type_info& ti) {
 }
 
 class context_info {
-  using container_type = std::shared_ptr<detail::container::DataContainer>;
-
 protected:
   using handler_type = shared_ptr_class<detail::task_handler>;
   using kernel_map   = std::map<size_t, shared_ptr_class<kernel>>;
 
-  context_info() {}
+  context_info(device d) : bound_device(d) {}
 
 public:
+  using container_type = std::shared_ptr<detail::container::DataContainer>;
+
   virtual ~context_info() = default;
   void* get_pointer(container_type c) const {
     return task_handler->get_pointer(c);
@@ -61,6 +61,7 @@ public:
     return p;
   }
 
+  device bound_device;
   handler_type task_handler;
   kernel_map kernels_; // all exiting kernels in the context
 };
@@ -69,7 +70,7 @@ class cpu_context_info : public context_info {
   void* dll_;
 
 public:
-  cpu_context_info() : context_info() {
+  cpu_context_info(device d) : context_info(d) {
     const char* env = getenv(ENV_KERNEL);
     string_class fn(env ? env : DEFAULT_LIB);
     dll_ = dlopen(fn.c_str(), RTLD_LAZY);

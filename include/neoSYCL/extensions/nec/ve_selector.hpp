@@ -30,8 +30,9 @@ public:
   }
 };
 
-detail::context_info* detail::ve_device_info::create_context_info() const {
-  return new extensions::nec::ve_context_info();
+detail::context_info*
+detail::ve_device_info::create_context_info(device d) const {
+  return new extensions::nec::ve_context_info(d);
 }
 
 #ifdef BUILD_VE
