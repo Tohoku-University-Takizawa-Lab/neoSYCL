@@ -22,7 +22,7 @@ public:
   friend bool operator==(const platform& lhs, const platform& rhs);
   friend bool operator!=(const platform& lhs, const platform& rhs);
 
-  // get a static default platform object (REGISTERED[0])
+  // get a static platform object by default (= REGISTERED[0])
   explicit platform() { *this = get_default_platform(); }
 
   explicit platform(cl_platform_id platformID) { throw unimplemented(); }
@@ -30,8 +30,8 @@ public:
   explicit platform(
       const device_selector& deviceSelector) /* defined in device.hpp*/;
 
-  // used only to create the default platform
-  explicit platform(detail::platform_info* info) : info_(info) {}
+  // INTERNAL USE ONLY: create the default platform
+  explicit platform(detail::platform_info* info) /* defined in device.hpp*/;
 
   /* -- common interface members -- */
   /* platform is not associated with OpenCL => 0  */

@@ -41,7 +41,8 @@ platform platform::register_all_devices() {
   platform p(new detail::default_platform_info(d));
 
   // register all available devices
-  p.info_->dev_.push_back(device(new detail::ve_device_info()));
+  device ve(new detail::ve_device_info(), &p);
+  p.info_->dev_.push_back(ve);
   return p;
 }
 #endif

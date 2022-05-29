@@ -23,17 +23,22 @@ public:
   friend bool operator==(const device& lhs, const device& rhs);
   friend bool operator!=(const device& lhs, const device& rhs);
 
-  device() : info_(nullptr) {
+  device() : info_(nullptr), plt_(nullptr) {
     *this = platform::get_default_platform().get_devices()[0];
   }
 
-  explicit device(detail::device_info* info) : info_(info) {}
+  explicit device(detail::device_info* info, platform* p = nullptr)
+      : info_(info), plt_(nullptr) {
+    if (p != nullptr)
+      plt_ = *p;
+  }
 
-  explicit device(cl_device_id deviceId) {
+  explicit device(cl_device_id deviceId) : info_(nullptr), plt_(nullptr) {
     throw feature_not_supported("OpenCL interop not supported.");
   }
 
-  explicit device(const device_selector& deviceSelector) {
+  explicit device(const device_selector& deviceSelector)
+      : info_(nullptr), plt_(nullptr) {
     *this = deviceSelector.select_device();
   }
 
@@ -48,7 +53,7 @@ public:
 
   bool is_accelerator() const { return info_->is_accelerator(); }
 
-  platform get_platform() const { throw unimplemented(); }
+  platform get_platform() const { return plt_; }
 
   template <info::device param>
   typename info::param_traits<info::device, param>::return_type
@@ -83,7 +88,10 @@ public:
     return info_->create_context_info();
   }
 private:
+  void set_platform(platform p) { plt_ = p; }
+
   shared_ptr_class<detail::device_info> info_;
+  platform plt_;
 };
 
 vector_class<device> platform::get_devices(info::device_type t) const {
@@ -99,6 +107,16 @@ platform::platform(const device_selector& deviceSelector) {
   device d = deviceSelector.select_device();
   info_    = shared_ptr_class<detail::platform_info>(
       new detail::host_platform_info(d));
+  for (auto& dev : info_->dev_)
+    dev.set_platform(*this);
+}
+
+platform::platform(detail::platform_info* info) : info_(info) {
+  /* do nothing if info == null */
+  if (info) {
+    for (auto& dev : info_->dev_)
+      dev.set_platform(*this);
+  }
 }
 
 #ifndef BUILD_VE
