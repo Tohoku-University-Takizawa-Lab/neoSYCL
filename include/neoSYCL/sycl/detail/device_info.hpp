@@ -1,5 +1,4 @@
-#ifndef NEOSYCL_INCLUDE_NEOSYCL_SYCL_DETAIL_DEVICE_INFO_HPP
-#define NEOSYCL_INCLUDE_NEOSYCL_SYCL_DETAIL_DEVICE_INFO_HPP
+#pragma once
 
 #include "neoSYCL/sycl/detail/device_type.hpp"
 
@@ -15,9 +14,9 @@ struct device_info {
 
   virtual bool is_accelerator() = 0;
 
-  virtual SUPPORT_PLATFORM_TYPE type() = 0;
+  virtual info::device_type type() = 0;
 
-  virtual context_info *create_context_info() const = 0;
+  virtual context_info* create_context_info() const = 0;
 };
 
 struct cpu_device_info : public device_info {
@@ -27,13 +26,11 @@ struct cpu_device_info : public device_info {
   bool is_gpu() override { return false; }
   bool is_accelerator() override { return false; }
 
-  SUPPORT_PLATFORM_TYPE type() override { return SUPPORT_PLATFORM_TYPE::CPU; }
+  info::device_type type() override { return info::device_type::cpu; }
 
-  context_info *create_context_info() const override;
+  context_info* create_context_info() const override;
 };
 
 using default_device_info = cpu_device_info;
 
 } // namespace neosycl::sycl::detail
-
-#endif // NEOSYCL_INCLUDE_NEOSYCL_SYCL_DETAIL_DEVICE_INFO_HPP

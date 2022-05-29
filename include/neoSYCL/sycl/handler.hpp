@@ -13,7 +13,6 @@
 #include "neoSYCL/sycl/kernel.hpp"
 #include "neoSYCL/sycl/detail/task.hpp"
 #include "neoSYCL/sycl/detail/task_handler.hpp"
-#include "neoSYCL/sycl/detail/registered_platforms.hpp"
 #include "neoSYCL/sycl/detail/task_counter.hpp"
 
 namespace neosycl::sycl {

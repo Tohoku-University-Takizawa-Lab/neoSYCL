@@ -1,37 +1,34 @@
-#ifndef NEOSYCL_INCLUDE_NEOSYCL_SYCL_DETAIL_PLATFORM_INFO_HPP
-#define NEOSYCL_INCLUDE_NEOSYCL_SYCL_DETAIL_PLATFORM_INFO_HPP
+#pragma once
 
 #include "neoSYCL/sycl/detail/device_info.hpp"
 #include "neoSYCL/sycl/detail/device_type.hpp"
 
-namespace neosycl::sycl::detail {
+namespace neosycl::sycl {
+class device;
 
-struct platform_info {
+namespace detail {
+class platform_info {
+public:
+  platform_info(device host_device);
 
   virtual bool is_host() = 0;
 
-  virtual SUPPORT_PLATFORM_TYPE type() = 0;
+  virtual bool has_extension(const string_class& extension) = 0;
 
-  virtual bool has_extension(const string_class &extension) = 0;
+  vector_class<device> list_devices() { return dev_; }
 
-  virtual vector_class<shared_ptr_class<device_info>> list_devices() = 0;
+  vector_class<device> dev_;
 };
 
-struct cpu_platform_info : public platform_info {
+class host_platform_info : public platform_info {
+public:
+  host_platform_info(device host_device);
 
   bool is_host() override { return true; }
-
-  SUPPORT_PLATFORM_TYPE type() override { return SUPPORT_PLATFORM_TYPE::CPU; }
-
-  bool has_extension(const string_class &extension) override { return false; }
-
-  vector_class<shared_ptr_class<device_info>> list_devices() override {
-    return {shared_ptr_class<device_info>(new cpu_device_info())};
-  }
+  bool has_extension(const string_class& extension) override { return false; }
 };
 
-using default_platform_info = cpu_platform_info;
+using default_platform_info = host_platform_info;
 
-} // namespace neosycl::sycl::detail
-
-#endif // NEOSYCL_INCLUDE_NEOSYCL_SYCL_DETAIL_PLATFORM_INFO_HPP
+} // namespace detail
+} // namespace neosycl::sycl

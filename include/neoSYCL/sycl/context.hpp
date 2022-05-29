@@ -41,8 +41,8 @@ public:
 
 private:
   void init(const device& dev) {
-    ctx_info = shared_ptr_class<detail::context_info>(
-        dev.device_info->create_context_info());
+    ctx_info =
+        shared_ptr_class<detail::context_info>(dev.create_context_info());
   }
 
   shared_ptr_class<detail::context_info> ctx_info;

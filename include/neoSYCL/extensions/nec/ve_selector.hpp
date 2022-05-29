@@ -13,21 +13,38 @@ namespace neosycl::sycl {
 class ve_selector : public device_selector {
 
 public:
-  int operator()(const device &dev) const override {
+  virtual int operator()(const device& dev) const override {
     if (dev.is_accelerator()) {
-      return true;
+      return 1;
     }
-    return false;
+    return 0;
   }
   device select_device() const override {
-    return device(
-        shared_ptr_class<detail::device_info>(new detail::ve_device_info()));
+    auto pf      = platform::get_default_platform();
+    auto devices = pf.get_devices(info::device_type::accelerator);
+    for (auto& i : devices) {
+      if (this->operator()(i) > 0)
+        return i;
+    }
+    throw sycl::runtime_error("no available device found");
   }
 };
 
 detail::context_info* detail::ve_device_info::create_context_info() const {
   return new extensions::nec::ve_context_info();
 }
+
+#ifdef BUILD_VE
+platform platform::register_all_devices() {
+  device d(new detail::default_device_info());
+  // create a platform with the default device at first
+  platform p(new detail::default_platform_info(d));
+
+  // register all available devices
+  p.info_->dev_.push_back(device(new detail::ve_device_info()));
+  return p;
+}
+#endif
 
 } // namespace neosycl::sycl
 

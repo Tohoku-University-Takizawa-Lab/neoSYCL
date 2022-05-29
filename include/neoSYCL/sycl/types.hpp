@@ -33,6 +33,10 @@ using exception_ptr_class = std::exception_ptr;
 
 template <class T> using buffer_allocator = std::allocator<T>;
 
+/* OpenCL interop (minimum type definition only) */
+using cl_platform_id = u_int64_t;
+using cl_device_id   = u_int64_t;
+
 } // namespace neosycl::sycl
 
 #endif // CUSTOM_SYCL_INCLUDE_SYCL_TYPES_HPP_
