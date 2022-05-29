@@ -8,5 +8,3 @@ using gl_context_interop = bool;
 enum class context : int { reference_count, platform, devices };
 
 } // namespace neosycl::sycl::info
-
-#endif // CUSTOM_SYCL_INCLUDE_SYCL_INFO_CONTEXT_HPP_
