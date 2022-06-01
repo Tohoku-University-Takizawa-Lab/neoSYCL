@@ -1,5 +1,4 @@
-#ifndef CUSTOM_SYCL_INCLUDE_SYCL_BUFFER_HPP_
-#define CUSTOM_SYCL_INCLUDE_SYCL_BUFFER_HPP_
+#pragma once
 
 #include "neoSYCL/sycl/detail/container/data_container.hpp"
 #include "neoSYCL/sycl/detail/container/data_container_nd.hpp"
@@ -56,14 +55,11 @@ public:
   using reference       = value_type&;
   using const_reference = const value_type&;
   using allocator_type  = AllocatorT;
+  using container_type  = detail::container::DataContainerND<T, dimensions>;
 
   buffer(const buffer& rhs) = default;
   buffer(buffer&& rhs)      = default;
-  ~buffer() {
-    for (auto& it : ctx_) {
-      it.get_context_info()->free_mem(data);
-    }
-  }
+  ~buffer() { ctx_.free_mem_(data); }
 
   buffer& operator=(const buffer& rhs) = default;
   buffer& operator=(buffer&& rhs) = default;
@@ -157,8 +153,9 @@ public:
             access::target target = access::target::global_buffer>
   accessor<T, dimensions, mode, target>
   get_access(handler& commandGroupHandler) {
-    push_context(commandGroupHandler.get_context(), mode);
-    return accessor<T, dimensions, mode, target>(*this);
+    accessor<T, dimensions, mode, target> acc(*this);
+    commandGroupHandler.alloc_mem_(acc);
+    return acc;
   }
 
   template <access::mode mode>
@@ -171,9 +168,10 @@ public:
   accessor<T, dimensions, mode, target>
   get_access(handler& commandGroupHandler, range<dimensions> accessRange,
              id<dimensions> accessOffset = {}) {
-    push_context(commandGroupHandler.get_context(), mode);
-    return accessor<T, dimensions, mode, target>(*this, commandGroupHandler,
-                                                 accessRange, accessOffset);
+    accessor<T, dimensions, mode, target> acc(*this, commandGroupHandler,
+                                              accessRange, accessOffset);
+    commandGroupHandler.alloc_mem_(acc);
+    return acc;
   }
 
   template <access::mode mode>
@@ -208,16 +206,8 @@ public:
 
 private:
   range<dimensions> bufferRange;
-  std::shared_ptr<detail::container::DataContainerND<T, dimensions>> data;
-  std::vector<context> ctx_;
-
-  void push_context(context c, access::mode m = access::mode::read) {
-    if (c.get_context_info()->alloc_mem(data, m) != nullptr)
-      ctx_.push_back(c);
-  }
-  void push_context(handler h, access::mode m = access::mode::read) {
-    push_context(h.get_context(), m);
-  }
+  std::shared_ptr<container_type> data;
+  context ctx_;
 };
 
 template <typename Ty, size_t D, typename A>
@@ -230,5 +220,3 @@ bool operator!=(const buffer<Ty, D, A>& lhs, const buffer<Ty, D, A>& rhs) {
 }
 
 } // namespace neosycl::sycl
-
-#endif // CUSTOM_SYCL_INCLUDE_SYCL_BUFFER_HPP_

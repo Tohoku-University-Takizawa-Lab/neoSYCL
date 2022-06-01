@@ -9,50 +9,50 @@ namespace neosycl::sycl {
 
 class queue {
 public:
-  explicit queue(const property_list &propList = {})
+  explicit queue(const property_list& propList = {})
       : bind_device(), counter(new detail::task_counter()), ctx(bind_device) {}
 
-  explicit queue(const async_handler &asyncHandler,
-                 const property_list &propList = {})
+  explicit queue(const async_handler& asyncHandler,
+                 const property_list& propList = {})
       : bind_device(), counter(new detail::task_counter()),
         err_handler(asyncHandler), ctx(bind_device) {}
 
-  explicit queue(const device_selector &deviceSelector,
-                 const property_list &propList = {})
+  explicit queue(const device_selector& deviceSelector,
+                 const property_list& propList = {})
       : bind_device(deviceSelector.select_device()),
         counter(new detail::task_counter()), ctx(bind_device) {}
 
-  explicit queue(const device_selector &deviceSelector,
-                 const async_handler &asyncHandler,
-                 const property_list &propList = {})
+  explicit queue(const device_selector& deviceSelector,
+                 const async_handler& asyncHandler,
+                 const property_list& propList = {})
       : bind_device(deviceSelector.select_device()),
         counter(new detail::task_counter()), err_handler(asyncHandler),
         ctx(bind_device) {}
 
-  explicit queue(const device &syclDevice, const property_list &propList = {})
+  explicit queue(const device& syclDevice, const property_list& propList = {})
       : bind_device(syclDevice), counter(new detail::task_counter()),
         ctx(bind_device) {}
 
-  explicit queue(const device &syclDevice, const async_handler &asyncHandler,
-                 const property_list &propList = {})
+  explicit queue(const device& syclDevice, const async_handler& asyncHandler,
+                 const property_list& propList = {})
       : bind_device(syclDevice), counter(new detail::task_counter()),
         err_handler(asyncHandler), ctx(bind_device) {}
 
-  explicit queue(const context &syclContext,
-                 const device_selector &deviceSelector,
-                 const property_list &propList = {});
+  explicit queue(const context& syclContext,
+                 const device_selector& deviceSelector,
+                 const property_list& propList = {});
 
-  explicit queue(const context &syclContext,
-                 const device_selector &deviceSelector,
-                 const async_handler &asyncHandler,
-                 const property_list &propList = {});
+  explicit queue(const context& syclContext,
+                 const device_selector& deviceSelector,
+                 const async_handler& asyncHandler,
+                 const property_list& propList = {});
 
-  explicit queue(const context &syclContext, const device &syclDevice,
-                 const property_list &propList = {});
+  explicit queue(const context& syclContext, const device& syclDevice,
+                 const property_list& propList = {});
 
-  explicit queue(const context &syclContext, const device &syclDevice,
-                 const async_handler &asyncHandler,
-                 const property_list &propList = {});
+  explicit queue(const context& syclContext, const device& syclDevice,
+                 const async_handler& asyncHandler,
+                 const property_list& propList = {});
 
   //  explicit queue(cl_command_queue clQueue, const context &syclContext,
   //                 const async_handler &asyncHandler = {});
@@ -70,10 +70,12 @@ public:
 
   template <typename T> event submit(T cgf) {
     try {
-      handler command_group_handler(bind_device, counter, ctx);
+      handler command_group_handler(counter, ctx,
+                                    ctx.get_context_info(bind_device));
       cgf(command_group_handler);
-    } catch (std::exception& e) {
-      PRINT_ERR("%s",e.what());
+    }
+    catch (std::exception& e) {
+      PRINT_ERR("%s", e.what());
       throw;
     }
     catch (...) {
@@ -83,7 +85,7 @@ public:
     return event();
   }
 
-  template <typename T> event submit(T cgf, const queue &secondaryQueue);
+  template <typename T> event submit(T cgf, const queue& secondaryQueue);
 
   void wait() { counter->wait(); }
 

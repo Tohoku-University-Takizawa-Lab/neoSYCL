@@ -4,7 +4,6 @@
 #include "neoSYCL/sycl/info/param_traits.hpp"
 #include "neoSYCL/sycl/detail/platform_info.hpp"
 #include "neoSYCL/sycl/detail/device_type.hpp"
-#include "neoSYCL/sycl/detail/task_handler.hpp"
 
 namespace neosycl::sycl {
 

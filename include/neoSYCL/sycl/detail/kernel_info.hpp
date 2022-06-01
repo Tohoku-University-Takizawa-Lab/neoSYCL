@@ -1,8 +1,6 @@
-#ifndef SYCL_INCLUDE_CL_SYCL_KERNEL_KERNEL_HPP_
-#define SYCL_INCLUDE_CL_SYCL_KERNEL_KERNEL_HPP_
-
+#pragma once
 #include <utility>
-#include "neoSYCL/sycl/detail/accessor_info.hpp"
+//#include "neoSYCL/sycl/detail/accessor_info.hpp"
 #include <dlfcn.h>
 
 namespace neosycl::sycl::detail {
@@ -29,4 +27,3 @@ struct kernel_info_cpu : public kernel_info {
 
 } // namespace neosycl::sycl::detail
 
-#endif // SYCL_INCLUDE_CL_SYCL_KERNEL_KERNEL_HPP_

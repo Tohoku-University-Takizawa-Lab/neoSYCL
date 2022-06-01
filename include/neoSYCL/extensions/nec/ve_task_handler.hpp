@@ -1,10 +1,9 @@
-#ifndef NEOSYCL_INCLUDE_NEOSYCL_EXTENSIONS_NEC_VE_TASK_HANDLER_HPP
-#define NEOSYCL_INCLUDE_NEOSYCL_EXTENSIONS_NEC_VE_TASK_HANDLER_HPP
+#pragma once
 
 namespace neosycl::sycl::extensions::nec {
 class task_handler_ve : public detail::task_handler {
   struct buf_info {
-    container_type buf;
+    container_ptr buf;
     uint64_t ptr;
     bool updated;
   };
@@ -16,12 +15,12 @@ public:
   }
   ~task_handler_ve() { veo_args_free(argp_); }
 
-  void run(shared_ptr_class<kernel> k) override {
-    DEBUG_INFO("run(): %s", k->get_name());
+  void run(kernel k) override {
+    DEBUG_INFO("run(): %s", k.get_name());
     call_kernel_func(k);
   }
 
-  kernel* create_kernel(const char* s) override {
+  kernel create_kernel(const char* s) override {
     kernel_info_ve* ki = new kernel_info_ve(s);
 
     std::string oname = std::string("__") + s + "_obj__";
@@ -33,14 +32,14 @@ public:
       PRINT_ERR("veo_get_sym() failed: %s", s);
       throw exception("create_kernel() failed");
     }
-    return new kernel(ki);
+    return kernel(ki);
   }
 
-  void set_capture(shared_ptr_class<kernel> k, void* p, size_t sz) override {
-    DEBUG_INFO("set capture: %s %lx %lx", k->get_name(), (size_t)proc_.ve_proc,
+  void set_capture(kernel& k, void* p, size_t sz) override {
+    DEBUG_INFO("set capture: %s %lx %lx", k.get_name(), (size_t)proc_.ve_proc,
                (size_t)proc_.handle);
 
-    kernel::info_type ki = k->get_kernel_info();
+    kernel::info_type ki = k.get_kernel_info();
     shared_ptr_class<kernel_info_ve> kiv =
         std::dynamic_pointer_cast<kernel_info_ve>(ki);
     if (kiv == nullptr) {
@@ -52,25 +51,25 @@ public:
                sz);
     int rt = veo_write_mem(proc_.ve_proc, kiv->capt_, p, sz);
     if (rt != VEO_COMMAND_OK) {
-      PRINT_ERR("veo_write_mem() failed: %s %d", k->get_name(), rt);
+      PRINT_ERR("veo_write_mem() failed: %s %d", k.get_name(), rt);
       throw exception("setup_capture() failed");
     }
   }
 
-  void set_range(shared_ptr_class<kernel> k, size_t r[6]) {
-    kernel::info_type ki = k->get_kernel_info();
+  void set_range(kernel& k, size_t r[6]) {
+    kernel::info_type ki = k.get_kernel_info();
     shared_ptr_class<kernel_info_ve> kiv =
         std::dynamic_pointer_cast<kernel_info_ve>(ki);
     if (kiv == nullptr) {
       PRINT_ERR("invalid kernel_info: %lx", (size_t)ki.get());
       throw exception("set_range() failed");
     }
-    DEBUG_INFO("range : %s %lu %lu %lu", k->get_name(), r[0], r[1], r[2]);
-    DEBUG_INFO("offset: %s %lu %lu %lu", k->get_name(), r[3], r[4], r[5]);
+    DEBUG_INFO("range : %s %lu %lu %lu", k.get_name(), r[0], r[1], r[2]);
+    DEBUG_INFO("offset: %s %lu %lu %lu", k.get_name(), r[3], r[4], r[5]);
 
     if (kiv->rnge_ == 0) {
       // this is the first call and the pointer is not set yet.
-      std::string rname = std::string("__") + k->get_name() + "_range__";
+      std::string rname = std::string("__") + k.get_name() + "_range__";
 
       kiv->rnge_ = veo_get_sym(proc_.ve_proc, proc_.handle, rname.c_str());
       if (kiv->rnge_ == 0) {
@@ -81,7 +80,7 @@ public:
 
     int rt = veo_write_mem(proc_.ve_proc, kiv->rnge_, r, sizeof(size_t) * 6);
     if (rt != VEO_COMMAND_OK) {
-      PRINT_ERR("veo_write_mem() failed: %s", k->get_name());
+      PRINT_ERR("veo_write_mem() failed: %s", k.get_name());
       throw exception("setup_range() failed");
     }
   }
@@ -96,37 +95,37 @@ public:
   }
 
 #if 0
-  void single_task(shared_ptr_class<kernel> k,
+  void single_task(kernel& k,
                    const std::function<void(void)>& func) override {
-    DEBUG_INFO("single_task(): %s", k->get_name());
+    DEBUG_INFO("single_task(): %s", k.get_name());
     call_kernel_func(k);
   }
 
   void parallel_for_1d(shared_ptr_class<kernel> k, range<1> r,
                        const std::function<void(id<1>)>& func,
                        id<1> offset) override {
-    DEBUG_INFO("parallel_for_1d(): %s", k->get_name());
+    DEBUG_INFO("parallel_for_1d(): %s", k.get_name());
     call_kernel_func(k);
   }
 
   void parallel_for_2d(shared_ptr_class<kernel> k, range<2> r,
                        const std::function<void(id<2>)>& func,
                        id<2> offset) override {
-    DEBUG_INFO("parallel_for_2d(): %s", k->get_name());
+    DEBUG_INFO("parallel_for_2d(): %s", k.get_name());
     call_kernel_func(k);
   }
 
   void parallel_for_3d(shared_ptr_class<kernel> k, range<3> r,
                        const std::function<void(id<3>)>& func,
                        id<3> offset) override {
-    DEBUG_INFO("parallel_for_3d(): %s", k->get_name());
+    DEBUG_INFO("parallel_for_3d(): %s", k.get_name());
     call_kernel_func(k);
   }
 #endif
 
   detail::SUPPORT_PLATFORM_TYPE type() override { return detail::VE; }
 
-  int find_buf(container_type d) {
+  int find_buf(container_ptr d) {
     for (size_t j = 0; j < bufs_.size(); j++) {
       if (d->get_raw_ptr() == bufs_[j].buf->get_raw_ptr()) {
         return j;
@@ -141,7 +140,7 @@ public:
     }
   }
 
-  void free_mem(container_type d) override {
+  void free_mem(container_ptr d) override {
     int index = find_buf(d);
     if (index < 0)
       return;
@@ -156,7 +155,7 @@ public:
     bufs_.erase(bufs_.begin() + index);
   }
 
-  void* alloc_mem(container_type d,
+  void* alloc_mem(container_ptr d,
                   access::mode mode = access::mode::read) override {
     int index          = find_buf(d);
     bool to_be_updated = (mode != access::mode::read);
@@ -196,7 +195,7 @@ public:
     return reinterpret_cast<void*>(bi.ptr);
   }
 
-  void* get_pointer(container_type d) override {
+  void* get_pointer(container_ptr d) override {
     int index = find_buf(d);
     if (index < 0)
       return nullptr;
@@ -233,8 +232,8 @@ private:
   buffer_type bufs_;
   struct veo_args* argp_;
 
-  void call_kernel_func(shared_ptr_class<kernel> k) {
-    kernel::info_type ki = k->get_kernel_info();
+  void call_kernel_func(kernel& k) {
+    kernel::info_type ki = k.get_kernel_info();
     shared_ptr_class<kernel_info_ve> kiv =
         std::dynamic_pointer_cast<kernel_info_ve>(ki);
     if (kiv == nullptr) {
@@ -242,7 +241,7 @@ private:
       throw exception("set_capture() failed");
     }
 
-    for (const detail::accessor_info& acc : k->get_acc()) {
+    for (const detail::accessor_info& acc : k.get_acc()) {
       acc.acquire_access();
       alloc_mem(acc.container, acc.mode);
     }
@@ -257,11 +256,10 @@ private:
     catch (exception& e) {
       PRINT_ERR("kernel execution failed: %s", e.what());
     }
-    for (const detail::accessor_info& acc : k->get_acc()) {
+    for (const detail::accessor_info& acc : k.get_acc()) {
       acc.release_access();
     }
   }
 };
 
 } // namespace neosycl::sycl::extensions::nec
-#endif // NEOSYCL_INCLUDE_NEOSYCL_EXTENSIONS_NEC_VE_TASK_HANDLER_HPP

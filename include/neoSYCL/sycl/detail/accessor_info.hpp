@@ -6,9 +6,9 @@
 namespace neosycl::sycl::detail {
 
 struct accessor_info {
-  using container_type = std::shared_ptr<detail::container::DataContainer>;
+  using container_ptr = shared_ptr_class<detail::container::DataContainer>;
 
-  accessor_info(container_type arg, access::mode mode)
+  accessor_info(container_ptr arg, access::mode mode)
       : container(std::move(arg)), mode(mode) {}
 
   void acquire_access() const {
@@ -35,7 +35,7 @@ struct accessor_info {
     }
   }
 
-  container_type container;
+  container_ptr container;
   access::mode mode;
 };
 

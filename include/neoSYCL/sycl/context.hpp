@@ -1,21 +1,30 @@
-#ifndef CUSTOM_SYCL_INCLUDE_SYCL_CONTEXT_HPP_
-#define CUSTOM_SYCL_INCLUDE_SYCL_CONTEXT_HPP_
+#pragma once
 
 #include "neoSYCL/sycl/info/context.hpp"
 #include "neoSYCL/sycl/detail/context_info.hpp"
 
 namespace neosycl::sycl {
+namespace detail {
+class backend {
+public:
+  vector_class<device> dev_;
+  vector_class<shared_ptr_class<context_info>> cinfo_;
+};
+} // namespace detail
 
 class context {
+  using container_ptr = detail::accessor_info::container_ptr;
 
 public:
-  explicit context(const property_list& propList = {}) { init(device()); }
+  explicit context(const property_list& propList = {}) { init({}); }
 
   ~context() = default;
 
   context(async_handler asyncHandler, const property_list& propList = {});
 
-  context(const device& dev, const property_list& propList = {}) { init(dev); }
+  context(const device& dev, const property_list& propList = {}) {
+    init({dev});
+  }
 
   context(const device& dev, async_handler asyncHandler,
           const property_list& propList = {});
@@ -37,17 +46,30 @@ public:
   typename info::param_traits<info::context, param>::return_type
   get_info() const;
 
-  detail::context_info* get_context_info() { return ctx_info.get(); }
-
-private:
-  void init(const device& dev) {
-    ctx_info =
-        shared_ptr_class<detail::context_info>(dev.create_context_info());
+  detail::context_info* get_context_info(device d) {
+    for (size_t i(0); i < impl_->dev_.size(); i++)
+      if (impl_->dev_[i] == d)
+        return impl_->cinfo_[i].get();
+    DEBUG_INFO("device not found");
+    return nullptr;
   }
 
-  shared_ptr_class<detail::context_info> ctx_info;
+  void free_mem_(container_ptr c) {
+    for (auto& ci : impl_->cinfo_)
+      ci->free_mem(c);
+  }
+
+private:
+  void init(vector_class<device> dev) {
+    impl_ = shared_ptr_class<detail::backend>(new detail::backend());
+    for (size_t i(0); i < dev.size(); i++) {
+      impl_->dev_.push_back(dev[i]);
+      shared_ptr_class<detail::context_info> p(dev[i].create_context_info());
+      impl_->cinfo_.push_back(p);
+    }
+  }
+
+  shared_ptr_class<detail::backend> impl_;
 };
 
 } // namespace neosycl::sycl
-
-#endif // CUSTOM_SYCL_INCLUDE_SYCL_CONTEXT_HPP_
