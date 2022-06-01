@@ -24,7 +24,7 @@ inline string_class get_kernel_name_from_class(const std::type_info& ti) {
 
 class context_info {
 protected:
-  context_info(device d) : bound_device(d) {}
+  context_info(device d) : bound_device(d), task_handler(nullptr) {}
   using container_ptr = detail::accessor_info::container_ptr;
 
 public:
@@ -49,7 +49,7 @@ public:
 
     if (kernels_.count(tinfo.hash_code())) {
       DEBUG_INFO("kernel found: %s",
-                 kernels_.at(tinfo.hash_code())->get_name());
+                 kernels_.at(tinfo.hash_code()).get_name());
       return kernels_.at(tinfo.hash_code());
     }
 
@@ -61,6 +61,12 @@ public:
     return k;
   }
 
+  virtual bool open()     = 0;
+
+  bool is_valid() {
+    return task_handler.get() != nullptr;
+  }
+
   device bound_device;
   task_handler_ptr task_handler;
   kernel_map kernels_; // all exiting kernels in the context
@@ -70,17 +76,24 @@ class cpu_context_info : public context_info {
   void* dll_;
 
 public:
-  cpu_context_info(device d) : context_info(d) {
+  cpu_context_info(device d) : context_info(d), dll_(nullptr) { open(); }
+
+  ~cpu_context_info() {
+    if (dll_)
+      dlclose(dll_);
+  }
+
+  bool open() {
     const char* env = getenv(ENV_KERNEL);
     string_class fn(env ? env : DEFAULT_LIB);
     dll_ = dlopen(fn.c_str(), RTLD_LAZY);
     if (!dll_) {
-      PRINT_ERR("dlopen failed: %s", dlerror());
-      throw exception("cpu_context_info() failed");
+      DEBUG_INFO("dlopen failed: %s", dlerror());
+      return false;
     }
     DEBUG_INFO("kernel lib loaded: %lx, %s", (size_t)dll_, fn.c_str());
     task_handler = task_handler_ptr(new task_handler_cpu(dll_));
+    return true;
   }
-  ~cpu_context_info() { dlclose(dll_); }
 };
 } // namespace neosycl::sycl::detail

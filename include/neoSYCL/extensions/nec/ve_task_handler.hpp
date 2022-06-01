@@ -10,9 +10,7 @@ class task_handler_ve : public detail::task_handler {
   using buffer_type = std::vector<struct buf_info>;
 
 public:
-  task_handler_ve(const VEProc& p, const VEContext& c) : proc_(p), ctx_(c) {
-    argp_ = alloc_veo_args();
-  }
+  task_handler_ve(const ve_context& c) : ctx_(c) { argp_ = alloc_veo_args(); }
   ~task_handler_ve() { veo_args_free(argp_); }
 
   void run(kernel k) override {
@@ -25,8 +23,8 @@ public:
 
     std::string oname = std::string("__") + s + "_obj__";
 
-    ki->func_ = veo_get_sym(proc_.ve_proc, proc_.handle, s);
-    ki->capt_ = veo_get_sym(proc_.ve_proc, proc_.handle, oname.c_str());
+    ki->func_ = veo_get_sym(ctx_.ve_proc, ctx_.handle, s);
+    ki->capt_ = veo_get_sym(ctx_.ve_proc, ctx_.handle, oname.c_str());
 
     if (ki->func_ == 0 || ki->capt_ == 0) {
       PRINT_ERR("veo_get_sym() failed: %s", s);
@@ -36,8 +34,8 @@ public:
   }
 
   void set_capture(kernel& k, void* p, size_t sz) override {
-    DEBUG_INFO("set capture: %s %lx %lx", k.get_name(), (size_t)proc_.ve_proc,
-               (size_t)proc_.handle);
+    DEBUG_INFO("set capture: %s %lx %lx", k.get_name(), (size_t)ctx_.ve_proc,
+               (size_t)ctx_.handle);
 
     kernel::info_type ki = k.get_kernel_info();
     shared_ptr_class<kernel_info_ve> kiv =
@@ -47,9 +45,8 @@ public:
       throw exception("set_capture() failed");
     }
 
-    DEBUG_INFO("set capture: %lx %lx %lx", (size_t)proc_.ve_proc, (size_t)p,
-               sz);
-    int rt = veo_write_mem(proc_.ve_proc, kiv->capt_, p, sz);
+    DEBUG_INFO("set capture: %lx %lx %lx", (size_t)ctx_.ve_proc, (size_t)p, sz);
+    int rt = veo_write_mem(ctx_.ve_proc, kiv->capt_, p, sz);
     if (rt != VEO_COMMAND_OK) {
       PRINT_ERR("veo_write_mem() failed: %s %d", k.get_name(), rt);
       throw exception("setup_capture() failed");
@@ -71,14 +68,14 @@ public:
       // this is the first call and the pointer is not set yet.
       std::string rname = std::string("__") + k.get_name() + "_range__";
 
-      kiv->rnge_ = veo_get_sym(proc_.ve_proc, proc_.handle, rname.c_str());
+      kiv->rnge_ = veo_get_sym(ctx_.ve_proc, ctx_.handle, rname.c_str());
       if (kiv->rnge_ == 0) {
         PRINT_ERR("veo_get_sym() failed: %s", rname.c_str());
         throw exception("set_range() failed");
       }
     }
 
-    int rt = veo_write_mem(proc_.ve_proc, kiv->rnge_, r, sizeof(size_t) * 6);
+    int rt = veo_write_mem(ctx_.ve_proc, kiv->rnge_, r, sizeof(size_t) * 6);
     if (rt != VEO_COMMAND_OK) {
       PRINT_ERR("veo_write_mem() failed: %s", k.get_name());
       throw exception("setup_range() failed");
@@ -147,7 +144,7 @@ public:
     copy_back(bufs_[index]);
     uint64_t device_ptr = bufs_[index].ptr;
 
-    int rt = veo_free_mem(proc_.ve_proc, device_ptr);
+    int rt = veo_free_mem(ctx_.ve_proc, device_ptr);
     if (rt != VEO_COMMAND_OK) {
       PRINT_ERR("veo_free_mem() failed: return code=%d", rt);
       throw exception("free_mem() failed");
@@ -168,7 +165,7 @@ public:
     size_t size_in_byte = d->get_size();
     uint64_t ve_addr_int;
 
-    int rt = veo_alloc_mem(proc_.ve_proc, &ve_addr_int, size_in_byte);
+    int rt = veo_alloc_mem(ctx_.ve_proc, &ve_addr_int, size_in_byte);
     if (rt != VEO_COMMAND_OK) {
       PRINT_ERR("veo_alloc_mem() failed: return code=%d", rt);
       throw exception("alloc_mem() failed");
@@ -184,7 +181,7 @@ public:
       DEBUG_INFO("memory copy (h2v): "
                  "vaddr=%lx, haddr=%lx, size=%lu",
                  (size_t)ve_addr_int, (size_t)d->get_raw_ptr(), size_in_byte);
-      rt = veo_write_mem(proc_.ve_proc, ve_addr_int, d->get_raw_ptr(),
+      rt = veo_write_mem(ctx_.ve_proc, ve_addr_int, d->get_raw_ptr(),
                          size_in_byte);
       if (rt != VEO_COMMAND_OK) {
         PRINT_ERR("veo_write_mem() failed");
@@ -211,7 +208,7 @@ public:
                  (size_t)device_ptr, (size_t)bi.buf->get_raw_ptr(),
                  size_in_byte);
       // do copy
-      int rt = veo_read_mem(proc_.ve_proc, bi.buf->get_raw_ptr(), device_ptr,
+      int rt = veo_read_mem(ctx_.ve_proc, bi.buf->get_raw_ptr(), device_ptr,
                             size_in_byte);
       if (rt != veo_command_state::VEO_COMMAND_OK) {
         PRINT_ERR("veo_read_mem() failed");
@@ -227,8 +224,9 @@ public:
   }
 
 private:
-  VEProc proc_;
-  VEContext ctx_;
+  // VEProc proc_;
+  // VEContext ctx_;
+  ve_context ctx_;
   buffer_type bufs_;
   struct veo_args* argp_;
 

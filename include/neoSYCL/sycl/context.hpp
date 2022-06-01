@@ -63,9 +63,17 @@ private:
   void init(vector_class<device> dev) {
     impl_ = shared_ptr_class<detail::backend>(new detail::backend());
     for (size_t i(0); i < dev.size(); i++) {
-      impl_->dev_.push_back(dev[i]);
-      shared_ptr_class<detail::context_info> p(dev[i].create_context_info());
-      impl_->cinfo_.push_back(p);
+      detail::context_info* p = dev[i].create_context_info();
+      if (p && p->is_valid()) {
+        impl_->dev_.push_back(dev[i]);
+        impl_->cinfo_.push_back(shared_ptr_class<detail::context_info>(p));
+      }
+      else if (p)
+        delete p;
+    }
+    if (dev.size() > 0 && impl_->dev_.size() == 0) {
+      DEBUG_INFO("no available device found");
+      throw sycl::runtime_error("no available device found");
     }
   }
 
