@@ -155,6 +155,7 @@ public:
   get_access(handler& commandGroupHandler) {
     accessor<T, dimensions, mode, target> acc(*this);
     commandGroupHandler.alloc_mem_(acc);
+    ctx_ = commandGroupHandler.get_context();
     return acc;
   }
 
@@ -171,6 +172,7 @@ public:
     accessor<T, dimensions, mode, target> acc(*this, commandGroupHandler,
                                               accessRange, accessOffset);
     commandGroupHandler.alloc_mem_(acc);
+    ctx_ = commandGroupHandler.get_context();
     return acc;
   }
 
@@ -208,6 +210,7 @@ private:
   range<dimensions> bufferRange;
   std::shared_ptr<container_type> data;
   context ctx_;
+  std::map<device, void*> map_;
 };
 
 template <typename Ty, size_t D, typename A>

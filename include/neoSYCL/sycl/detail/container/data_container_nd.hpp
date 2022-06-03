@@ -145,9 +145,11 @@ public:
  * @tparam T DataType
  * @tparam dimensions Buffer dimensions
  */
-template <typename T, size_t dimensions> struct AccessProxyND {};
+template <typename T, size_t dimensions>
+struct AccessProxyND {};
 
-template <typename T> struct AccessProxyND<T, 3> {
+template <typename T>
+struct AccessProxyND<T, 3> {
   AccessProxyND(const ArrayND<3>& r, T* ptr) : range(r), base_ptr(ptr) {}
 
   T* operator[](size_t i) const {

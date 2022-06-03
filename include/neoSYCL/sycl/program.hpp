@@ -1,29 +1,37 @@
-#ifndef NEOSYCL_INCLUDE_NEOSYCL_SYCL_PROGRAM_HPP_
-#define NEOSYCL_INCLUDE_NEOSYCL_SYCL_PROGRAM_HPP_
+#pragma once
 
-#include "neoSYCL/sycl/property_list.hpp"
+//#include "neoSYCL/sycl/property_list.hpp"
 #include "neoSYCL/sycl/info/program.hpp"
 
 namespace neosycl::sycl {
 
-class kernel;
+namespace detail {
+class program_impl;
+class program_data;
+}; // namespace detail
 
 enum class program_state { none, compiled, linked };
 
 class program {
 public:
+  using data = detail::program_data;
+
   program() = delete;
 
-  explicit program(const context &context, const property_list &propList = {});
+  explicit program(const context& context, const property_list& propList = {}) {
+    init_(context, context.get_devices());
+  }
 
-  program(const context &context, vector_class<device> deviceList,
-          const property_list &propList = {});
+  program(const context& context, vector_class<device> deviceList,
+          const property_list& propList = {}) {
+    init_(context, deviceList);
+  }
 
-  program(vector_class<program> &programList,
-          const property_list &propList = {});
+  program(vector_class<program>& programList,
+          const property_list& propList = {});
 
-  program(vector_class<program> &programList, string_class linkOptions,
-          const property_list &propList = {});
+  program(vector_class<program>& programList, string_class linkOptions,
+          const property_list& propList = {});
 
   //  program(const context &context, cl_program clProgram);
 
@@ -44,13 +52,13 @@ public:
 
   void link(string_class linkOptions = "");
 
-  //  template<typename kernelT>
-  //  bool has_kernel<kernelT>() const;
+  template <typename kernelT>
+  bool has_kernel() const;
 
   bool has_kernel(string_class kernelName) const;
 
-  //  template<typename kernelT>
-  //  kernel get_kernel<kernelT>() const;
+  template <typename kernelT>
+  kernel get_kernel() const;
 
   kernel get_kernel(string_class kernelName) const;
 
@@ -71,8 +79,11 @@ public:
   string_class get_build_options() const;
 
   program_state get_state() const;
+
+private:
+  shared_ptr_class<detail::program_impl> impl_;
+
+  void init_(context c, vector_class<device> deviceList);
 };
 
 } // namespace neosycl::sycl
-
-#endif // NEOSYCL_INCLUDE_NEOSYCL_SYCL_PROGRAM_HPP_

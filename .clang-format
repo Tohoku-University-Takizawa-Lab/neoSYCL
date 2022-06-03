@@ -2,7 +2,7 @@ BasedOnStyle: LLVM
 Language: Cpp
 AlignConsecutiveAssignments: Consecutive
 AlignTrailingComments: true
-AlwaysBreakTemplateDeclarations: MultiLine
+AlwaysBreakTemplateDeclarations: Yes
 BreakBeforeBraces: Custom
 BraceWrapping:
   AfterClass:      false

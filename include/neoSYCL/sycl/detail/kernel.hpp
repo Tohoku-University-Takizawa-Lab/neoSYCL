@@ -1,16 +1,61 @@
-#ifndef SYCL_INCLUDE_CL_SYCL_KERNEL_KERNEL_HPP_
-#define SYCL_INCLUDE_CL_SYCL_KERNEL_KERNEL_HPP_
-
+#pragma once
 #include <utility>
-#include "neoSYCL/sycl/detail/accessor_info.hpp"
+#include <dlfcn.h>
+#include <map>
 
-namespace neosycl::sycl::detail {
+namespace neosycl::sycl {
 
-struct kernel {
-  vector_class<accessor_info> args;
-  string_class name;
+namespace detail {
+
+class kernel_data {
+public:
+  kernel_data()          = default;
+  virtual ~kernel_data() = default;
 };
 
-} // namespace neosycl::sycl::detail
+class kernel_impl {
+  friend class program_impl;
+  friend class kernel;
 
-#endif // SYCL_INCLUDE_CL_SYCL_KERNEL_KERNEL_HPP_
+public:
+  using kernel_data_map =
+      std::map<info::device_type, shared_ptr_class<kernel_data>>;
+
+  kernel_impl(string_class n, program p) : name(n), prog(p) {}
+  virtual ~kernel_impl() = default;
+
+  string_class name;
+  program prog;
+  kernel_data_map map;
+};
+
+class kernel_data_cpu : public kernel_data {
+public:
+  void* dll_;
+  int (*func_)();
+  void* capt_;
+  void* rnge_;
+
+  kernel_data_cpu() : kernel_data() {
+    dll_  = nullptr;
+    func_ = nullptr;
+    capt_ = nullptr;
+    rnge_ = nullptr;
+  }
+};
+
+} // namespace detail
+
+kernel::kernel() : acc_(), impl_(nullptr) {}
+
+kernel::kernel(string_class name, program prog) : acc_(), impl_(nullptr) {
+  impl_ = std::move(shared_ptr_class<detail::kernel_impl>(
+      new detail::kernel_impl(name, prog)));
+}
+
+shared_ptr_class<detail::kernel_data> kernel::get_kernel_data(device d) {
+  return impl_->map.at(d.type());
+}
+
+const char* kernel::get_name() const { return impl_->name.c_str(); }
+} // namespace neosycl::sycl

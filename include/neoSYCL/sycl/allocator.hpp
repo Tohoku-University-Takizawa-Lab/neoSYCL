@@ -3,7 +3,8 @@
 
 namespace neosycl::sycl {
 
-template <typename T> using buffer_allocator = std::allocator<T>;
+template <typename T>
+using buffer_allocator = std::allocator<T>;
 
 }
 

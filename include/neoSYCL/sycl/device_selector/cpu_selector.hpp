@@ -1,7 +1,5 @@
 #pragma once
 
-#include "neoSYCL/sycl/detail/context_info.hpp"
-
 namespace neosycl::sycl {
 
 class cpu_selector : public device_selector {
@@ -22,17 +20,10 @@ public:
         return i;
     }
     throw sycl::runtime_error("no available device found");
-    // return device(new detail::cpu_device_info());
   }
 };
 
 using default_selector = cpu_selector;
 using host_selector    = cpu_selector;
-
-namespace detail {
-context_info* cpu_device_info::create_context_info(device d) const {
-  return new cpu_context_info(d);
-}
-} // namespace detail
 
 } // namespace neosycl::sycl

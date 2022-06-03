@@ -6,7 +6,8 @@
 namespace neosycl::sycl {
 
 // prototype decls
-template <typename T, size_t dimensions, typename AllocatorT> class buffer;
+template <typename T, size_t dimensions, typename AllocatorT>
+class buffer;
 class handler;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -289,7 +290,7 @@ public:
   void* get_pointer() const;
 
 private:
-  std::shared_ptr<detail::container::DataContainerND<dataT, dimensions>> data;
+  std::shared_ptr<container_type> data;
   range<dimensions> accessRange;
   id<dimensions> accessOffset;
   void* device_ptr;

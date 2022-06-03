@@ -1,21 +1,20 @@
 #pragma once
 
+#include "neoSYCL/sycl/property_list.hpp"
 #include "neoSYCL/sycl/info/context.hpp"
-#include "neoSYCL/sycl/detail/context_info.hpp"
+//#include "neoSYCL/sycl/detail/context_info.hpp"
 
 namespace neosycl::sycl {
+
 namespace detail {
-class backend {
-public:
-  vector_class<device> dev_;
-  vector_class<shared_ptr_class<context_info>> cinfo_;
-};
-} // namespace detail
+class context_impl;
+}
 
 class context {
-  using container_ptr = detail::accessor_info::container_ptr;
 
 public:
+  using container_ptr = device::container_ptr;
+
   explicit context(const property_list& propList = {}) { init({}); }
 
   ~context() = default;
@@ -40,50 +39,23 @@ public:
   context(const vector_class<device>& deviceList, async_handler asyncHandler,
           const property_list& propList = {});
 
-  //  context(cl_context clContext, async_handler asyncHandler = {});
+  context(cl_context clContext, async_handler asyncHandler = {}) {
+    throw unimplemented();
+  }
 
   template <info::context param>
   typename info::param_traits<info::context, param>::return_type
   get_info() const;
 
-  detail::context_info* get_context_info(device d) {
-    for (size_t i(0); i < impl_->cinfo_.size(); i++) {
-      // assert(impl_->cinfo_[i] != nullptr);
-      if (impl_->cinfo_[i]->bound_device == d)
-        return impl_->cinfo_[i].get();
-    }
-    DEBUG_INFO("context_info not found");
-    return nullptr;
-  }
+  vector_class<device> get_devices() const;
 
-  void free_mem_(container_ptr c) {
-    if (impl_ == nullptr)
-      return;
-    for (auto& ci : impl_->cinfo_)
-      ci->free_mem(c);
-  }
+  // INTERNAL USE: called by buffer::~buffer()
+  void free_mem_(container_ptr c);
 
 private:
-  void init(vector_class<device> dev) {
-    impl_ = nullptr;
-    if (dev.size() == 0)
-      return;
-    impl_ = shared_ptr_class<detail::backend>(new detail::backend());
-    for (size_t i(0); i < dev.size(); i++) {
-      detail::context_info* p = dev[i].create_context_info();
-      if (p && p->is_valid()) {
-        impl_->cinfo_.push_back(shared_ptr_class<detail::context_info>(p));
-      }
-      else if (p)
-        delete p;
-    }
-    if (dev.size() > 0 && impl_->cinfo_.size() == 0) {
-      DEBUG_INFO("no available device found");
-      throw sycl::runtime_error("no available device found");
-    }
-  }
+  void init(vector_class<device>);
 
-  shared_ptr_class<detail::backend> impl_;
+  shared_ptr_class<detail::context_impl> impl_;
 };
 
 } // namespace neosycl::sycl

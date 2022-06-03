@@ -1,11 +1,10 @@
-#ifndef SYCL_INCLUDE_CL_SYCL_ID_HPP_
-#define SYCL_INCLUDE_CL_SYCL_ID_HPP_
-
+#pragma once
 #include "neoSYCL/sycl/detail/container/array_nd.hpp"
 
 namespace neosycl::sycl {
 
-template <std::size_t dimensions = 1> struct id {
+template <std::size_t dimensions = 1>
+struct id {
   id() = default;
 
   template <int D = dimensions, typename = std::enable_if_t<D == 1>>
@@ -17,13 +16,13 @@ template <std::size_t dimensions = 1> struct id {
   template <int D = dimensions, typename = std::enable_if_t<D == 3>>
   id(size_t dim0, size_t dim1, size_t dim2) : data{dim0, dim1, dim2} {}
 
-  id(const range<dimensions> &range) {
+  id(const range<dimensions>& range) {
     for (size_t i = 0; i < dimensions; i++) {
       this->data[i] = range.get(i);
     }
   }
 
-  id(const item<dimensions> &item) {
+  id(const item<dimensions>& item) {
     for (size_t i = 0; i < dimensions; i++) {
       this->data[i] = item[i];
     }
@@ -31,7 +30,7 @@ template <std::size_t dimensions = 1> struct id {
 
   size_t get(int dimension) const { return data[dimension]; }
 
-  size_t &operator[](int dimension) { return data[dimension]; }
+  size_t& operator[](int dimension) { return data[dimension]; }
 
   size_t operator[](int dimension) const { return data[dimension]; }
 
@@ -119,5 +118,3 @@ template <std::size_t dimensions = 1> struct id {
 };
 
 } // namespace neosycl::sycl
-
-#endif // SYCL_INCLUDE_CL_SYCL_ID_HPP_

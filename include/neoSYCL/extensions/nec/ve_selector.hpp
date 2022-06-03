@@ -1,13 +1,14 @@
 #ifndef SYCL_INCLUDE_CL_SYCL_NEC_VE_SELECTOR_HPP_
 #define SYCL_INCLUDE_CL_SYCL_NEC_VE_SELECTOR_HPP_
 
+#if 0
 #include "neoSYCL/extensions/nec/ve_info.hpp"
 #include "neoSYCL/extensions/nec/ve_kernel_info.hpp"
 #include "neoSYCL/extensions/nec/ve_task_handler.hpp"
 #include "neoSYCL/extensions/nec/ve_device_info.hpp"
 #include "neoSYCL/sycl/detail/context_info.hpp"
 #include "neoSYCL/extensions/nec/ve_context_info.hpp"
-
+#endif
 namespace neosycl::sycl {
 
 class ve_selector : public device_selector {
@@ -30,20 +31,13 @@ public:
   }
 };
 
-detail::context_info*
-detail::ve_device_info::create_context_info(device d) const {
-  return new extensions::nec::ve_context_info(d);
-}
-
 #ifdef BUILD_VE
 platform platform::register_all_devices() {
-  device d(new detail::default_device_info());
   // create a platform with the default device at first
-  platform p(new detail::default_platform_info(d));
-
+  initial_platform_builder builder;
+  platform p(builder.create());
   // register all available devices
-  device ve(new detail::ve_device_info(), &p);
-  p.info_->dev_.push_back(ve);
+  builder.add<detail::ve_device_impl>(p);
   return p;
 }
 #endif

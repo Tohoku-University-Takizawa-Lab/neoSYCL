@@ -1,5 +1,4 @@
-#ifndef CUSTOM_SYCL_INCLUDE_SYCL_INFO_PLATFORM_HPP_
-#define CUSTOM_SYCL_INCLUDE_SYCL_INFO_PLATFORM_HPP_
+#pragma once
 
 namespace neosycl::sycl::info {
 
@@ -33,5 +32,3 @@ enum class platform : unsigned int {
 };
 
 } // namespace neosycl::sycl::info
-
-#endif // CUSTOM_SYCL_INCLUDE_SYCL_INFO_PLATFORM_HPP_

@@ -11,59 +11,62 @@
 //#include "neoSYCL/sycl/detail/highlight_func.hpp"
 #include "neoSYCL/sycl/kernel.hpp"
 #include "neoSYCL/sycl/detail/task.hpp"
-#include "neoSYCL/sycl/detail/task_handler.hpp"
+//#include "neoSYCL/sycl/detail/task_handler.hpp"
 #include "neoSYCL/sycl/detail/task_counter.hpp"
 
 namespace neosycl::sycl {
 
 class handler {
-  using handler_type = shared_ptr_class<detail::task_handler>;
   using counter_type = shared_ptr_class<detail::task_counter>;
   using kernel_type  = shared_ptr_class<kernel>;
   // using accessor_list = std::vector<detail::accessor_info>;
 
   friend class queue;
-  explicit handler(counter_type counter, context c, detail::context_info* ci)
-      : counter_(std::move(counter)), kernel_(nullptr), ctx_(c), cinfo_(ci) {}
+  explicit handler(context c, device d, program p, counter_type counter)
+      : ctx_(c), dev_(d), prog_(p), cntr_(std::move(counter)), kernel_() {}
 
 public:
   template <typename KernelName, typename KernelType, size_t dimensions>
-  void run(range<dimensions> r, id<dimensions> o, KernelType kernelFunc) {
-    handler_type task_handler = cinfo_->task_handler;
-    kernel_                   = cinfo_->get_kernel<KernelName>();
+  void run(range<dimensions> kernelRange, id<dimensions> kernelOffset,
+           KernelType kernelFunc) {
+    // handler_type task_handler = cinfo_->task_handler;
+    // kernel_                   = cinfo_->get_kernel<KernelName>();
+    kernel_ = prog_.get_kernel<KernelName>();
     kernel_.get_acc().clear();
-    task_handler->set_range(kernel_, r, o);
+    detail::device_impl* dev = dev_.impl_.get();
+    dev->set_range(kernel_, kernelRange, kernelOffset);
 
     kernelFunc();
 
-    submit_task([h = task_handler, k = kernel_]() { h->run(k); });
+    submit_task([h = dev, k = kernel_]() { h->run(k); });
   }
 
   template <typename KernelName, typename KernelType, size_t dimensions>
-  void run(range<dimensions> r, KernelType kernelFunc) {
-    handler_type task_handler = cinfo_->task_handler;
-    kernel_                   = cinfo_->get_kernel<KernelName>();
+  void run(range<dimensions> kernelRange, KernelType kernelFunc) {
+    kernel_ = prog_.get_kernel<KernelName>();
     kernel_.get_acc().clear();
-    task_handler->set_range(kernel_, r);
+    detail::device_impl* dev = dev_.impl_.get();
+    dev->set_range(kernel_, kernelRange);
 
     kernelFunc();
 
-    submit_task([h = task_handler, k = kernel_]() { h->run(k); });
+    submit_task([h = dev, k = kernel_]() { h->run(k); });
   }
 
   template <typename KernelName, typename KernelType>
   void run(KernelType kernelFunc) {
-    handler_type task_handler = cinfo_->task_handler;
-    kernel_                   = cinfo_->get_kernel<KernelName>();
+    kernel_ = prog_.get_kernel<KernelName>();
     kernel_.get_acc().clear();
+    detail::device_impl* dev = dev_.impl_.get();
 
     kernelFunc();
 
-    submit_task([h = task_handler, k = kernel_]() { h->run(k); });
+    submit_task([h = dev, k = kernel_]() { h->run(k); });
   }
 
-  template <typename KernelName> void copy_capture(KernelName* p) {
-    cinfo_->set_capture(kernel_, p, sizeof(KernelName));
+  template <typename KernelName>
+  void copy_capture(KernelName* p) {
+    dev_.impl_->set_capture(kernel_, p, sizeof(KernelName));
   }
 
   template <typename KernelName, typename KernelType>
@@ -110,13 +113,15 @@ public:
   }
 
   //----- OpenCL interoperability interface //
-  template <typename T> void set_arg(int argIndex, T&& arg);
+  template <typename T>
+  void set_arg(int argIndex, T&& arg);
 
-  template <typename... Ts> void set_args(Ts&&... args);
+  template <typename... Ts>
+  void set_args(Ts&&... args);
 
   template <typename T, size_t D, access::mode m, access::target t>
   void require(sycl::accessor<T, D, m, t, access::placeholder::true_t> acc) {
-    cinfo_->alloc_mem(acc.data, m);
+    dev_.impl_->alloc_mem(acc.data, m);
     // acc.handler_ = this;
     // acc_.push_back(detail::accessor_info(acc, m));
   }
@@ -126,18 +131,19 @@ public:
   T* get_pointer(sycl::accessor<T, D, m, t, p> acc) {
     if (acc.device_ptr)
       return (T*)acc.device_ptr;
-    return (T*)cinfo_->get_pointer(acc.data);
+    return (T*)dev_.impl_->get_pointer(acc.data);
   }
 
   template <typename T, size_t D, access::mode m, access::target t,
             access::placeholder p>
   void* alloc_mem_(sycl::accessor<T, D, m, t, p>& acc) {
-    void* dp = cinfo_->alloc_mem(acc.data, m);
+    void* dp = dev_.impl_->alloc_mem(acc.data, m);
     if (dp) // a memory region is newly allocated
       acc.device_ptr = dp;
     return dp;
   }
-  // context& get_context() { return ctx_; }
+
+  context& get_context() { return ctx_; }
 
   // accessor_list& get_acc_() { return acc_; }
 
@@ -159,16 +165,18 @@ public:
   }
 
 private:
-  // device bind_device_;
-  counter_type counter_;
-  kernel kernel_;
   context ctx_;
-  detail::context_info* cinfo_;
+  device dev_;
+  program prog_;
+  counter_type cntr_;
+  kernel kernel_;
+  // detail::context_info* cinfo_;
   // accessor_list acc_;
 
-  template <typename Func> void submit_task(Func func) {
-    counter_->incr();
-    std::thread t([f = func, c = counter_]() {
+  template <typename Func>
+  void submit_task(Func func) {
+    cntr_->incr();
+    std::thread t([f = func, c = cntr_]() {
       try {
         f();
       }

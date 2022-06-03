@@ -1,12 +1,10 @@
-#ifndef SYCL_INCLUDE_CL_SYCL_ACCESSOR_INFO_HPP_
-#define SYCL_INCLUDE_CL_SYCL_ACCESSOR_INFO_HPP_
+#pragma once
 #include "neoSYCL/sycl/detail/container/data_container.hpp"
-#include "neoSYCL/sycl/access.hpp"
 
 namespace neosycl::sycl::detail {
 
 struct accessor_info {
-  using container_ptr = shared_ptr_class<detail::container::DataContainer>;
+  using container_ptr = sycl::device::container_ptr;
 
   accessor_info(container_ptr arg, access::mode mode)
       : container(std::move(arg)), mode(mode) {}
@@ -40,5 +38,3 @@ struct accessor_info {
 };
 
 } // namespace neosycl::sycl::detail
-
-#endif // SYCL_INCLUDE_CL_SYCL_ACCESSOR_INFO_HPP_

@@ -1,18 +1,22 @@
 #pragma once
-
-#include "neoSYCL/sycl/info/device_type.hpp"
-#include "neoSYCL/sycl/info/device.hpp"
-#include "neoSYCL/sycl/info/param_traits.hpp"
-#include "neoSYCL/sycl/detail/device_info.hpp"
+#include "neoSYCL/sycl/detail/container/data_container.hpp"
 
 namespace neosycl::sycl {
+
+namespace detail {
+class device_impl;
+class program_data;
+} // namespace detail
 
 class device {
   friend class handler;
   friend class context;
   friend class platform;
+  friend class initial_platform_builder;
 
 public:
+  using container_ptr = shared_ptr_class<detail::container::DataContainer>;
+
   device(const device& rhs) = default;
   device(device&& rhs)      = default;
   ~device()                 = default;
@@ -23,35 +27,29 @@ public:
   friend bool operator==(const device& lhs, const device& rhs);
   friend bool operator!=(const device& lhs, const device& rhs);
 
-  device() : info_(nullptr), plt_(nullptr) {
-    *this = platform::get_default_platform().get_devices()[0];
+  explicit device() : impl_(nullptr), plt_() {
+    DEBUG_INFO("empty device created");
   }
 
-  explicit device(detail::device_info* info, platform* p = nullptr)
-      : info_(info), plt_(nullptr) {
-    if (p != nullptr)
-      plt_ = *p;
-  }
-
-  explicit device(cl_device_id deviceId) : info_(nullptr), plt_(nullptr) {
+  explicit device(cl_device_id deviceId) {
     throw feature_not_supported("OpenCL interop not supported.");
   }
 
   explicit device(const device_selector& deviceSelector)
-      : info_(nullptr), plt_(nullptr) {
+      : impl_(nullptr), plt_() {
     *this = deviceSelector.select_device();
   }
 
   /* -- common interface members -- */
   //  cl_device_id get() const;
 
-  bool is_host() const { return info_->is_host(); }
+  bool is_host() const;
 
-  bool is_cpu() const { return info_->is_cpu(); }
+  bool is_cpu() const;
 
-  bool is_gpu() const { return info_->is_gpu(); }
+  bool is_gpu() const;
 
-  bool is_accelerator() const { return info_->is_accelerator(); }
+  bool is_accelerator() const;
 
   platform get_platform() const { return plt_; }
 
@@ -82,63 +80,31 @@ public:
   create_sub_devices(info::affinity_domain affinityDomain) const;
 #endif
 
-  info::device_type type() const { return info_->type(); }
+  static device get_default_device();
 
-  detail::context_info* create_context_info() const {
-    return info_->create_context_info(*this);
-  }
+  // INTERNAL USE ONLY
+  info::device_type type() const;
+  detail::program_data* create_program() const;
+  shared_ptr_class<detail::device_impl> get_impl() const { return impl_; }
+
 private:
+  // INTERNAL USE ONLY
   void set_platform(platform p) { plt_ = p; }
+  explicit device(detail::device_impl* impl, platform* p = nullptr)
+      : impl_(impl), plt_() {
+    if (impl == nullptr) {
+      *this = platform::get_default_platform().get_devices()[0];
+    }
+    else if (p != nullptr)
+      plt_ = *p;
+  }
 
-  shared_ptr_class<detail::device_info> info_;
+  shared_ptr_class<detail::device_impl> impl_;
   platform plt_;
 };
 
 bool operator==(const device& lhs, const device& rhs) {
-  return (lhs.info_ == rhs.info_ && lhs.plt_ == rhs.plt_);
+  return (lhs.impl_ == rhs.impl_ && lhs.plt_ == rhs.plt_);
 }
 bool operator!=(const device& lhs, const device& rhs) { return !(lhs == rhs); }
-
-vector_class<device> platform::get_devices(info::device_type t) const {
-  vector_class<device> ret;
-  for (const device& dev : info_->list_devices()) {
-    if (t == info::device_type::all || t == dev.type())
-      ret.push_back(dev);
-  }
-  return ret;
-}
-
-platform::platform(const device_selector& deviceSelector) {
-  device d = deviceSelector.select_device();
-  info_    = shared_ptr_class<detail::platform_info>(
-      new detail::host_platform_info(d));
-  for (auto& dev : info_->dev_)
-    dev.set_platform(*this);
-}
-
-platform::platform(detail::platform_info* info) : info_(info) {
-  /* do nothing if info == null */
-  if (info) {
-    for (auto& dev : info_->dev_)
-      dev.set_platform(*this);
-  }
-}
-
-#ifndef BUILD_VE
-// See also extensions/nec/ve_selector.hpp
-platform platform::register_all_devices() {
-  device d(new detail::default_device_info());
-  // create a platform with the defaut device at first
-  platform p(new detail::default_platform_info(d));
-  // register all available devices
-  return p;
-}
-#endif
-
-namespace detail {
-/* platform with a single device */
-platform_info::platform_info(device d) : dev_() { dev_.push_back(d); }
-host_platform_info::host_platform_info(device d) : platform_info(d) {}
-} // namespace detail
-
 } // namespace neosycl::sycl

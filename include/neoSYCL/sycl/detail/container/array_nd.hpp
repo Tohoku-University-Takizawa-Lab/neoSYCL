@@ -2,8 +2,8 @@
 #define NEOSYCL_INCLUDE_NEOSYCL_SYCL_BUFFER_ARRAY_ND_HPP_
 
 #define DEFINE_ARRAY_ND_OP_CONST(op)                                           \
-  friend ArrayND<dimensions> operator op(const ArrayND<dimensions> &lhs,       \
-                                         const ArrayND<dimensions> &rhs) {     \
+  friend ArrayND<dimensions> operator op(const ArrayND<dimensions>& lhs,       \
+                                         const ArrayND<dimensions>& rhs) {     \
     ArrayND<dimensions> ret;                                                   \
     for (std::size_t i = 0; i < dimensions; ++i) {                             \
       ret[i] = (size_t)(lhs[i] op rhs[i]);                                     \
@@ -12,8 +12,8 @@
   };
 
 #define DEFINE_ARRAY_ND_OP_CONST_SIZE_T(op)                                    \
-  friend ArrayND<dimensions> operator op(const ArrayND<dimensions> &lhs,       \
-                                         const size_t &rhs) {                  \
+  friend ArrayND<dimensions> operator op(const ArrayND<dimensions>& lhs,       \
+                                         const size_t& rhs) {                  \
     ArrayND<dimensions> ret;                                                   \
     for (std::size_t i = 0; i < dimensions; ++i) {                             \
       ret[i] = (size_t)(lhs[i] op rhs);                                        \
@@ -22,8 +22,8 @@
   };
 
 #define DEFINE_ARRAY_ND_OP(op)                                                 \
-  friend ArrayND<dimensions> &operator op(ArrayND<dimensions> &lhs,            \
-                                          const ArrayND<dimensions> &rhs) {    \
+  friend ArrayND<dimensions>& operator op(ArrayND<dimensions>& lhs,            \
+                                          const ArrayND<dimensions>& rhs) {    \
     for (std::size_t i = 0; i < dimensions; ++i) {                             \
       lhs[i] = (size_t)(lhs[i] op rhs[i]);                                     \
     }                                                                          \
@@ -31,8 +31,8 @@
   };
 
 #define DEFINE_ARRAY_ND_OP_SIZE_T(op)                                          \
-  friend ArrayND<dimensions> &operator op(ArrayND<dimensions> &lhs,            \
-                                          const size_t &rhs) {                 \
+  friend ArrayND<dimensions>& operator op(ArrayND<dimensions>& lhs,            \
+                                          const size_t& rhs) {                 \
     for (std::size_t i = 0; i < dimensions; ++i) {                             \
       lhs[i] = (size_t)(lhs[i] op rhs);                                        \
     }                                                                          \
@@ -40,8 +40,8 @@
   };
 
 #define DEFINE_ARRAY_ND_OP_CONST_SIZE_T_LEFT(op)                               \
-  friend ArrayND<dimensions> operator op(const size_t &lhs,                    \
-                                         ArrayND<dimensions> &rhs) {           \
+  friend ArrayND<dimensions> operator op(const size_t& lhs,                    \
+                                         ArrayND<dimensions>& rhs) {           \
     ArrayND<dimensions> ret;                                                   \
     for (std::size_t i = 0; i < dimensions; ++i) {                             \
       ret[i] = (size_t)(rhs[i] op lhs);                                        \
@@ -50,8 +50,8 @@
   };
 
 #define DEFINE_ARRAY_ND_COMMON_BY_VALUE_SEMANTICS()                            \
-  friend bool operator==(const ArrayND<dimensions> &lhs,                       \
-                         const ArrayND<dimensions> &rhs) {                     \
+  friend bool operator==(const ArrayND<dimensions>& lhs,                       \
+                         const ArrayND<dimensions>& rhs) {                     \
     for (std::size_t i = 0; i < dimensions; ++i) {                             \
       if (lhs[i] != rhs[i]) {                                                  \
         return false;                                                          \
@@ -59,8 +59,8 @@
     }                                                                          \
     return true;                                                               \
   }                                                                            \
-  friend bool operator!=(const ArrayND<dimensions> &lhs,                       \
-                         const ArrayND<dimensions> &rhs) {                     \
+  friend bool operator!=(const ArrayND<dimensions>& lhs,                       \
+                         const ArrayND<dimensions>& rhs) {                     \
     for (std::size_t i = 0; i < dimensions; ++i) {                             \
       if (lhs[i] != rhs[i]) {                                                  \
         return true;                                                           \
@@ -71,7 +71,8 @@
 
 namespace neosycl::sycl::detail::container {
 
-template <size_t dimensions = 1> struct ArrayND {
+template <size_t dimensions = 1>
+struct ArrayND {
   ArrayND() : data{} {}
 
   template <int D = dimensions, typename = std::enable_if_t<D == 1>>
@@ -85,12 +86,13 @@ template <size_t dimensions = 1> struct ArrayND {
 
   size_t operator[](int dimension) const { return data[dimension]; }
 
-  size_t &operator[](int dimension) { return data[dimension]; }
+  size_t& operator[](int dimension) { return data[dimension]; }
 
   size_t get_liner() const {
     if (dimensions == 2) {
       return data[0] * data[1];
-    } else if (dimensions == 3) {
+    }
+    else if (dimensions == 3) {
       return data[0] * data[1] * data[2];
     }
     return data[0];

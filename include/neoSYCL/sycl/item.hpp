@@ -1,6 +1,4 @@
-#ifndef SYCL_INCLUDE_CL_SYCL_ITEM_HPP_
-#define SYCL_INCLUDE_CL_SYCL_ITEM_HPP_
-
+#pragma once
 #include "neoSYCL/sycl/detail/container/array_nd.hpp"
 
 #define DEFINE_ITEM_BY_VALUE_OP(cls)                                           \
@@ -17,9 +15,11 @@
 
 namespace neosycl::sycl {
 
-template <std::size_t dimensions> struct id;
+template <std::size_t dimensions>
+struct id;
 
-template <size_t dimensions = 1, bool with_offset = true> struct item {
+template <size_t dimensions = 1, bool with_offset = true>
+struct item {
   item() = delete;
 
   template <int D = dimensions>
@@ -62,5 +62,3 @@ struct nd_item : public neosycl::sycl::item<dimensions, with_offset> {
 };
 
 } // namespace neosycl::sycl
-
-#endif // SYCL_INCLUDE_CL_SYCL_ITEM_HPP_

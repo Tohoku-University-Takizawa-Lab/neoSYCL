@@ -5,11 +5,13 @@ namespace neosycl::sycl {
 
 class property_list {
 
-  template <typename propertyT> bool has_property() const {
+  template <typename propertyT>
+  bool has_property() const {
     throw unimplemented();
   }
 
-  template <typename propertyT> propertyT get_property() const {
+  template <typename propertyT>
+  propertyT get_property() const {
     throw unimplemented();
   }
 };

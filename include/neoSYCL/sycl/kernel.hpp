@@ -1,31 +1,39 @@
-#ifndef NEOSYCL_INCLUDE_NEOSYCL_SYCL_KERNEL_HPP
-#define NEOSYCL_INCLUDE_NEOSYCL_SYCL_KERNEL_HPP
-
-#include "neoSYCL/sycl/detail/kernel_info.hpp"
+#pragma once
+#include "neoSYCL/sycl/access.hpp"
 #include "neoSYCL/sycl/detail/accessor_info.hpp"
 
 namespace neosycl::sycl {
 
+namespace detail {
+class kernel_impl;
+class kernel_data;
+} // namespace detail
+
+class program;
+class handler;
+
 class kernel {
+  friend class handler;
+
+  explicit kernel();
+
 public:
-  using info_type     = shared_ptr_class<detail::kernel_info>;
   using accessor_list = vector_class<detail::accessor_info>;
 
-  kernel(detail::kernel_info* info) : acc_(), info_(std::move(info)) {}
-  kernel(const kernel& k) : acc_(k.acc_), info_(k.info_) {}
+  kernel(string_class name, program prog);
+  kernel(const kernel& k) : acc_(k.acc_), impl_(k.impl_) {}
+  ~kernel() = default;
 
+  // INTERNAL USE ONLY: for debugging
+  const char* get_name() const;
+  shared_ptr_class<detail::kernel_data> get_kernel_data(device);
+  shared_ptr_class<detail::kernel_impl> get_impl() { return impl_; }
   void set_acc(accessor_list& acc) { acc_ = acc; }
   accessor_list& get_acc() { return acc_; }
-  info_type get_kernel_info() { return info_; }
-  // string_class get_name() { return info_->name; }
-  const char* get_name() const { return info_->name.c_str(); }
-
-  ~kernel() = default;
 
 private:
   accessor_list acc_;
-  info_type info_;
+  shared_ptr_class<detail::kernel_impl> impl_;
 };
 
 } // namespace neosycl::sycl
-#endif

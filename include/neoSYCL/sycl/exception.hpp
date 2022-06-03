@@ -1,8 +1,5 @@
-#ifndef CUSTOM_SYCL_INCLUDE_SYCL_EXCEPTION_HPP_
-#define CUSTOM_SYCL_INCLUDE_SYCL_EXCEPTION_HPP_
-
+#pragma once
 #include <exception>
-#include <iterator>
 
 namespace neosycl::sycl {
 
@@ -10,9 +7,9 @@ class context;
 
 class exception : public std::exception {
 public:
-  exception(const string_class &message) : error_msg(message) {}
+  exception(const string_class& message) : error_msg(message) {}
 
-  const char *what() const noexcept override { return error_msg.c_str(); }
+  const char* what() const noexcept override { return error_msg.c_str(); }
 
   bool has_context() const;
 
@@ -74,5 +71,3 @@ public:
 };
 
 } // namespace neosycl::sycl
-
-#endif // CUSTOM_SYCL_INCLUDE_SYCL_EXCEPTION_HPP_

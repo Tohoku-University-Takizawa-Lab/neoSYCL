@@ -5,7 +5,8 @@
 
 namespace neosycl::sycl {
 
-template <int dimensions = 1> struct nd_range {
+template <int dimensions = 1>
+struct nd_range {
   nd_range(range<dimensions> globalSize, range<dimensions> localSize,
            id<dimensions> offset = id<dimensions>())
       : global_range(globalSize), local_range(localSize), offset(offset) {}

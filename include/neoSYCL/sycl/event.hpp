@@ -16,13 +16,13 @@ public:
 
   void wait() { throw unimplemented(); }
 
-  static void wait(const vector_class<event> &eventList) {
+  static void wait(const vector_class<event>& eventList) {
     throw unimplemented();
   }
 
   void wait_and_throw() { throw unimplemented(); }
 
-  static void wait_and_throw(const vector_class<event> &eventList) {
+  static void wait_and_throw(const vector_class<event>& eventList) {
     throw unimplemented();
   }
 };

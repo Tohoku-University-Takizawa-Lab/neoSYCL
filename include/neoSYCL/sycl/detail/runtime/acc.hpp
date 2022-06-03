@@ -4,7 +4,8 @@ namespace neosycl::sycl::rt {
 
 using namespace neosycl::sycl;
 
-template <typename T> struct acc_ {
+template <typename T>
+struct acc_ {
   T* p_;
   size_t r_[6];
 
@@ -15,7 +16,8 @@ template <typename T> struct acc_ {
   inline T& operator[](const id<2> i) { return p_[i[1] * r_[0] + i[0]]; }
   inline T& operator[](const id<1> i) { return p_[i[0]]; }
 
-  template <size_t dimensions> T& operator[](item<dimensions>& i) {
+  template <size_t dimensions>
+  T& operator[](item<dimensions>& i) {
     return this->operator[](i.get_id());
   }
 };

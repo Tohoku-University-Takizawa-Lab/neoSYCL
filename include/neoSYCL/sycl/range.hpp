@@ -1,11 +1,10 @@
-#ifndef CUSTOM_SYCL_INCLUDE_SYCL_RANGE_H_
-#define CUSTOM_SYCL_INCLUDE_SYCL_RANGE_H_
-
+#pragma once
 #include "neoSYCL/sycl/detail/container/array_nd.hpp"
 
 namespace neosycl::sycl {
 
-template <std::size_t dimensions = 1> struct range {
+template <std::size_t dimensions = 1>
+struct range {
   template <int D = dimensions, typename = std::enable_if_t<D == 1>>
   range(size_t dim0) : data(dim0) {}
 
@@ -17,7 +16,7 @@ template <std::size_t dimensions = 1> struct range {
 
   size_t get(int dimension) const { return data[dimension]; }
 
-  size_t &operator[](int dimension) { return data[dimension]; }
+  size_t& operator[](int dimension) { return data[dimension]; }
 
   size_t operator[](int dimension) const { return data[dimension]; }
 
@@ -107,5 +106,3 @@ template <std::size_t dimensions = 1> struct range {
 };
 
 } // namespace neosycl::sycl
-
-#endif // CUSTOM_SYCL_INCLUDE_SYCL_RANGE_H_

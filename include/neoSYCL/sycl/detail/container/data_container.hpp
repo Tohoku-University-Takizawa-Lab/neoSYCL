@@ -21,7 +21,7 @@ public:
 
   void unlock_write() const { mtx.unlock(); }
 
-  virtual void *get_raw_ptr() = 0;
+  virtual void* get_raw_ptr() = 0;
 
   virtual size_t get_size() = 0;
 
