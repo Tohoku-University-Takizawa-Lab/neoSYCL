@@ -44,12 +44,12 @@ public:
     task_handler->set_capture(k, p, sz);
   }
 
-  template <typename KernelName> kernel get_kernel() {
+  template <typename KernelName>
+  kernel get_kernel() {
     const std::type_info& tinfo = typeid(KernelName*);
 
     if (kernels_.count(tinfo.hash_code())) {
-      DEBUG_INFO("kernel found: %s",
-                 kernels_.at(tinfo.hash_code()).get_name());
+      DEBUG_INFO("kernel found: %s", kernels_.at(tinfo.hash_code()).get_name());
       return kernels_.at(tinfo.hash_code());
     }
 
@@ -61,11 +61,9 @@ public:
     return k;
   }
 
-  virtual bool open()     = 0;
+  virtual bool open() = 0;
 
-  bool is_valid() {
-    return task_handler.get() != nullptr;
-  }
+  bool is_valid() { return task_handler.get() != nullptr; }
 
   device bound_device;
   task_handler_ptr task_handler;

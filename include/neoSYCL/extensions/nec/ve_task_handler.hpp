@@ -120,7 +120,7 @@ public:
   }
 #endif
 
-  detail::SUPPORT_PLATFORM_TYPE type() override { return detail::VE; }
+  //detail::SUPPORT_PLATFORM_TYPE type() override { return detail::VE; }
 
   int find_buf(container_ptr d) {
     for (size_t j = 0; j < bufs_.size(); j++) {

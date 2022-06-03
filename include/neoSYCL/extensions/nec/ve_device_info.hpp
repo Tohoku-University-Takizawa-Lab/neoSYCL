@@ -2,7 +2,7 @@
 
 namespace neosycl::sycl::detail {
 
-struct ve_device_info : public device_info {
+struct ve_device_impl : public device_impl {
   bool is_host() override { return false; }
 
   bool is_cpu() override { return true; }

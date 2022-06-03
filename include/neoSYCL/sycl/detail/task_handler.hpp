@@ -16,7 +16,7 @@ public:
 
   virtual void run(kernel k) = 0;
 
-  virtual SUPPORT_PLATFORM_TYPE type() = 0;
+  // virtual SUPPORT_PLATFORM_TYPE type() = 0;
 
   virtual void* get_pointer(container_ptr)                                  = 0;
   virtual void* alloc_mem(container_ptr, access::mode = access::mode::read) = 0;
@@ -26,7 +26,8 @@ public:
   virtual void set_capture(kernel&, void* p, size_t sz) = 0;
   virtual void set_range(kernel&, size_t r[6])          = 0;
 
-  template <size_t dim> void set_range(kernel& k, range<dim> r) {
+  template <size_t dim>
+  void set_range(kernel& k, range<dim> r) {
     size_t sz[6] = {1, 1, 1, 0, 0, 0};
     for (size_t idx(0); idx != dim; idx++) {
       sz[idx] = r[idx];
@@ -34,7 +35,8 @@ public:
     set_range(k, sz);
   }
 
-  template <size_t dim> void set_range(kernel& k, range<dim> r, id<dim> i) {
+  template <size_t dim>
+  void set_range(kernel& k, range<dim> r, id<dim> i) {
     size_t sz[6] = {1, 1, 1, 0, 0, 0};
     for (size_t idx(0); idx != dim; idx++) {
       sz[idx] = r[idx];
@@ -151,7 +153,7 @@ public:
     }
   }
 
-  SUPPORT_PLATFORM_TYPE type() override { return CPU; }
+  // SUPPORT_PLATFORM_TYPE type() override { return CPU; }
 
   void* get_pointer(container_ptr p) override { return p->get_raw_ptr(); }
   void* alloc_mem(container_ptr p, access::mode = access::mode::read) override {

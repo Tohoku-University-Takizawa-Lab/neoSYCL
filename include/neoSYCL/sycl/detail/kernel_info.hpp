@@ -9,6 +9,7 @@ struct kernel_info {
   std::string name;
 
   virtual ~kernel_info() = default;
+
 protected:
   kernel_info(const char* c) : name(c) {}
 };
@@ -26,4 +27,3 @@ struct kernel_info_cpu : public kernel_info {
 };
 
 } // namespace neosycl::sycl::detail
-
