@@ -10,7 +10,6 @@ public:
 
   context ctx_;
   vector_class<device> dev_;
-  //  vector_class<shared_ptr_class<context_info>> cinfo_;
 };
 } // namespace detail
 
@@ -29,12 +28,12 @@ void context::init(vector_class<device> dev) {
       throw invalid_object_error("null device object found");
   impl_->dev_ = dev;
 }
-
+#if 0
 void context::free_mem_(container_ptr c) {
   if (!impl_)
     return;
   for (auto& d : impl_->dev_)
     d.impl_->free_mem(c);
 }
-
+#endif
 } // namespace neosycl::sycl

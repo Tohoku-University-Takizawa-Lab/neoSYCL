@@ -73,7 +73,7 @@ class initial_platform_builder {
 public:
   template <typename T>
   device get() {
-    device dummy;
+    device dummy(nullptr);
     device d(new T(dummy));
     d.get_impl()->dev_ = d;
     return d;
@@ -101,7 +101,7 @@ platform platform::register_all_devices() {
   initial_platform_builder builder;
   platform p(builder.create());
   // register all available devices
-  /* nothing */
+  builder.add<detail::device_impl_cpu>(p);
   return p;
 }
 #endif

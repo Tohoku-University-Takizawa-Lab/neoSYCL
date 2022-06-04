@@ -7,10 +7,14 @@ namespace neosycl::sycl {
 
 namespace detail {
 
-class kernel_data {
-public:
-  kernel_data()          = default;
-  virtual ~kernel_data() = default;
+struct kernel_data {
+  kernel_data() {}
+  virtual ~kernel_data() {}
+};
+
+struct kernel_data_host : public kernel_data {
+  kernel_data_host() : kernel_data() {}
+  virtual ~kernel_data_host() {}
 };
 
 class kernel_impl {
@@ -57,5 +61,7 @@ shared_ptr_class<detail::kernel_data> kernel::get_kernel_data(device d) {
   return impl_->map.at(d.type());
 }
 
-const char* kernel::get_name() const { return impl_->name.c_str(); }
+const char* kernel::get_name() const {
+  return impl_->name.c_str();
+}
 } // namespace neosycl::sycl

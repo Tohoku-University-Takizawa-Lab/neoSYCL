@@ -1,5 +1,7 @@
 #pragma once
 #include "neoSYCL/sycl/detail/container/data_container.hpp"
+#include "neoSYCL/sycl/detail/container/data_container_nd.hpp"
+#include "neoSYCL/sycl/detail/container/buffer_container.hpp"
 
 namespace neosycl::sycl {
 
@@ -15,8 +17,6 @@ class device {
   friend class initial_platform_builder;
 
 public:
-  using container_ptr = shared_ptr_class<detail::container::DataContainer>;
-
   device(const device& rhs) = default;
   device(device&& rhs)      = default;
   ~device()                 = default;
@@ -26,9 +26,10 @@ public:
 
   friend bool operator==(const device& lhs, const device& rhs);
   friend bool operator!=(const device& lhs, const device& rhs);
+  friend bool operator<(const device& lhs, const device& rhs);
 
   explicit device() : impl_(nullptr), plt_() {
-    DEBUG_INFO("empty device created");
+    *this = device::get_default_device();
   }
 
   explicit device(cl_device_id deviceId) {
@@ -51,7 +52,9 @@ public:
 
   bool is_accelerator() const;
 
-  platform get_platform() const { return plt_; }
+  platform get_platform() const {
+    return plt_;
+  }
 
   template <info::device param>
   typename info::param_traits<info::device, param>::return_type
@@ -85,15 +88,19 @@ public:
   // INTERNAL USE ONLY
   info::device_type type() const;
   detail::program_data* create_program() const;
-  shared_ptr_class<detail::device_impl> get_impl() const { return impl_; }
+  shared_ptr_class<detail::device_impl> get_impl() const {
+    return impl_;
+  }
 
 private:
   // INTERNAL USE ONLY
-  void set_platform(platform p) { plt_ = p; }
+  void set_platform(platform p) {
+    plt_ = p;
+  }
   explicit device(detail::device_impl* impl, platform* p = nullptr)
       : impl_(impl), plt_() {
     if (impl == nullptr) {
-      *this = platform::get_default_platform().get_devices()[0];
+      DEBUG_INFO("empty device created");
     }
     else if (p != nullptr)
       plt_ = *p;
@@ -106,5 +113,10 @@ private:
 bool operator==(const device& lhs, const device& rhs) {
   return (lhs.impl_ == rhs.impl_ && lhs.plt_ == rhs.plt_);
 }
-bool operator!=(const device& lhs, const device& rhs) { return !(lhs == rhs); }
+bool operator!=(const device& lhs, const device& rhs) {
+  return !(lhs == rhs);
+}
+bool operator<(const device& lhs, const device& rhs) {
+  return (lhs.impl_ < rhs.impl_);
+}
 } // namespace neosycl::sycl

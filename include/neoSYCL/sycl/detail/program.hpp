@@ -61,9 +61,13 @@ public:
   ~program_impl() = default;
 
   /* host program not supported yet */
-  bool is_host() const { return false; }
+  bool is_host() const {
+    return false;
+  }
 
-  bool has_kernel(string_class name) { return kernels_.count(name); }
+  bool has_kernel(string_class name) {
+    return kernels_.count(name);
+  }
 
   template <typename KernelName>
   bool has_kernel() {
@@ -98,7 +102,9 @@ public:
     return get_kernel(name);
   }
 
-  context get_context() const { return ctx_; }
+  context get_context() const {
+    return ctx_;
+  }
 
 private:
   program prog_;
@@ -106,6 +112,27 @@ private:
   program_state state;
   vector_class<shared_ptr_class<program_data>> data_;
   kernel_map kernels_; // all exiting kernels in the context
+};
+
+class program_data_host : public program_data {
+public:
+  program_data_host(device d) : program_data(d) {}
+
+  ~program_data_host() {}
+
+  bool open() override {
+    return true;
+  }
+
+  bool is_valid() override {
+    return true;
+  }
+
+  kernel_data_ptr create_kernel_data(const char* s) override {
+    auto data = new kernel_data_host();
+    kernel_data_ptr ret(data);
+    return ret;
+  }
 };
 
 class program_data_cpu : public program_data {
@@ -131,7 +158,9 @@ public:
     return true;
   }
 
-  bool is_valid() override { return dll_ != nullptr; }
+  bool is_valid() override {
+    return dll_ != nullptr;
+  }
 
   kernel_data_ptr create_kernel_data(const char* s) override {
     auto data         = new kernel_data_cpu();

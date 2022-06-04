@@ -29,14 +29,14 @@
 #include "neoSYCL/sycl/detail/platform.hpp"
 
 #include "sycl/device_selector/cpu_selector.hpp"
-#if 0
 #ifdef BUILD_VE
 #include "extensions/nec/ve_selector.hpp"
 #endif
-#endif
+
 #include "sycl/atomic.hpp"
 #include "sycl/accessor.hpp"
 #include "sycl/handler.hpp"
+#include "sycl/event.hpp"
 #include "sycl/queue.hpp"
 
 // include buffer headers

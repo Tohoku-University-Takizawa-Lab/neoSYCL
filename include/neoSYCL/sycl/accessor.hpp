@@ -2,6 +2,7 @@
 
 #include "neoSYCL/sycl/detail/container/data_container.hpp"
 #include "neoSYCL/sycl/detail/container/data_container_nd.hpp"
+#include "neoSYCL/sycl/detail/container/buffer_container.hpp"
 
 namespace neosycl::sycl {
 
@@ -21,7 +22,7 @@ public:
   using value_type      = dataT;
   using reference       = dataT&;
   using const_reference = const dataT&;
-  using container_type  = detail::container::DataContainerND<dataT, dimensions>;
+  using container_type  = detail::container::BufferContainer<dataT, dimensions>;
 
   accessor(const accessor& rhs) = default;
   accessor(accessor&& rhs)      = default;
@@ -173,7 +174,7 @@ public:
                                  (D > 0)>>
   dataT& operator[](id<dimensions> index) const {
     size_t index_val = id2index(index);
-    DEBUG_INFO("access with index: %d", index_val);
+    DEBUG_INFO("access with index: %lu", index_val);
     return (*data).get(index_val);
   }
 
@@ -182,7 +183,7 @@ public:
       typename = std::enable_if_t<(Mode == access::mode::read) && (D > 0)>>
   dataT operator[](id<dimensions> index) const {
     size_t index_val = id2index(index);
-    DEBUG_INFO("read access with index: %d", index_val);
+    DEBUG_INFO("read access with index: %lu", index_val);
     return (*data).get(index_val);
   }
 

@@ -55,11 +55,11 @@ public:
   using reference       = value_type&;
   using const_reference = const value_type&;
   using allocator_type  = AllocatorT;
-  using container_type  = detail::container::DataContainerND<T, dimensions>;
+  using container_type  = detail::container::BufferContainer<T, dimensions>;
 
   buffer(const buffer& rhs) = default;
   buffer(buffer&& rhs)      = default;
-  ~buffer() { ctx_.free_mem_(data); }
+  ~buffer()                 = default;
 
   buffer& operator=(const buffer& rhs) = default;
   buffer& operator=(buffer&& rhs) = default;
@@ -78,8 +78,7 @@ public:
   buffer(const range<dimensions>& bufferRange, AllocatorT allocator,
          const property_list& propList = {})
       : bufferRange(bufferRange),
-        data(new detail::container::DataContainerND<T, dimensions>(
-            bufferRange.data, allocator)) {}
+        data(new container_type(bufferRange.data, allocator)) {}
 
   buffer(T* hostData, const range<dimensions>& bufferRange,
          const property_list& propList = {})
@@ -88,8 +87,7 @@ public:
   buffer(T* hostData, const range<dimensions>& bufferRange,
          AllocatorT allocator, const property_list& propList = {})
       : bufferRange(bufferRange),
-        data(new detail::container::DataContainerND<T, dimensions>(
-            hostData, bufferRange.data, allocator)) {}
+        data(new container_type(hostData, bufferRange.data, allocator)) {}
 
   buffer(const T* hostData, const range<dimensions>& bufferRange,
          const property_list& propList = {})
@@ -98,29 +96,26 @@ public:
   buffer(const T* hostData, const range<dimensions>& bufferRange,
          AllocatorT allocator, const property_list& propList = {})
       : bufferRange(bufferRange),
-        data(new detail::container::DataContainerND<T, dimensions, AllocatorT>(
-            hostData, bufferRange.data)) {}
+        data(new container_type(hostData, bufferRange.data)) {}
 
   buffer(const shared_ptr_class<T>& hostData,
          const range<dimensions>& bufferRange, AllocatorT allocator,
          const property_list& propList = {})
       : bufferRange(bufferRange),
-        data(new detail::container::DataContainerND<T, dimensions>(
-            hostData, bufferRange.data, allocator)) {}
+        data(new container_type(hostData, bufferRange.data, allocator)) {}
 
   buffer(const shared_ptr_class<T>& hostData,
          const range<dimensions>& bufferRange,
          const property_list& propList = {})
       : bufferRange(bufferRange),
-        data(new detail::container::DataContainerND<T, dimensions>(
-            hostData.get(), bufferRange.data)) {}
+        data(new container_type(hostData.get(), bufferRange.data)) {}
 
   template <typename InputIterator, int D = dimensions,
             typename = std::enable_if_t<D == 1>>
   buffer(InputIterator first, InputIterator last, AllocatorT allocator,
          const property_list& propList = {})
       : bufferRange((last - first) / sizeof(T)),
-        data(new detail::container::DataContainerND<T, dimensions>(
+        data(new container_type(
             first, detail::container::ArrayND<1>((last - first) / sizeof(T)),
             allocator)) {}
 
@@ -129,7 +124,7 @@ public:
   buffer(InputIterator first, InputIterator last,
          const property_list& propList = {})
       : bufferRange((last - first) / sizeof(T)),
-        data(new detail::container::DataContainerND<T, dimensions>(
+        data(new container_type(
             first, detail::container::ArrayND<1>(last - first) / sizeof(T))) {}
 
   buffer(buffer<T, dimensions, AllocatorT> b, const id<dimensions>& baseIndex,
@@ -141,13 +136,21 @@ public:
 
   /* -- common interface members -- */
   /* -- property interface members -- */
-  range<dimensions> get_range() const { return bufferRange; }
+  range<dimensions> get_range() const {
+    return bufferRange;
+  }
 
-  size_t get_count() const { return bufferRange.size(); }
+  size_t get_count() const {
+    return bufferRange.size();
+  }
 
-  size_t get_size() const { return get_count() * sizeof(T); }
+  size_t get_size() const {
+    return get_count() * sizeof(T);
+  }
 
-  AllocatorT get_allocator() const { return AllocatorT(); }
+  AllocatorT get_allocator() const {
+    return AllocatorT();
+  }
 
   template <access::mode mode,
             access::target target = access::target::global_buffer>
@@ -155,7 +158,6 @@ public:
   get_access(handler& commandGroupHandler) {
     accessor<T, dimensions, mode, target> acc(*this);
     commandGroupHandler.alloc_mem_(acc);
-    ctx_ = commandGroupHandler.get_context();
     return acc;
   }
 
@@ -172,7 +174,6 @@ public:
     accessor<T, dimensions, mode, target> acc(*this, commandGroupHandler,
                                               accessRange, accessOffset);
     commandGroupHandler.alloc_mem_(acc);
-    ctx_ = commandGroupHandler.get_context();
     return acc;
   }
 
@@ -189,7 +190,9 @@ public:
   void set_write_back(bool flag = true);
 
   /* TODO: sub-buffer is not supported yet */
-  bool is_sub_buffer() const { return false; }
+  bool is_sub_buffer() const {
+    return false;
+  }
 
   template <typename ReinterpretT, int ReinterpretDim>
   buffer<ReinterpretT, ReinterpretDim, AllocatorT>
@@ -209,8 +212,6 @@ public:
 private:
   range<dimensions> bufferRange;
   std::shared_ptr<container_type> data;
-  context ctx_;
-  std::map<device, void*> map_;
 };
 
 template <typename Ty, size_t D, typename A>

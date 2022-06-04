@@ -13,8 +13,6 @@ class context_impl;
 class context {
 
 public:
-  using container_ptr = device::container_ptr;
-
   explicit context(const property_list& propList = {}) { init({}); }
 
   ~context() = default;
@@ -48,9 +46,6 @@ public:
   get_info() const;
 
   vector_class<device> get_devices() const;
-
-  // INTERNAL USE: called by buffer::~buffer()
-  void free_mem_(container_ptr c);
 
 private:
   void init(vector_class<device>);

@@ -1,14 +1,17 @@
-#ifndef SYCL_INCLUDE_CL_SYCL_NEC_VE_SELECTOR_HPP_
-#define SYCL_INCLUDE_CL_SYCL_NEC_VE_SELECTOR_HPP_
+#pragma once 
 
 #if 0
-#include "neoSYCL/extensions/nec/ve_info.hpp"
-#include "neoSYCL/extensions/nec/ve_kernel_info.hpp"
-#include "neoSYCL/extensions/nec/ve_task_handler.hpp"
-#include "neoSYCL/extensions/nec/ve_device_info.hpp"
-#include "neoSYCL/sycl/detail/context_info.hpp"
-#include "neoSYCL/extensions/nec/ve_context_info.hpp"
+//#include "neoSYCL/extensions/nec/ve_info.hpp"
+//#include "neoSYCL/extensions/nec/ve_kernel_info.hpp"
+//#include "neoSYCL/extensions/nec/ve_task_handler.hpp"
+//#include "neoSYCL/extensions/nec/ve_device_info.hpp"
+//#include "neoSYCL/sycl/detail/context_info.hpp"
+//#include "neoSYCL/extensions/nec/ve_context_info.hpp"
+
+#include "neoSYCL/extensions/nec/program.hpp"
+#include "neoSYCL/extensions/nec/device.hpp"
 #endif
+
 namespace neosycl::sycl {
 
 class ve_selector : public device_selector {
@@ -31,17 +34,14 @@ public:
   }
 };
 
-#ifdef BUILD_VE
 platform platform::register_all_devices() {
   // create a platform with the default device at first
   initial_platform_builder builder;
   platform p(builder.create());
   // register all available devices
-  builder.add<detail::ve_device_impl>(p);
+  builder.add<detail::device_impl_cpu>(p);
+  //builder.add<detail::device_impl_ve>(p);
   return p;
 }
-#endif
 
 } // namespace neosycl::sycl
-
-#endif // SYCL_INCLUDE_CL_SYCL_NEC_VE_SELECTOR_HPP_

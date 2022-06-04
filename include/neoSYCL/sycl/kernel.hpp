@@ -1,6 +1,6 @@
 #pragma once
 #include "neoSYCL/sycl/access.hpp"
-#include "neoSYCL/sycl/detail/accessor_info.hpp"
+#include "neoSYCL/sycl/detail/accessor_data.hpp"
 
 namespace neosycl::sycl {
 
@@ -18,7 +18,7 @@ class kernel {
   explicit kernel();
 
 public:
-  using accessor_list = vector_class<detail::accessor_info>;
+  using accessor_list = vector_class<detail::accessor_data>;
 
   kernel(string_class name, program prog);
   kernel(const kernel& k) : acc_(k.acc_), impl_(k.impl_) {}
