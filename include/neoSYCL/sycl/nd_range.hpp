@@ -1,7 +1,4 @@
-#ifndef NEOSYCL_INCLUDE_NEOSYCL_SYCL_ND_RANGE_HPP_
-#define NEOSYCL_INCLUDE_NEOSYCL_SYCL_ND_RANGE_HPP_
-
-#include "neoSYCL/sycl/id.hpp"
+#pragma once
 
 namespace neosycl::sycl {
 
@@ -11,13 +8,19 @@ struct nd_range {
            id<dimensions> offset = id<dimensions>())
       : global_range(globalSize), local_range(localSize), offset(offset) {}
 
-  range<dimensions> get_global_range() const { return global_range; }
+  range<dimensions> get_global_range() const {
+    return global_range;
+  }
 
-  range<dimensions> get_local_range() const { return local_range; }
+  range<dimensions> get_local_range() const {
+    return local_range;
+  }
 
   range<dimensions> get_group_range();
 
-  id<dimensions> get_offset() const { return offset; }
+  id<dimensions> get_offset() const {
+    return offset;
+  }
 
   range<dimensions> global_range;
   range<dimensions> local_range;
@@ -25,5 +28,3 @@ struct nd_range {
 };
 
 } // namespace neosycl::sycl
-
-#endif // NEOSYCL_INCLUDE_NEOSYCL_SYCL_ND_RANGE_HPP_

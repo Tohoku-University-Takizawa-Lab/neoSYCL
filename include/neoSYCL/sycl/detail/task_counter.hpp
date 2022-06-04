@@ -18,7 +18,9 @@ private:
 public:
   task_counter() : counter(0) {}
 
-  void incr() { counter++; }
+  void incr() {
+    counter++;
+  }
 
   void decr() {
     std::unique_lock<std::mutex> ul{lock};

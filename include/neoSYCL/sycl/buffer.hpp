@@ -1,5 +1,4 @@
 #pragma once
-
 #include "neoSYCL/sycl/detail/container/data_container.hpp"
 #include "neoSYCL/sycl/detail/container/data_container_nd.hpp"
 
@@ -28,28 +27,6 @@ public:
 template <typename T, size_t dimensions = 1,
           typename AllocatorT = buffer_allocator<T>>
 class buffer {
-  friend class handler;
-  friend accessor<T, dimensions, access::mode::read,
-                  access::target::global_buffer>;
-  friend accessor<T, dimensions, access::mode::read,
-                  access::target::host_buffer>;
-  friend accessor<T, dimensions, access::mode::write,
-                  access::target::global_buffer>;
-  friend accessor<T, dimensions, access::mode::write,
-                  access::target::host_buffer>;
-  friend accessor<T, dimensions, access::mode::read_write,
-                  access::target::global_buffer>;
-  friend accessor<T, dimensions, access::mode::read_write,
-                  access::target::host_buffer>;
-  friend accessor<T, dimensions, access::mode::discard_write,
-                  access::target::global_buffer>;
-  friend accessor<T, dimensions, access::mode::discard_write,
-                  access::target::host_buffer>;
-  friend accessor<T, dimensions, access::mode::discard_read_write,
-                  access::target::global_buffer>;
-  friend accessor<T, dimensions, access::mode::discard_read_write,
-                  access::target::host_buffer>;
-
 public:
   using value_type      = T;
   using reference       = value_type&;
@@ -207,6 +184,10 @@ public:
         throw sycl::invalid_object_error("invalid range");
     }
     return r;
+  }
+
+  std::shared_ptr<container_type> get_data() {
+    return data;
   }
 
 private:

@@ -28,13 +28,21 @@ struct item {
        const detail::container::ArrayND<dimensions>& offsets)
       : max_range(r), data{index}, offset{offsets} {}
 
-  id<dimensions> get_id() const { return id<dimensions>(*this); };
+  id<dimensions> get_id() const {
+    return id<dimensions>(*this);
+  };
 
-  size_t get_id(int dimension) const { return this->data[dimension]; };
+  size_t get_id(int dimension) const {
+    return this->data[dimension];
+  };
 
-  size_t operator[](int dimension) const { return this->data[dimension]; }
+  size_t operator[](int dimension) const {
+    return this->data[dimension];
+  }
 
-  range<dimensions> get_range() const { return this->max_range; }
+  range<dimensions> get_range() const {
+    return this->max_range;
+  }
 
   // only available if with_offset is true
   template <bool OFFSET = with_offset, typename = std::enable_if_t<OFFSET>>
@@ -58,7 +66,9 @@ struct item {
 // experimental impl just for testing
 template <size_t dimensions = 1, bool with_offset = true>
 struct nd_item : public neosycl::sycl::item<dimensions, with_offset> {
-  size_t get_global_linear_id() { return 0; }
+  size_t get_global_linear_id() {
+    return 0;
+  }
 };
 
 } // namespace neosycl::sycl

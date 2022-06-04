@@ -117,21 +117,21 @@ static void printLoop(str& st, CXXMethodDecl* func, Decl* d, Data& data) {
   }
   if (vtype == "id") {
     if (dim == 1)
-      st << "{ cl::sycl::id<1> " << vname << "(i0_);\n";
+      st << "{ [[maybe_unused]] cl::sycl::id<1> " << vname << "(i0_);\n";
     else if (dim == 2)
-      st << "{ cl::sycl::id<2> " << vname << "(i0_,i1_);\n";
+      st << "{ [[maybe_unused]] cl::sycl::id<2> " << vname << "(i0_,i1_);\n";
     else if (dim == 3)
-      st << "{ cl::sycl::id<3> " << vname << "(i0_,i1_,i2_);\n";
+      st << "{ [[maybe_unused]] cl::sycl::id<3> " << vname << "(i0_,i1_,i2_);\n";
   }
   else if (vtype == "item") {
     if (dim == 1)
-      st << "{ cl::sycl::item<1> " << vname
+      st << "{ [[maybe_unused]] cl::sycl::item<1> " << vname
          << "= cl::sycl::rt::id2item(r_,i0_);\n";
     else if (dim == 2)
-      st << "{ cl::sycl::item<2> " << vname
+      st << "{ [[maybe_unused]] cl::sycl::item<2> " << vname
          << "= cl::sycl::rt::id2item(r_,i0_,i1_);\n";
     else if (dim == 3)
-      st << "{ cl::sycl::item<3> " << vname
+      st << "{ [[maybe_unused]] cl::sycl::item<3> " << vname
          << "= cl::sycl::rt::id2item(r_,i0_,i1_,i2_);\n";
   }
   else {
@@ -160,9 +160,8 @@ static void printRunFunc(CXXMethodDecl* functor_op, Data& data) {
 
 static void writeDevCode(str& os, Data& data) {
   string& cls = data.kernel;
-  if (data.dim != 0) {
+  //if (data.dim != 0)
     os << "size_t  __" << cls << "_range__[6]={1,1,1,0,0,0};\n";
-  }
 
   os << "class " << cls << " {\n";
   os << "public:\n";
@@ -362,7 +361,8 @@ bool KoutVisitor::VisitCXXMemberCallExpr(CXXMemberCallExpr* ce) {
   }
 
   if (class_def.empty() == false) {
-    TheRewriter.ReplaceText(ce->getSourceRange(), class_def);
+    // TheRewriter.ReplaceText(ce->getSourceRange(), class_def);
+    TheRewriter.InsertTextBefore(ce->getSourceRange().getBegin(), class_def);
   }
 
   return true;

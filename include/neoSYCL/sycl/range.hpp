@@ -14,13 +14,21 @@ struct range {
   template <int D = dimensions, typename = std::enable_if_t<D == 3>>
   range(size_t dim0, size_t dim1, size_t dim2) : data(dim0, dim1, dim2) {}
 
-  size_t get(int dimension) const { return data[dimension]; }
+  size_t get(int dimension) const {
+    return data[dimension];
+  }
 
-  size_t& operator[](int dimension) { return data[dimension]; }
+  size_t& operator[](int dimension) {
+    return data[dimension];
+  }
 
-  size_t operator[](int dimension) const { return data[dimension]; }
+  size_t operator[](int dimension) const {
+    return data[dimension];
+  }
 
-  size_t size() const { return data.get_liner(); }
+  size_t size() const {
+    return data.get_liner();
+  }
 
   // Where OP is: +, -, *, /, %, <<, >>, &, |, ˆ, &&, ||, <, >, <=, >=.
   DEFINE_OP_CONST(range, +);

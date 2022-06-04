@@ -1,4 +1,7 @@
 #pragma once
+#include "neoSYCL/sycl/detail/cpu/kernel.hpp"
+#include "neoSYCL/sycl/detail/cpu/program.hpp"
+#include "neoSYCL/sycl/detail/cpu/device.hpp"
 
 namespace neosycl::sycl {
 

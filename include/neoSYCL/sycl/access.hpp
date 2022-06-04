@@ -1,5 +1,4 @@
-#ifndef CUSTOM_SYCL_INCLUDE_SYCL_ACCESS_HPP_
-#define CUSTOM_SYCL_INCLUDE_SYCL_ACCESS_HPP_
+#pragma once
 
 namespace neosycl::sycl {
 
@@ -36,5 +35,3 @@ enum class address_space : int {
 } // namespace access
 
 } // namespace neosycl::sycl
-
-#endif // CUSTOM_SYCL_INCLUDE_SYCL_ACCESS_HPP_

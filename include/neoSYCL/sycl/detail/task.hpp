@@ -9,7 +9,9 @@ private:
   std::condition_variable cond;
   std::mutex lock;
 
-  void start() { waiting = true; }
+  void start() {
+    waiting = true;
+  }
 
   void end() {
     std::unique_lock<std::mutex> ul{lock};

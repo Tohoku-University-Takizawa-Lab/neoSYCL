@@ -13,13 +13,21 @@ private:
   mutable std::shared_mutex mtx;
 
 public:
-  void lock_read() const { mtx.lock_shared(); }
+  void lock_read() const {
+    mtx.lock_shared();
+  }
 
-  void unlock_read() const { mtx.unlock_shared(); }
+  void unlock_read() const {
+    mtx.unlock_shared();
+  }
 
-  void lock_write() const { mtx.lock(); }
+  void lock_write() const {
+    mtx.lock();
+  }
 
-  void unlock_write() const { mtx.unlock(); }
+  void unlock_write() const {
+    mtx.unlock();
+  }
 
   virtual void* get_raw_ptr() = 0;
 

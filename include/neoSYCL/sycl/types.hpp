@@ -1,6 +1,4 @@
-#ifndef CUSTOM_SYCL_INCLUDE_SYCL_TYPES_HPP_
-#define CUSTOM_SYCL_INCLUDE_SYCL_TYPES_HPP_
-
+#pragma once
 #include <exception>
 #include <functional>
 #include <memory>
@@ -42,6 +40,5 @@ using buffer_allocator = std::allocator<T>;
 using cl_platform_id = u_int64_t;
 using cl_device_id   = u_int64_t;
 using cl_context     = u_int64_t;
+using cl_program     = u_int64_t;
 } // namespace neosycl::sycl
-
-#endif // CUSTOM_SYCL_INCLUDE_SYCL_TYPES_HPP_

@@ -1,6 +1,4 @@
-#ifndef NEOSYCL_INCLUDE_CL_SYCL_EXTENSIONS_HPP_
-#define NEOSYCL_INCLUDE_CL_SYCL_EXTENSIONS_HPP_
+#pragma once
 
 namespace neosycl::sycl {}
 
-#endif // NEOSYCL_INCLUDE_CL_SYCL_EXTENSIONS_HPP_

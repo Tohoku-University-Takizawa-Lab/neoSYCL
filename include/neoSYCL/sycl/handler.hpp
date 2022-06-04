@@ -1,72 +1,57 @@
 #pragma once
-
-//#include <utility>
-//#include <shared_mutex>
-//#include <regex>
-#include "neoSYCL/sycl/nd_range.hpp"
-//#include "neoSYCL/sycl/types.hpp"
-//#include "neoSYCL/sycl/id.hpp"
-//#include "neoSYCL/sycl/allocator.hpp"
-//#include "neoSYCL/sycl/detail/highlight_func.hpp"
-//#include "neoSYCL/sycl/kernel.hpp"
-//#include "neoSYCL/sycl/detail/task.hpp"
-//#include "neoSYCL/sycl/detail/task_handler.hpp"
 #include "neoSYCL/sycl/detail/task_counter.hpp"
 #include "neoSYCL/sycl/detail/handler.hpp"
 
 namespace neosycl::sycl {
 
+///////////////////////////////////////////////////////////////////////////////
 class handler {
   using counter_type = shared_ptr_class<detail::task_counter>;
-  using kernel_type  = shared_ptr_class<kernel>;
-  // using accessor_list = std::vector<detail::accessor_info>;
+  using handler_type = shared_ptr_class<detail::program_data>;
 
   friend class queue;
   explicit handler(context c, device d, program p, counter_type counter)
-      : ctx_(c), dev_(d), prog_(p), cntr_(std::move(counter)), kernel_() {}
+      : ctx_(c), dev_(d), prog_(p), cntr_(std::move(counter)), kernel_() {
+    hndl_ = prog_.get_data(dev_);
+  }
 
 public:
   template <typename KernelName, typename KernelType, size_t dimensions>
   void run(range<dimensions> kernelRange, id<dimensions> kernelOffset,
            KernelType kernelFunc) {
-    // handler_type task_handler = cinfo_->task_handler;
-    // kernel_                   = cinfo_->get_kernel<KernelName>();
     kernel_ = prog_.get_kernel<KernelName>();
     kernel_.get_acc().clear();
-    detail::device_impl* dev = dev_.impl_.get();
-    dev->set_range(kernel_, kernelRange, kernelOffset);
+    hndl_->set_range(kernel_, kernelRange, kernelOffset);
 
     kernelFunc();
 
-    submit_task([h = dev, k = kernel_]() { h->run(k); });
+    submit_task([h = hndl_, k = kernel_]() { h->run(k); });
   }
 
   template <typename KernelName, typename KernelType, size_t dimensions>
   void run(range<dimensions> kernelRange, KernelType kernelFunc) {
     kernel_ = prog_.get_kernel<KernelName>();
     kernel_.get_acc().clear();
-    detail::device_impl* dev = dev_.impl_.get();
-    dev->set_range(kernel_, kernelRange);
+    hndl_->set_range(kernel_, kernelRange);
 
     kernelFunc();
 
-    submit_task([h = dev, k = kernel_]() { h->run(k); });
+    submit_task([h = hndl_, k = kernel_]() { h->run(k); });
   }
 
   template <typename KernelName, typename KernelType>
   void run(KernelType kernelFunc) {
     kernel_ = prog_.get_kernel<KernelName>();
     kernel_.get_acc().clear();
-    detail::device_impl* dev = dev_.impl_.get();
 
     kernelFunc();
 
-    submit_task([h = dev, k = kernel_]() { h->run(k); });
+    submit_task([h = hndl_, k = kernel_]() { h->run(k); });
   }
 
   template <typename KernelName>
   void copy_capture(KernelName* p) {
-    dev_.impl_->set_capture(kernel_, p, sizeof(KernelName));
+    hndl_->set_capture(kernel_, p, sizeof(KernelName));
   }
 
   template <typename KernelName, typename KernelType>
@@ -126,9 +111,8 @@ public:
 
   template <typename T, size_t D, access::mode m, access::target t>
   void require(sycl::accessor<T, D, m, t, access::placeholder::true_t> acc) {
-    dev_.impl_->alloc_mem(*acc.data, m);
-    // acc.handler_ = this;
-    // acc_.push_back(detail::accessor_info(acc, m));
+    hndl_->alloc_mem(*acc.data, m);
+    // acc_.push_back(detail::accessor_data(acc, m));
   }
 
   template <typename T, size_t D, access::mode m, access::target t,
@@ -136,13 +120,13 @@ public:
   T* get_pointer(sycl::accessor<T, D, m, t, p> acc) {
     if (acc.device_ptr)
       return (T*)acc.device_ptr;
-    return (T*)dev_.impl_->get_pointer(*acc.data);
+    return (T*)hndl_->get_pointer(*acc.data);
   }
 
   template <typename T, size_t D, access::mode m, access::target t,
             access::placeholder p>
   void* alloc_mem_(sycl::accessor<T, D, m, t, p>& acc) {
-    acc.device_ptr = dev_.impl_->alloc_mem(*acc.data, m);
+    acc.device_ptr = hndl_->alloc_mem(*acc.data, m);
     return acc.device_ptr;
   }
 
@@ -158,7 +142,7 @@ public:
     size_t sz[6] = {1, 1, 1, 0, 0, 0};
     size_t i;
     for (i = 0; i < kernel_.get_acc().size(); i++)
-      if (kernel_.get_acc()[i].data == acc.data) {
+      if (kernel_.get_acc()[i].data.get() == acc.data.get()) {
         if (m != access::mode::read)
           kernel_.get_acc()[i].mode = m;
         break;
@@ -178,8 +162,7 @@ private:
   program prog_;
   counter_type cntr_;
   kernel kernel_;
-  // detail::context_info* cinfo_;
-  // accessor_list acc_;
+  handler_type hndl_;
 
   template <typename Func>
   void submit_task(Func func) {

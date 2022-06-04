@@ -3,7 +3,9 @@
 
 class VarDeclFinder : public RecursiveASTVisitor<VarDeclFinder> {
 public:
-  virtual bool shouldVisitTemplateInstantiations() { return true; }
+  virtual bool shouldVisitTemplateInstantiations() {
+    return true;
+  }
 
   bool isInList(std::vector<Decl*>& l, Decl* d) {
     for (const auto& item : l) {

@@ -1,8 +1,4 @@
-#ifndef CUSTOM_SYCL_INCLUDE_SYCL_EVENT_HPP_
-#define CUSTOM_SYCL_INCLUDE_SYCL_EVENT_HPP_
-
-#include "neoSYCL/sycl/types.hpp"
-#include "neoSYCL/sycl/exception.hpp"
+#pragma once
 
 namespace neosycl::sycl {
 
@@ -12,15 +8,21 @@ public:
 
   ~event() {}
 
-  vector_class<event> get_wait_list() { throw unimplemented(); }
+  vector_class<event> get_wait_list() {
+    throw unimplemented();
+  }
 
-  void wait() { throw unimplemented(); }
+  void wait() {
+    throw unimplemented();
+  }
 
   static void wait(const vector_class<event>& eventList) {
     throw unimplemented();
   }
 
-  void wait_and_throw() { throw unimplemented(); }
+  void wait_and_throw() {
+    throw unimplemented();
+  }
 
   static void wait_and_throw(const vector_class<event>& eventList) {
     throw unimplemented();
@@ -28,5 +30,3 @@ public:
 };
 
 } // namespace neosycl::sycl
-
-#endif // CUSTOM_SYCL_INCLUDE_SYCL_EVENT_HPP_

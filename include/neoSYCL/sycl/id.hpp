@@ -28,11 +28,17 @@ struct id {
     }
   }
 
-  size_t get(int dimension) const { return data[dimension]; }
+  size_t get(int dimension) const {
+    return data[dimension];
+  }
 
-  size_t& operator[](int dimension) { return data[dimension]; }
+  size_t& operator[](int dimension) {
+    return data[dimension];
+  }
 
-  size_t operator[](int dimension) const { return data[dimension]; }
+  size_t operator[](int dimension) const {
+    return data[dimension];
+  }
 
   // Where OP is: +, -, *, /, %, <<, >>, &, |, ˆ, &&, ||, <, >, <=, >=.
   DEFINE_OP_CONST(id, +);

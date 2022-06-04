@@ -5,13 +5,17 @@ namespace neosycl::sycl {
 namespace detail {
 class platform_impl {
 public:
-  platform_impl(device d) { dev_.push_back(d); }
+  platform_impl(device d) {
+    dev_.push_back(d);
+  }
 
   virtual bool is_host() = 0;
 
   virtual bool has_extension(const string_class& extension) = 0;
 
-  vector_class<device> list_devices() { return dev_; }
+  vector_class<device> list_devices() {
+    return dev_;
+  }
 
   vector_class<device> dev_;
 };
@@ -20,8 +24,12 @@ class host_platform_impl : public platform_impl {
 public:
   host_platform_impl(device d) : platform_impl(d) {}
 
-  bool is_host() override { return true; }
-  bool has_extension(const string_class& extension) override { return false; }
+  bool is_host() override {
+    return true;
+  }
+  bool has_extension(const string_class& extension) override {
+    return false;
+  }
 };
 
 using default_platform_impl = host_platform_impl;
@@ -31,7 +39,9 @@ using default_platform_impl = host_platform_impl;
 vector_class<platform> platform::REGISTERED = {
     platform::register_all_devices()};
 
-platform platform::get_default_platform() { return platform::REGISTERED[0]; }
+platform platform::get_default_platform() {
+  return platform::REGISTERED[0];
+}
 
 vector_class<platform> platform::get_platforms() {
   return platform::REGISTERED;
@@ -66,7 +76,9 @@ bool platform::has_extension(const string_class& extension) const {
   return impl_->has_extension(extension);
 }
 
-bool platform::is_host() const { return impl_->is_host(); }
+bool platform::is_host() const {
+  return impl_->is_host();
+}
 
 /* this class accesses private members of platform and device */
 class initial_platform_builder {

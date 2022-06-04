@@ -68,7 +68,9 @@ class vec {
   FRIEND_VEC_UNARY_OPERATOR(!);
   FRIEND_VEC_UNARY_OPERATOR(~);
 
-  static constexpr size_t size() { return NumElems; }
+  static constexpr size_t size() {
+    return NumElems;
+  }
 
 public:
   using element_type     = DataT;
@@ -114,8 +116,12 @@ public:
     return data_[0];
   }
 
-  size_t get_count() const { return size(); }
-  size_t get_size() const { return get_count() * sizeof(DataT); }
+  size_t get_count() const {
+    return size();
+  }
+  size_t get_size() const {
+    return get_count() * sizeof(DataT);
+  }
 
   template <typename convT, rounding_mode rm = rounding_mode::automatic>
   vec<convT, NumElems> convert() const {
@@ -179,7 +185,9 @@ public:
     return *this;
   };
 
-  element_type& x() { return data_[0]; }
+  element_type& x() {
+    return data_[0];
+  }
   template <size_t N = size(), typename = std::enable_if_t<(N > 1)>>
   element_type& y() {
     return data_[1];
@@ -192,8 +200,12 @@ public:
   element_type& w() {
     return data_[3];
   }
-  inline element_type& operator[](size_t i) { return data_[i]; }
-  inline const element_type operator[](size_t i) const { return data_[i]; }
+  inline element_type& operator[](size_t i) {
+    return data_[i];
+  }
+  inline const element_type operator[](size_t i) const {
+    return data_[i];
+  }
 
 private:
   element_type data_[NumElems];

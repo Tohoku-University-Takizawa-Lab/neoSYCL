@@ -1,7 +1,4 @@
 #pragma once
-#include "neoSYCL/sycl/detail/container/data_container.hpp"
-#include "neoSYCL/sycl/detail/container/data_container_nd.hpp"
-#include "neoSYCL/sycl/detail/container/buffer_container.hpp"
 
 namespace neosycl::sycl {
 
@@ -10,6 +7,7 @@ class device_impl;
 class program_data;
 } // namespace detail
 
+///////////////////////////////////////////////////////////////////////////////
 class device {
   friend class handler;
   friend class context;

@@ -12,6 +12,7 @@ class kernel_data;
 class program;
 class handler;
 
+///////////////////////////////////////////////////////////////////////////////
 class kernel {
   friend class handler;
 
@@ -27,9 +28,15 @@ public:
   // INTERNAL USE ONLY: for debugging
   const char* get_name() const;
   shared_ptr_class<detail::kernel_data> get_kernel_data(device);
-  shared_ptr_class<detail::kernel_impl> get_impl() { return impl_; }
-  void set_acc(accessor_list& acc) { acc_ = acc; }
-  accessor_list& get_acc() { return acc_; }
+  shared_ptr_class<detail::kernel_impl> get_impl() {
+    return impl_;
+  }
+  void set_acc(accessor_list& acc) {
+    acc_ = acc;
+  }
+  accessor_list& get_acc() {
+    return acc_;
+  }
 
 private:
   accessor_list acc_;

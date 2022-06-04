@@ -1,5 +1,4 @@
 #pragma once
-
 #include "neoSYCL/sycl/detail/container/data_container.hpp"
 #include "neoSYCL/sycl/detail/container/data_container_nd.hpp"
 #include "neoSYCL/sycl/detail/container/buffer_container.hpp"
@@ -51,7 +50,7 @@ public:
             typename = std::enable_if_t<(D == 0)>>
   accessor(buffer<dataT, 1, AllocatorT>& bufferRef,
            const property_list& propList = {})
-      : data(bufferRef.data), accessRange(bufferRef.get_range()),
+      : data(bufferRef.get_data()), accessRange(bufferRef.get_range()),
         accessOffset(), device_ptr(nullptr) {}
 
   /* Available only when: (isPlaceholder == access::placeholder::false_t &&
@@ -61,7 +60,7 @@ public:
             typename = std::enable_if_t<(D == 0)>>
   accessor(buffer<dataT, 1, AllocatorT>& bufferRef,
            handler& commandGroupHandlerRef, const property_list& propList = {})
-      : data(bufferRef.data), accessRange(bufferRef.get_range()),
+      : data(bufferRef.get_data()), accessRange(bufferRef.get_range()),
         accessOffset(), device_ptr(nullptr) {
     alloc_(commandGroupHandlerRef);
   }
@@ -75,7 +74,7 @@ public:
             typename = std::enable_if_t<(D > 0)>>
   accessor(buffer<dataT, dimensions, AllocatorT>& bufferRef,
            const property_list& propList = {})
-      : data(bufferRef.data), accessRange(bufferRef.get_range()),
+      : data(bufferRef.get_data()), accessRange(bufferRef.get_range()),
         accessOffset(), device_ptr(nullptr) {}
 
   /* Available only when: (isPlaceholder == access::placeholder::false_t &&
@@ -85,7 +84,7 @@ public:
             typename = std::enable_if_t<(D > 0)>>
   accessor(buffer<dataT, dimensions, AllocatorT>& bufferRef,
            handler& commandGroupHandlerRef, const property_list& propList = {})
-      : data(bufferRef.data), accessRange(bufferRef.get_range()),
+      : data(bufferRef.get_data()), accessRange(bufferRef.get_range()),
         accessOffset(), device_ptr(nullptr) {
     alloc_(commandGroupHandlerRef);
   }
@@ -98,7 +97,7 @@ public:
             typename = std::enable_if_t<(D > 0)>>
   accessor(buffer<dataT, dimensions, AllocatorT>& bufferRef,
            range<dimensions> accessRange, const property_list& propList = {})
-      : data(bufferRef.data), accessRange(accessRange), accessOffset(),
+      : data(bufferRef.get_data()), accessRange(accessRange), accessOffset(),
         device_ptr(nullptr) {}
 
   /* Available only when: (isPlaceholder == access::placeholder::false_t &&
@@ -110,7 +109,7 @@ public:
   accessor(buffer<dataT, dimensions, AllocatorT>& bufferRef,
            range<dimensions> accessRange, id<dimensions> accessOffset,
            const property_list& propList = {})
-      : data(bufferRef.data), accessRange(accessRange),
+      : data(bufferRef.get_data()), accessRange(accessRange),
         accessOffset(accessOffset), device_ptr(nullptr) {}
 
   /* Available only when: (isPlaceholder == access::placeholder::false_t &&
@@ -121,7 +120,7 @@ public:
   accessor(buffer<dataT, dimensions, AllocatorT>& bufferRef,
            handler& commandGroupHandlerRef, range<dimensions> accessRange,
            const property_list& propList = {})
-      : data(bufferRef.data), accessRange(accessRange), accessOffset(),
+      : data(bufferRef.get_data()), accessRange(accessRange), accessOffset(),
         device_ptr(nullptr) {
     alloc_(commandGroupHandlerRef);
   }
@@ -134,7 +133,7 @@ public:
   accessor(buffer<dataT, dimensions, AllocatorT>& bufferRef,
            handler& commandGroupHandlerRef, range<dimensions> accessRange,
            id<dimensions> accessOffset, const property_list& propList = {})
-      : data(bufferRef.data), accessRange(accessRange),
+      : data(bufferRef.get_data()), accessRange(accessRange),
         accessOffset(accessOffset), device_ptr(nullptr) {
     alloc_(commandGroupHandlerRef);
   }
@@ -142,15 +141,25 @@ public:
   /* -- common interface members -- */
 
   /* -- property interface members -- */
-  constexpr bool is_placeholder() const { return isPlaceholder; }
+  constexpr bool is_placeholder() const {
+    return isPlaceholder;
+  }
 
-  size_t get_size() const { return data->get_size(); }
+  size_t get_size() const {
+    return data->get_size();
+  }
 
-  size_t get_count() const { return data->get_count(); }
+  size_t get_count() const {
+    return data->get_count();
+  }
 
-  range<dimensions> get_range() const { return accessRange; }
+  range<dimensions> get_range() const {
+    return accessRange;
+  }
 
-  id<dimensions> get_offset() const { return accessOffset; }
+  id<dimensions> get_offset() const {
+    return accessOffset;
+  }
 
   /* Available only when: (accessMode == access::mode::read_write ||
    * accessMode

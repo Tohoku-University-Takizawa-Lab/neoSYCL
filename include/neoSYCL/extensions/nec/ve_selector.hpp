@@ -1,21 +1,12 @@
-#pragma once 
-
-#if 0
-//#include "neoSYCL/extensions/nec/ve_info.hpp"
-//#include "neoSYCL/extensions/nec/ve_kernel_info.hpp"
-//#include "neoSYCL/extensions/nec/ve_task_handler.hpp"
-//#include "neoSYCL/extensions/nec/ve_device_info.hpp"
-//#include "neoSYCL/sycl/detail/context_info.hpp"
-//#include "neoSYCL/extensions/nec/ve_context_info.hpp"
-
+#pragma once
+#include "neoSYCL/extensions/nec/veo_util.hpp"
+#include "neoSYCL/extensions/nec/kernel.hpp"
 #include "neoSYCL/extensions/nec/program.hpp"
 #include "neoSYCL/extensions/nec/device.hpp"
-#endif
 
 namespace neosycl::sycl {
 
 class ve_selector : public device_selector {
-
 public:
   virtual int operator()(const device& dev) const override {
     if (dev.is_accelerator()) {
@@ -40,7 +31,7 @@ platform platform::register_all_devices() {
   platform p(builder.create());
   // register all available devices
   builder.add<detail::device_impl_cpu>(p);
-  //builder.add<detail::device_impl_ve>(p);
+  builder.add<extensions::nec::device_impl_ve>(p);
   return p;
 }
 

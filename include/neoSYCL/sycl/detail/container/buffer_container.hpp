@@ -3,7 +3,7 @@
 #include "neoSYCL/sycl/access.hpp"
 
 namespace neosycl::sycl {
-class device;
+// class device;
 
 namespace detail::container {
 
@@ -35,7 +35,7 @@ public:
       : DataContainerND<T, dimensions, AllocatorT>(rhs) {}
 
   ~BufferContainer();
-  std::map<device, device_ptr> map;
+  std::map<uint64_t, device_ptr> map;
 };
 } // namespace detail::container
 } // namespace neosycl::sycl

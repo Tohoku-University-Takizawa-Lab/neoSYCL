@@ -2,6 +2,9 @@
 #include <map>
 #include <regex>
 #include <cxxabi.h>
+#include "neoSYCL/sycl/detail/container/data_container.hpp"
+#include "neoSYCL/sycl/detail/container/data_container_nd.hpp"
+#include "neoSYCL/sycl/detail/container/buffer_container.hpp"
 
 namespace neosycl::sycl {
 
@@ -24,17 +27,105 @@ inline string_class get_kernel_name_from_class(const std::type_info& ti) {
 
 class program_data {
 public:
-  program_data(device d) : dev(d) {}
-  virtual ~program_data() {}
-  // using kernel_data_map = std::map<string_class, kernel_data*>;
   using kernel_data_ptr = shared_ptr_class<kernel_data>;
+  // don't copy the instance
+  program_data(const program_data& rhs) = delete;
+  program_data(program_data&& rhs)      = delete;
+  program_data& operator=(const program_data& rhs) = delete;
+  program_data& operator=(program_data&& rhs) = delete;
+
+  program_data(device d) : dev_(d) {}
+  virtual ~program_data() {}
 
   virtual bool open()                                       = 0;
-  virtual bool is_valid()                                   = 0;
+  virtual bool is_open()                                    = 0;
+  virtual void run(kernel k)                                = 0;
+  virtual void set_capture(kernel&, void* p, size_t sz)     = 0;
+  virtual void set_range(kernel&, size_t r[6])              = 0;
   virtual kernel_data_ptr create_kernel_data(const char* s) = 0;
 
-  // kernel_data_map map;
-  device dev;
+  device get_device() const {
+    return dev_;
+  }
+
+  template <typename T, size_t D, typename A = buffer_allocator<T>>
+  void* get_pointer(container::BufferContainer<T, D, A>& buf) {
+    if (get_device().is_host())
+      return buf.get_raw_ptr();
+    else if (buf.map.count((uint64_t)this))
+      return buf.map.at((uint64_t)this).ptr;
+    throw runtime_error("invalid BufferContainer object");
+  }
+
+  template <typename T, size_t D, typename A = buffer_allocator<T>>
+  void* alloc_mem(container::BufferContainer<T, D, A>& buf,
+                  access::mode m = access::mode::read) {
+    if (get_device().is_host())
+      return buf.get_raw_ptr();
+
+    int count = buf.map.count((uint64_t)this);
+    if (count == 1)
+      return buf.map.at((uint64_t)this).ptr;
+    else if (count == 0) {
+      void* dp = alloc_mem(buf.get_raw_ptr(), buf.get_size(), m);
+      container::device_ptr cdp = {dp, m};
+      buf.map.insert(std::make_pair((uint64_t)this, cdp));
+      return dp;
+    }
+    throw runtime_error("invalid BufferContainer object");
+  }
+
+  template <typename T, size_t D, typename A = buffer_allocator<T>>
+  void free_mem(container::BufferContainer<T, D, A>& buf) {
+    if (dev_.is_host())
+      return;
+    if (buf.map.count((uint64_t)this)) {
+      auto [devp, mode] = buf.map.at((uint64_t)this);
+      if (mode != access::mode::read)
+        copy_back(buf.get_raw_ptr(), devp, buf.get_size());
+      // buf.map.erase(dev_);
+      free_mem(devp);
+    }
+  }
+
+  template <size_t dim>
+  void set_range(kernel& k, range<dim> r) {
+    size_t sz[6] = {1, 1, 1, 0, 0, 0};
+    for (size_t idx(0); idx != dim; idx++) {
+      sz[idx] = r[idx];
+    }
+    set_range(k, sz);
+  }
+
+  template <size_t dim>
+  void set_range(kernel& k, range<dim> r, id<dim> i) {
+    size_t sz[6] = {1, 1, 1, 0, 0, 0};
+    for (size_t idx(0); idx != dim; idx++) {
+      sz[idx] = r[idx];
+    }
+    for (size_t idx(3); idx != dim + 3; idx++) {
+      sz[idx] = i[idx];
+    }
+    set_range(k, sz);
+  }
+
+protected:
+  device dev_;
+
+  virtual void* alloc_mem(void*, size_t, access::mode) = 0;
+  virtual void free_mem(void*)                         = 0;
+  virtual void copy_back(void*, void*, size_t)         = 0;
+
+  template <typename T>
+  auto cast(kernel k) const {
+    auto kd  = k.get_kernel_data(get_device());
+    auto kdc = std::dynamic_pointer_cast<T>(kd);
+    if (kdc.get() == nullptr) {
+      PRINT_ERR("invalid kernel_data: %lx", (size_t)kd.get());
+      throw runtime_error("program_data::cast() failed");
+    }
+    return kdc;
+  }
 };
 
 class program_impl {
@@ -48,21 +139,28 @@ class program_impl {
   }
 
   void init(const vector_class<device>& d) {
-    for (auto& dev : d) {
+    if (d.size() == 0)
+      throw runtime_error("contenxt with no available device");
+    if (d.size() > 2) {
+      DEBUG_INFO("one context with host and multiple devices (experimental)");
+    }
+    for (const auto& dev : d) {
       program_data* p = dev.create_program();
       if (p && p->open())
         data_.push_back(shared_ptr_class<program_data>(p));
-      else
+      else if (p)
         delete p;
     }
+    if (data_.size() == 0)
+      throw runtime_error("program initialization failed");
   }
 
 public:
   ~program_impl() = default;
 
-  /* host program not supported yet */
   bool is_host() const {
-    return false;
+    // true if only the host is available.
+    return data_.size() < 2;
   }
 
   bool has_kernel(string_class name) {
@@ -86,7 +184,7 @@ public:
     kernel k(name.c_str(), prog_);
     for (auto& d : data_) {
       auto kd = d->create_kernel_data(name.c_str());
-      k.get_impl()->map.insert(std::make_pair(d->dev.type(), kd));
+      k.get_impl()->map.insert(std::make_pair(d->get_device().type(), kd));
     }
     // kernel k = task_handler->create_kernel(name.c_str());
     kernels_.insert(std::make_pair(name, k));
@@ -107,9 +205,9 @@ public:
   }
 
 private:
+  program_state state;
   program prog_;
   context ctx_;
-  program_state state;
   vector_class<shared_ptr_class<program_data>> data_;
   kernel_map kernels_; // all exiting kernels in the context
 };
@@ -124,61 +222,26 @@ public:
     return true;
   }
 
-  bool is_valid() override {
+  bool is_open() override {
     return true;
   }
+
+  void run(kernel k) override {}
+
+  void* alloc_mem(void* p, size_t s, access::mode m) override {
+    return nullptr;
+  }
+
+  void free_mem(void* p) override {}
+
+  void copy_back(void* h, void* d, size_t s) override {}
+
+  void set_capture(kernel& k, void* p, size_t sz) override {}
+
+  void set_range(kernel& k, size_t r[6]) override {}
 
   kernel_data_ptr create_kernel_data(const char* s) override {
     auto data = new kernel_data_host();
-    kernel_data_ptr ret(data);
-    return ret;
-  }
-};
-
-class program_data_cpu : public program_data {
-  void* dll_;
-
-public:
-  program_data_cpu(device d) : program_data(d), dll_(nullptr) {}
-
-  ~program_data_cpu() {
-    if (dll_)
-      dlclose(dll_);
-  }
-
-  bool open() override {
-    const char* env = getenv(ENV_KERNEL);
-    string_class fn(env ? env : DEFAULT_LIB);
-    dll_ = dlopen(fn.c_str(), RTLD_LAZY);
-    if (!dll_) {
-      DEBUG_INFO("dlopen failed: %s", dlerror());
-      return false;
-    }
-    DEBUG_INFO("kernel lib loaded: %lx, %s", (size_t)dll_, fn.c_str());
-    return true;
-  }
-
-  bool is_valid() override {
-    return dll_ != nullptr;
-  }
-
-  kernel_data_ptr create_kernel_data(const char* s) override {
-    auto data         = new kernel_data_cpu();
-    data->dll_        = dll_;
-    string_class capt = string_class("__") + s + "_obj__";
-    string_class rnge = string_class("__") + s + "_range__";
-    auto f            = dlsym(dll_, s);
-    data->func_       = reinterpret_cast<int (*)()>(f);
-    data->capt_       = dlsym(dll_, capt.c_str());
-
-    if (!data->dll_ || !data->func_ || !data->capt_) {
-      PRINT_ERR("dlsym() for %s failed: %s", s, dlerror());
-      throw exception("create_kernel() failed");
-    }
-
-    data->rnge_ = dlsym(dll_, rnge.c_str()); // this call could fail
-    dlerror();                               // reset dlerror
-
     kernel_data_ptr ret(data);
     return ret;
   }
@@ -207,5 +270,24 @@ kernel program::get_kernel() const {
 kernel program::get_kernel(string_class kernelName) const {
   return impl_->get_kernel(kernelName);
 }
+
+shared_ptr_class<detail::program_data> program::get_data(device dev) const {
+  for (auto& d : impl_->data_)
+    if (dev == d->get_device())
+      return d;
+  return nullptr;
+}
+
+namespace detail::container {
+template <typename T, size_t D, typename A>
+BufferContainer<T, D, A>::~BufferContainer() {
+  DEBUG_INFO("# device pointers = %lu", map.size());
+  for (auto& d : map) {
+    program_data* p = (program_data*)(d.first);
+    DEBUG_INFO("device type = %d", p->get_device().type());
+    // p->free_mem(*this);
+  }
+}
+} // namespace detail::container
 
 } // namespace neosycl::sycl

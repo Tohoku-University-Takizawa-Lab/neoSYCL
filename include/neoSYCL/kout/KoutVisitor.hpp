@@ -25,14 +25,18 @@ public:
   KoutVisitor(Rewriter& R, ASTContext& ast)
       : TheRewriter(R), kcode_(), kernCode(kcode_), ast_(ast) {}
 
-  bool shouldVisitTemplateInstantiations() { return true; }
+  bool shouldVisitTemplateInstantiations() {
+    return true;
+  }
 
   void checkCXXMCallExpr(bool is_single, CXXMemberCallExpr* ce,
                          CXXMethodDecl* callee, std::string& text);
 
   bool VisitCXXMemberCallExpr(CXXMemberCallExpr* ce);
 
-  string& getDeviceCode() { return kcode_; }
+  string& getDeviceCode() {
+    return kcode_;
+  }
 
   bool VisitTypeAliasDecl(TypeAliasDecl* d);
 

@@ -2,6 +2,7 @@
 #define SYCL_INCLUDE_CL_SYCL_BUFFER_DATA_CONTAINER_ND_HPP_
 
 #include <shared_mutex>
+#include <cstring>
 #include "neoSYCL/sycl/detail/container/array_nd.hpp"
 
 namespace neosycl::sycl::detail::container {
@@ -33,29 +34,47 @@ public:
   DataContainerD(T* data, ArrayND<dimensions> r, AllocatorT allocatorT)
       : alloc(allocatorT), range(r), ptr(data), allocate_ptr(nullptr) {}
 
-  size_t get_size() override { return sizeof(T) * range.get_liner(); }
+  size_t get_size() override {
+    return sizeof(T) * range.get_liner();
+  }
 
-  size_t get_count() override { return range.get_liner(); }
+  size_t get_count() override {
+    return range.get_liner();
+  }
 
-  T* get_ptr() const { return ptr; }
+  T* get_ptr() const {
+    return ptr;
+  }
 
-  void* get_raw_ptr() override { return (void*)get_ptr(); }
+  void* get_raw_ptr() override {
+    return (void*)get_ptr();
+  }
 
-  T* begin() const { return ptr; }
+  T* begin() const {
+    return ptr;
+  }
 
-  T* end() const { return ptr + range.get_liner(); }
+  T* end() const {
+    return ptr + range.get_liner();
+  }
 
-  T& get(size_t x) const { return ptr[x]; }
+  T& get(size_t x) const {
+    return ptr[x];
+  }
 
-  AllocatorT get_allocator() { return alloc; }
+  AllocatorT get_allocator() {
+    return alloc;
+  }
 
-  ArrayND<dimensions> get_range() const { return range; }
+  ArrayND<dimensions> get_range() const {
+    return range;
+  }
 
   DataContainerD(const DataContainerD& rhs)
       : alloc(rhs.alloc), range(rhs.range) {
     allocate_ptr = shared_ptr_class<T>(alloc.allocate(range.get_liner()));
     ptr          = allocate_ptr.get();
-    memcpy(ptr, rhs.ptr, sizeof(T) * range.get_liner());
+    std::memcpy(ptr, rhs.ptr, sizeof(T) * range.get_liner());
   }
 
   DataContainerD(DataContainerD&& rhs)
@@ -108,7 +127,9 @@ public:
   DataContainerND(DataContainerD<T, 1, AllocatorT>&& rhs)
       : DataContainerD<T, 1, AllocatorT>(rhs) {}
 
-  T& operator[](size_t x) const { return this->get_ptr()[x]; }
+  T& operator[](size_t x) const {
+    return this->get_ptr()[x];
+  }
 };
 
 template <typename T, typename AllocatorT>

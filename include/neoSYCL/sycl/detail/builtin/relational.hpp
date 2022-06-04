@@ -5,8 +5,12 @@ namespace neosycl::sycl {
 #include <cmath>
 
 #define DEFINE_REL_FUNC(F, Exp)                                                \
-  inline std::uint32_t F(float p0, float p1) { return std::uint32_t(Exp); }    \
-  inline std::uint64_t F(double p0, double p1) { return std::uint64_t(Exp); }  \
+  inline std::uint32_t F(float p0, float p1) {                                 \
+    return std::uint32_t(Exp);                                                 \
+  }                                                                            \
+  inline std::uint64_t F(double p0, double p1) {                               \
+    return std::uint64_t(Exp);                                                 \
+  }                                                                            \
   template <size_t D>                                                          \
   vec<std::uint32_t, D> F(const vec<float, D>& p0, const vec<float, D>& p1) {  \
     vec<std::uint32_t, D> r;                                                   \
@@ -24,8 +28,12 @@ namespace neosycl::sycl {
   }
 
 #define DEFINE_TEST_FUNC(F, Exp)                                               \
-  inline std::uint32_t F(float p) { return std::uint32_t(Exp); }               \
-  inline std::uint64_t F(double p) { return std::uint64_t(Exp); }              \
+  inline std::uint32_t F(float p) {                                            \
+    return std::uint32_t(Exp);                                                 \
+  }                                                                            \
+  inline std::uint64_t F(double p) {                                           \
+    return std::uint64_t(Exp);                                                 \
+  }                                                                            \
   template <size_t D>                                                          \
   vec<std::uint32_t, D> F(const vec<float, D>& p) {                            \
     vec<std::uint32_t, D> r;                                                   \

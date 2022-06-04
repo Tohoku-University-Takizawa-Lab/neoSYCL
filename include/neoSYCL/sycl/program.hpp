@@ -1,6 +1,5 @@
 #pragma once
 
-//#include "neoSYCL/sycl/property_list.hpp"
 #include "neoSYCL/sycl/info/program.hpp"
 
 namespace neosycl::sycl {
@@ -10,10 +9,14 @@ class program_impl;
 class program_data;
 }; // namespace detail
 
+class handler;
+
 enum class program_state { none, compiled, linked };
 
+///////////////////////////////////////////////////////////////////////////////
 class program {
 public:
+  friend class handler;
   using data = detail::program_data;
 
   program() = delete;
@@ -35,7 +38,10 @@ public:
 
   //  program(const context &context, cl_program clProgram);
 
-  //  cl_program get() const;
+  /* -- common interface members -- */
+  cl_program get() const {
+    throw unimplemented();
+  }
 
   bool is_host() const;
 
@@ -79,6 +85,9 @@ public:
   string_class get_build_options() const;
 
   program_state get_state() const;
+
+  // INTERNAL USE ONLY
+  shared_ptr_class<detail::program_data> get_data(device dev) const;
 
 private:
   shared_ptr_class<detail::program_impl> impl_;

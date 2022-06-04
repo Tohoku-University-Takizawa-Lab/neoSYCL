@@ -7,11 +7,12 @@
 namespace neosycl::sycl {
 
 namespace detail {
-class platform_impl; // #include <> in device.hpp
+class platform_impl;
 };
 
 class device;
 
+///////////////////////////////////////////////////////////////////////////////
 class platform {
   friend class initial_platform_builder;
 
@@ -30,13 +31,17 @@ public:
   // explicit platform() { *this = get_default_platform(); }
   explicit platform() : impl_(nullptr) {}
 
-  explicit platform(cl_platform_id platformID) { throw unimplemented(); }
+  explicit platform(cl_platform_id platformID) {
+    throw unimplemented();
+  }
 
   explicit platform(const device_selector& deviceSelector);
 
   /* -- common interface members -- */
   /* platform is not associated with OpenCL => 0  */
-  cl_platform_id get() const { return 0; }
+  cl_platform_id get() const {
+    return 0;
+  }
 
   vector_class<device>
       get_devices(info::device_type = info::device_type::all) const;

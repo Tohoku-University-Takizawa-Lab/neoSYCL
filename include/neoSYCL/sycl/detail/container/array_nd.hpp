@@ -84,9 +84,13 @@ struct ArrayND {
   template <int D = dimensions, typename = std::enable_if_t<D == 3>>
   ArrayND(size_t dim0, size_t dim1, size_t dim2) : data{dim0, dim1, dim2} {}
 
-  size_t operator[](int dimension) const { return data[dimension]; }
+  size_t operator[](int dimension) const {
+    return data[dimension];
+  }
 
-  size_t& operator[](int dimension) { return data[dimension]; }
+  size_t& operator[](int dimension) {
+    return data[dimension];
+  }
 
   size_t get_liner() const {
     if (dimensions == 2) {

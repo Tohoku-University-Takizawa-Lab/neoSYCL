@@ -1,12 +1,10 @@
-#ifndef CUSTOM_SYCL_INCLUDE_SYCL_QUEUE_HPP_
-#define CUSTOM_SYCL_INCLUDE_SYCL_QUEUE_HPP_
-
-#include <utility>
-
+#pragma once
 #include "neoSYCL/sycl/info/queue.hpp"
 #include "neoSYCL/sycl/detail/task_counter.hpp"
+
 namespace neosycl::sycl {
 
+///////////////////////////////////////////////////////////////////////////////
 class queue {
 public:
   explicit queue(const property_list& propList = {})
@@ -61,11 +59,17 @@ public:
 
   //  cl_command_queue get() const;
 
-  context get_context() const { return ctx; }
+  context get_context() const {
+    return ctx;
+  }
 
-  device get_device() const { return bind_device; }
+  device get_device() const {
+    return bind_device;
+  }
 
-  bool is_host() const { return bind_device.is_host(); }
+  bool is_host() const {
+    return bind_device.is_host();
+  }
 
   template <info::queue param>
   typename info::param_traits<info::queue, param>::return_type get_info() const;
@@ -90,13 +94,17 @@ public:
   template <typename T>
   event submit(T cgf, const queue& secondaryQueue);
 
-  void wait() { counter->wait(); }
+  void wait() {
+    counter->wait();
+  }
 
   void wait_and_throw();
 
   void throw_asynchronous();
 
-  virtual ~queue() { counter->wait(); }
+  virtual ~queue() {
+    counter->wait();
+  }
 
 private:
   device bind_device;
@@ -107,5 +115,3 @@ private:
 };
 
 } // namespace neosycl::sycl
-
-#endif // CUSTOM_SYCL_INCLUDE_SYCL_QUEUE_HPP_

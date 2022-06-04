@@ -1,5 +1,4 @@
-#ifndef NEOSYCL_INCLUDE_NEOSYCL_SYCL_HPP_
-#define NEOSYCL_INCLUDE_NEOSYCL_SYCL_HPP_
+#pragma once
 
 // debug headers
 #include "sycl/detail/debug.hpp"
@@ -10,6 +9,7 @@
 #include "sycl/range.hpp"
 #include "sycl/item.hpp"
 #include "sycl/id.hpp"
+#include "sycl/nd_range.hpp"
 
 #include "sycl/detail/runtime/acc.hpp"
 #include "sycl/detail/builtin/builtin.hpp"
@@ -49,5 +49,3 @@ namespace neosycl {
 using namespace neosycl::sycl;
 
 }
-
-#endif // NEOSYCL_INCLUDE_NEOSYCL_SYCL_HPP_
