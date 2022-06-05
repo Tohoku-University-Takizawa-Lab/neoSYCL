@@ -44,7 +44,7 @@ public:
   virtual void set_range(kernel&, size_t r[6])              = 0;
   virtual kernel_data_ptr create_kernel_data(const char* s) = 0;
 
-  device get_device() const {
+  device& get_device() {
     return dev_;
   }
 
@@ -117,7 +117,7 @@ protected:
   virtual void copy_back(void*, void*, size_t)         = 0;
 
   template <typename T>
-  auto cast(kernel k) const {
+  auto cast(kernel k) {
     auto kd  = k.get_kernel_data(get_device());
     auto kdc = std::dynamic_pointer_cast<T>(kd);
     if (kdc.get() == nullptr) {
@@ -131,7 +131,8 @@ protected:
 class program_impl {
   friend class sycl::program;
   using kernel_data_ptr = program_data::kernel_data_ptr;
-  using kernel_map      = std::map<string_class, kernel>;
+  using kernel_hash_map      = std::map<size_t, kernel>;
+  using kernel_name_map      = std::map<string_class, kernel>;
 
   program_impl(program p, context c, vector_class<device> d)
       : prog_(p), ctx_(c) {
@@ -164,40 +165,53 @@ public:
   }
 
   bool has_kernel(string_class name) {
-    return kernels_.count(name);
+    return name_map_.count(name);
   }
 
   template <typename KernelName>
   bool has_kernel() {
     const std::type_info& tinfo = typeid(KernelName*);
+    if (hash_map_.count(tinfo.hash_code())) 
+      return true;
 
     string_class name = get_kernel_name_from_class(tinfo);
     return has_kernel(name);
   }
 
   kernel get_kernel(string_class name) {
-    if (kernels_.count(name)) {
-      DEBUG_INFO("kernel found: %s", name.c_str());
-      return kernels_.at(name);
+    if (name_map_.count(name)) {
+      DEBUG_INFO("kernel found: %s", name);
+      return name_map_.at(name);
     }
 
     kernel k(name.c_str(), prog_);
+#ifndef DISABLE_MULTI_DEVICE_SUPPORT
     for (auto& d : data_) {
       auto kd = d->create_kernel_data(name.c_str());
       k.get_impl()->map.insert(std::make_pair(d->get_device().type(), kd));
     }
-    // kernel k = task_handler->create_kernel(name.c_str());
-    kernels_.insert(std::make_pair(name, k));
+#else
+    auto kd            = data_[0]->create_kernel_data(name.c_str());
+    k.get_impl()->data = std::move(kd);
+#endif
+    name_map_.insert(std::make_pair(name, k));
     return k;
   }
 
   template <typename KernelName>
   kernel get_kernel() {
     const std::type_info& tinfo = typeid(KernelName*);
+    if (hash_map_.count(tinfo.hash_code())) {
+      DEBUG_INFO("kernel found: %s", tinfo.name());
+      return hash_map_.at(tinfo.hash_code());
+    }
 
     string_class name = get_kernel_name_from_class(tinfo);
     DEBUG_INFO("kernel class: %s", name.c_str());
-    return get_kernel(name);
+
+    kernel k=std::move(get_kernel(name));
+    hash_map_.insert(std::make_pair(tinfo.hash_code(), k));
+    return k;
   }
 
   context get_context() const {
@@ -209,7 +223,8 @@ private:
   program prog_;
   context ctx_;
   vector_class<shared_ptr_class<program_data>> data_;
-  kernel_map kernels_; // all exiting kernels in the context
+  kernel_hash_map hash_map_; // quickly accessible
+  kernel_name_map name_map_; // all exiting kernels
 };
 
 class program_data_host : public program_data {

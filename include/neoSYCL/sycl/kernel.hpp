@@ -22,7 +22,7 @@ public:
   using accessor_list = vector_class<detail::accessor_data>;
 
   kernel(string_class name, program prog);
-  kernel(const kernel& k) : acc_(k.acc_), impl_(k.impl_) {}
+  kernel(const kernel& k) : impl_(k.impl_) {}
   ~kernel() = default;
 
   // INTERNAL USE ONLY: for debugging
@@ -31,15 +31,10 @@ public:
   shared_ptr_class<detail::kernel_impl> get_impl() {
     return impl_;
   }
-  void set_acc(accessor_list& acc) {
-    acc_ = acc;
-  }
-  accessor_list& get_acc() {
-    return acc_;
-  }
+  void set_acc(accessor_list& acc);
+  accessor_list& get_acc();
 
 private:
-  accessor_list acc_;
   shared_ptr_class<detail::kernel_impl> impl_;
 };
 

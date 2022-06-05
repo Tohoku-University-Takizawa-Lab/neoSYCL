@@ -109,7 +109,7 @@ private:
 };
 
 bool operator==(const device& lhs, const device& rhs) {
-  return (lhs.impl_ == rhs.impl_ && lhs.plt_ == rhs.plt_);
+  return (lhs.impl_ == rhs.impl_);
 }
 bool operator!=(const device& lhs, const device& rhs) {
   return !(lhs == rhs);
