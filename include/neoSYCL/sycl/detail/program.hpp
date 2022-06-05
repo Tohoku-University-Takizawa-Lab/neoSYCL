@@ -8,6 +8,12 @@
 
 namespace neosycl::sycl {
 
+class handler;
+
+namespace detail::container {
+class CopybackProxy;
+}
+
 namespace detail {
 const char* DEFAULT_LIB = "./kernel.so";
 const char* ENV_KERNEL  = "NEOSYCL_KERNEL";
@@ -27,6 +33,9 @@ inline string_class get_kernel_name_from_class(const std::type_info& ti) {
 
 class program_data {
 public:
+  friend class neosycl::sycl::handler;
+  friend class container::CopybackProxy;
+
   using kernel_data_ptr = shared_ptr_class<kernel_data>;
   // don't copy the instance
   program_data(const program_data& rhs) = delete;
@@ -48,12 +57,13 @@ public:
     return dev_;
   }
 
+protected:
   template <typename T, size_t D, typename A = buffer_allocator<T>>
   void* get_pointer(container::BufferContainer<T, D, A>& buf) {
     if (get_device().is_host())
       return buf.get_raw_ptr();
-    else if (buf.map.count((uint64_t)this))
-      return buf.map.at((uint64_t)this).ptr;
+    else if (buf.map.count(this))
+      return buf.map.at(this).ptr;
     throw runtime_error("invalid BufferContainer object");
   }
 
@@ -63,13 +73,13 @@ public:
     if (get_device().is_host())
       return buf.get_raw_ptr();
 
-    int count = buf.map.count((uint64_t)this);
+    int count = buf.map.count(this);
     if (count == 1)
-      return buf.map.at((uint64_t)this).ptr;
+      return buf.map.at(this).ptr;
     else if (count == 0) {
       void* dp = alloc_mem(buf.get_raw_ptr(), buf.get_size(), m);
       container::device_ptr cdp = {dp, m};
-      buf.map.insert(std::make_pair((uint64_t)this, cdp));
+      buf.map.insert(std::make_pair(this, cdp));
       return dp;
     }
     throw runtime_error("invalid BufferContainer object");
@@ -79,8 +89,8 @@ public:
   void free_mem(container::BufferContainer<T, D, A>& buf) {
     if (dev_.is_host())
       return;
-    if (buf.map.count((uint64_t)this)) {
-      auto [devp, mode] = buf.map.at((uint64_t)this);
+    if (buf.map.count(this)) {
+      auto [devp, mode] = buf.map.at(this);
       if (mode != access::mode::read)
         copy_back(buf.get_raw_ptr(), devp, buf.get_size());
       // buf.map.erase(dev_);
@@ -131,8 +141,8 @@ protected:
 class program_impl {
   friend class sycl::program;
   using kernel_data_ptr = program_data::kernel_data_ptr;
-  using kernel_hash_map      = std::map<size_t, kernel>;
-  using kernel_name_map      = std::map<string_class, kernel>;
+  using kernel_hash_map = std::map<size_t, kernel>;
+  using kernel_name_map = std::map<string_class, kernel>;
 
   program_impl(program p, context c, vector_class<device> d)
       : prog_(p), ctx_(c) {
@@ -171,7 +181,7 @@ public:
   template <typename KernelName>
   bool has_kernel() {
     const std::type_info& tinfo = typeid(KernelName*);
-    if (hash_map_.count(tinfo.hash_code())) 
+    if (hash_map_.count(tinfo.hash_code()))
       return true;
 
     string_class name = get_kernel_name_from_class(tinfo);
@@ -209,7 +219,7 @@ public:
     string_class name = get_kernel_name_from_class(tinfo);
     DEBUG_INFO("kernel class: %s", name.c_str());
 
-    kernel k=std::move(get_kernel(name));
+    kernel k = std::move(get_kernel(name));
     hash_map_.insert(std::make_pair(tinfo.hash_code(), k));
     return k;
   }
@@ -294,13 +304,25 @@ shared_ptr_class<detail::program_data> program::get_data(device dev) const {
 }
 
 namespace detail::container {
+
+class CopybackProxy {
+public:
+  template <typename T, size_t D, typename A = buffer_allocator<T>>
+  void copy_back(BufferContainer<T, D, A>& buf, program_data* p) {
+    if (p) {
+      DEBUG_INFO("device type = %d", p->get_device().type());
+      p->free_mem(buf);
+    }
+  }
+};
+
 template <typename T, size_t D, typename A>
 BufferContainer<T, D, A>::~BufferContainer() {
+  CopybackProxy proxy;
   DEBUG_INFO("# device pointers = %lu", map.size());
   for (auto& d : map) {
     program_data* p = (program_data*)(d.first);
-    DEBUG_INFO("device type = %d", p->get_device().type());
-    // p->free_mem(*this);
+    proxy.copy_back(*this, p);
   }
 }
 } // namespace detail::container

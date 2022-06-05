@@ -127,6 +127,8 @@ public:
             access::placeholder p>
   void* alloc_mem_(sycl::accessor<T, D, m, t, p>& acc) {
     acc.device_ptr = hndl_->alloc_mem(*acc.data, m);
+    // avoid deleting program_data before buffer destruction.
+    acc.data->progs.push_back(prog_);
     return acc.device_ptr;
   }
 

@@ -3,7 +3,10 @@
 #include "neoSYCL/sycl/access.hpp"
 
 namespace neosycl::sycl {
-// class device;
+
+namespace detail {
+class program_data;
+};
 
 namespace detail::container {
 
@@ -35,7 +38,13 @@ public:
       : DataContainerND<T, dimensions, AllocatorT>(rhs) {}
 
   ~BufferContainer();
-  std::map<uint64_t, device_ptr> map;
+
+  /* keep the program object not to delete program_data before buffer
+   * destruction */
+  vector_class<program> progs; // See handler::alloc_mem_
+
+  /* {program_data*, device_ptr} */
+  std::map<program_data*, device_ptr> map; // See program_data::alloc_mem
 };
 } // namespace detail::container
 } // namespace neosycl::sycl

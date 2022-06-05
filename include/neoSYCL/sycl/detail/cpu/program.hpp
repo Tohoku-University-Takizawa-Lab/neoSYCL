@@ -6,6 +6,7 @@ class program_data_cpu : public program_data {
   void* dll_;
 
 public:
+  friend class handler;
   program_data_cpu(device d) : program_data(d), dll_(nullptr) {}
 
   ~program_data_cpu() {
