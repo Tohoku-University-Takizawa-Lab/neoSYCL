@@ -75,6 +75,23 @@ public:
     return rt;
   }
 
+  int copy_mem(void* dst, const void* src, size_t sz) {
+    shared_ptr_class<unsigned char> tmp(new unsigned char[sz]);
+
+    // the data is copied twice...
+    int rt = veo_read_mem(proc_, tmp.get(), (uint64_t)src, sz);
+    if (rt != VEO_COMMAND_OK) {
+      PRINT_ERR("veo_copy_mem() failed (%d)", rt);
+      throw exception("veo_util::copy_mem() failed");
+    }
+    rt = veo_write_mem(proc_, (uint64_t)dst, tmp.get(), sz);
+    if (rt != VEO_COMMAND_OK) {
+      PRINT_ERR("veo_copy_mem() failed (%d)", rt);
+      throw exception("veo_util::copy_mem() failed");
+    }
+    return rt;
+  }
+
   void* alloc_mem(size_t sz) {
     uint64_t ve_addr_int;
 

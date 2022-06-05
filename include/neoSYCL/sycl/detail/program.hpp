@@ -49,59 +49,27 @@ public:
   program_data(device d) : dev_(d) {}
   virtual ~program_data() {}
 
-  virtual bool open()                                       = 0;
-  virtual bool is_open()                                    = 0;
-  virtual void run(kernel k)                                = 0;
-  virtual void set_capture(kernel&, void* p, size_t sz)     = 0;
-  virtual void set_range(kernel&, size_t r[6])              = 0;
-  virtual kernel_data_ptr create_kernel_data(const char* s) = 0;
-
   device& get_device() {
     return dev_;
   }
 
+  virtual bool open()                                       = 0;
+  virtual bool is_open()                                    = 0;
+  virtual void run(kernel k)                                = 0;
+  virtual kernel_data_ptr create_kernel_data(const char* s) = 0;
+
 protected:
-  template <typename T, size_t D, typename A = buffer_allocator<T>>
-  void* get_pointer(container::BufferContainer<T, D, A>& buf) {
-    if (get_device().is_host())
-      return buf.get_raw_ptr();
-    else if (buf.map.count(this))
-      return buf.map.at(this).ptr;
-    throw runtime_error("invalid BufferContainer object");
-  }
+  device dev_;
 
-  template <typename T, size_t D, typename A = buffer_allocator<T>>
-  void* alloc_mem(container::BufferContainer<T, D, A>& buf,
-                  access::mode m = access::mode::read) {
-    if (get_device().is_host())
-      return buf.get_raw_ptr();
+  virtual void* alloc_mem(void*, size_t, access::mode)  = 0;
+  virtual void free_mem(void*)                          = 0;
+  virtual void write_mem(void*, void*, size_t)          = 0;
+  virtual void read_mem(void*, void*, size_t)           = 0;
+  virtual void copy_mem(void*, void*, size_t)           = 0;
+  virtual void set_capture(kernel&, void* p, size_t sz) = 0;
+  virtual void set_range(kernel&, size_t r[6])          = 0;
 
-    int count = buf.map.count(this);
-    if (count == 1)
-      return buf.map.at(this).ptr;
-    else if (count == 0) {
-      void* dp = alloc_mem(buf.get_raw_ptr(), buf.get_size(), m);
-      container::device_ptr cdp = {dp, m};
-      buf.map.insert(std::make_pair(this, cdp));
-      return dp;
-    }
-    throw runtime_error("invalid BufferContainer object");
-  }
-
-  template <typename T, size_t D, typename A = buffer_allocator<T>>
-  void free_mem(container::BufferContainer<T, D, A>& buf) {
-    if (dev_.is_host())
-      return;
-    if (buf.map.count(this)) {
-      auto [devp, mode] = buf.map.at(this);
-      if (mode != access::mode::read)
-        copy_back(buf.get_raw_ptr(), devp, buf.get_size());
-      // buf.map.erase(dev_);
-      free_mem(devp);
-    }
-  }
-
-  template <size_t dim>
+  template <int dim>
   void set_range(kernel& k, range<dim> r) {
     size_t sz[6] = {1, 1, 1, 0, 0, 0};
     for (size_t idx(0); idx != dim; idx++) {
@@ -110,7 +78,7 @@ protected:
     set_range(k, sz);
   }
 
-  template <size_t dim>
+  template <int dim>
   void set_range(kernel& k, range<dim> r, id<dim> i) {
     size_t sz[6] = {1, 1, 1, 0, 0, 0};
     for (size_t idx(0); idx != dim; idx++) {
@@ -121,13 +89,6 @@ protected:
     }
     set_range(k, sz);
   }
-
-protected:
-  device dev_;
-
-  virtual void* alloc_mem(void*, size_t, access::mode) = 0;
-  virtual void free_mem(void*)                         = 0;
-  virtual void copy_back(void*, void*, size_t)         = 0;
 
   template <typename T>
   auto cast(kernel k) {
@@ -195,7 +156,7 @@ public:
 
   kernel get_kernel(string_class name) {
     if (name_map_.count(name)) {
-      DEBUG_INFO("kernel found: %s", name);
+      DEBUG_INFO("kernel found: %s", name.c_str());
       return name_map_.at(name);
     }
 
@@ -217,7 +178,7 @@ public:
   kernel get_kernel() {
     const std::type_info& tinfo = typeid(KernelName*);
     if (hash_map_.count(tinfo.hash_code())) {
-      DEBUG_INFO("kernel found: %s", tinfo.name());
+      DEBUG_INFO("kernel found: hash=%lu", tinfo.has_code());
       return hash_map_.at(tinfo.hash_code());
     }
 
@@ -264,7 +225,11 @@ public:
 
   void free_mem(void* p) override {}
 
-  void copy_back(void* h, void* d, size_t s) override {}
+  void write_mem(void* d, void* h, size_t s) override {}
+
+  void read_mem(void* h, void* d, size_t s) override {}
+
+  void copy_mem(void* h, void* d, size_t s) override {}
 
   void set_capture(kernel& k, void* p, size_t sz) override {}
 
@@ -329,24 +294,37 @@ shared_ptr_class<detail::program_data> program::get_data(device dev) const {
 
 namespace detail::container {
 
+///////////////////////////////////////////////////////////////////////////////
+// Copyback device data to host memory at buffer object destruction
 class CopybackProxy {
+  // buffer must be copied back even after a queue/program is destoryed.
+  // so shared_ptr<program_data> is kept in the map to do it.
 public:
-  template <typename T, size_t D, typename A = buffer_allocator<T>>
-  void copy_back(BufferContainer<T, D, A>& buf, program_data* p) {
-    if (p) {
-      DEBUG_INFO("device type = %d", p->get_device().type());
-      p->free_mem(buf);
+  template <typename T, int D, typename A = buffer_allocator<T>>
+  void operator()(BufferContainer<T, D, A>& buf,
+                  shared_ptr_class<program_data> p, bool free_mem_flag) {
+    DEBUG_INFO("memory copy back : device type = %d",
+               (int)p->get_device().type());
+
+    if (p->get_device().is_host())
+      return;
+    if (buf.map.count(p)) {
+      auto [devp, mode] = buf.map.at(p);
+      if (mode != access::mode::read)
+        p->read_mem(buf.get_raw_ptr(), devp, buf.get_size());
+      // buf.map.erase(p);
+      if (free_mem_flag)
+        p->free_mem(devp);
     }
   }
 };
 
-template <typename T, size_t D, typename A>
+template <typename T, int D, typename A>
 BufferContainer<T, D, A>::~BufferContainer() {
   CopybackProxy proxy;
-  DEBUG_INFO("# device pointers = %lu", map.size());
+  DEBUG_INFO("buffer destruction: %lu device(s)", map.size());
   for (auto& d : map) {
-    program_data* p = (program_data*)(d.first);
-    proxy.copy_back(*this, p);
+    proxy(*this, d.first, true);
   }
 }
 } // namespace detail::container

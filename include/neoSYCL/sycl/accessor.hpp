@@ -6,12 +6,12 @@
 namespace neosycl::sycl {
 
 // prototype decls
-template <typename T, size_t dimensions, typename AllocatorT>
+template <typename T, int dimensions, typename AllocatorT>
 class buffer;
 class handler;
 
 ///////////////////////////////////////////////////////////////////////////////
-template <typename dataT, size_t dimensions, access::mode accessMode,
+template <typename dataT, int dimensions, access::mode accessMode,
           access::target accessTarget       = access::target::global_buffer,
           access::placeholder isPlaceholder = access::placeholder::false_t>
 class accessor {
@@ -30,11 +30,11 @@ public:
   accessor& operator=(const accessor& rhs) = default;
   accessor& operator=(accessor&& rhs) = default;
 
-  template <typename T, size_t D, access::mode M, access::target A,
+  template <typename T, int D, access::mode M, access::target A,
             access::placeholder P>
   friend bool operator==(const accessor<T, D, M, A, P>& lhs,
                          const accessor<T, D, M, A, P>& rhs);
-  template <typename T, size_t D, access::mode M, access::target A,
+  template <typename T, int D, access::mode M, access::target A,
             access::placeholder P>
   friend bool operator!=(const accessor<T, D, M, A, P>& lhs,
                          const accessor<T, D, M, A, P>& rhs);
@@ -46,7 +46,7 @@ public:
   accessTarget == access::target::host_buffer) || (isPlaceholder ==
   access::placeholder::true_t && (accessTarget == access::target::global_buffer
   || accessTarget == access::target::constant_buffer))) && dimensions == 0 */
-  template <typename AllocatorT, size_t D = dimensions,
+  template <typename AllocatorT, int D = dimensions,
             typename = std::enable_if_t<(D == 0)>>
   accessor(buffer<dataT, 1, AllocatorT>& bufferRef,
            const property_list& propList = {})
@@ -56,7 +56,7 @@ public:
   /* Available only when: (isPlaceholder == access::placeholder::false_t &&
      (accessTarget == access::target::global_buffer || accessTarget ==
      access::target::constant_buffer)) && dimensions == 0 */
-  template <typename AllocatorT, size_t D = dimensions,
+  template <typename AllocatorT, int D = dimensions,
             typename = std::enable_if_t<(D == 0)>>
   accessor(buffer<dataT, 1, AllocatorT>& bufferRef,
            handler& commandGroupHandlerRef, const property_list& propList = {})
@@ -70,7 +70,7 @@ public:
    accessTarget == access::target::host_buffer) || (isPlaceholder ==
    access::placeholder::true_t && (accessTarget == access::target::global_buffer
    || accessTarget == access::target::constant_buffer))) && dimensions > 0 */
-  template <typename AllocatorT, size_t D = dimensions,
+  template <typename AllocatorT, int D = dimensions,
             typename = std::enable_if_t<(D > 0)>>
   accessor(buffer<dataT, dimensions, AllocatorT>& bufferRef,
            const property_list& propList = {})
@@ -80,7 +80,7 @@ public:
   /* Available only when: (isPlaceholder == access::placeholder::false_t &&
    (accessTarget == access::target::global_buffer || accessTarget ==
    access::target::constant_buffer)) && dimensions > 0 */
-  template <typename AllocatorT, size_t D = dimensions,
+  template <typename AllocatorT, int D = dimensions,
             typename = std::enable_if_t<(D > 0)>>
   accessor(buffer<dataT, dimensions, AllocatorT>& bufferRef,
            handler& commandGroupHandlerRef, const property_list& propList = {})
@@ -93,7 +93,7 @@ public:
    accessTarget == access::target::host_buffer) || (isPlaceholder ==
   access::placeholder::true_t && (accessTarget == access::target::global_buffer
    || accessTarget == access::target::constant_buffer)) && dimensions > 0 */
-  template <typename AllocatorT, size_t D = dimensions,
+  template <typename AllocatorT, int D = dimensions,
             typename = std::enable_if_t<(D > 0)>>
   accessor(buffer<dataT, dimensions, AllocatorT>& bufferRef,
            range<dimensions> accessRange, const property_list& propList = {})
@@ -104,7 +104,7 @@ public:
    accessTarget == access::target::host_buffer) || (isPlaceholder ==
    access::placeholder::true_t && (accessTarget == access::target::global_buffer
   || accessTarget == access::target::constant_buffer)) && dimensions > 0 */
-  template <typename AllocatorT, size_t D = dimensions,
+  template <typename AllocatorT, int D = dimensions,
             typename = std::enable_if_t<(D > 0)>>
   accessor(buffer<dataT, dimensions, AllocatorT>& bufferRef,
            range<dimensions> accessRange, id<dimensions> accessOffset,
@@ -115,7 +115,7 @@ public:
   /* Available only when: (isPlaceholder == access::placeholder::false_t &&
   (accessTarget == access::target::global_buffer || accessTarget ==
   access::target::constant_buffer)) && dimensions > 0 */
-  template <typename AllocatorT, size_t D = dimensions,
+  template <typename AllocatorT, int D = dimensions,
             typename = std::enable_if_t<(D > 0)>>
   accessor(buffer<dataT, dimensions, AllocatorT>& bufferRef,
            handler& commandGroupHandlerRef, range<dimensions> accessRange,
@@ -128,7 +128,7 @@ public:
   /* Available only when: (isPlaceholder == access::placeholder::false_t &&
   (accessTarget == access::target::global_buffer || accessTarget ==
   access::target::constant_buffer)) && dimensions > 0 */
-  template <typename AllocatorT, size_t D = dimensions,
+  template <typename AllocatorT, int D = dimensions,
             typename = std::enable_if_t<(D > 0)>>
   accessor(buffer<dataT, dimensions, AllocatorT>& bufferRef,
            handler& commandGroupHandlerRef, range<dimensions> accessRange,
@@ -164,7 +164,7 @@ public:
   /* Available only when: (accessMode == access::mode::read_write ||
    * accessMode
    * == access::mode::discard_read_write) && dimensions == 0) */
-  template <access::mode Mode = accessMode, size_t D = dimensions,
+  template <access::mode Mode = accessMode, int D = dimensions,
             typename =
                 std::enable_if_t<((Mode == access::mode::read_write) ||
                                   (Mode == access::mode::discard_read_write)) &&
@@ -174,7 +174,7 @@ public:
   /* Available only when: (accessMode == access::mode::write || accessMode ==
    * access::mode::read_write || accessMode == access::mode::discard_write ||
    * accessMode == access::mode::discard_read_write) && dimensions > 0) */
-  template <access::mode Mode = accessMode, size_t D = dimensions,
+  template <access::mode Mode = accessMode, int D = dimensions,
             typename =
                 std::enable_if_t<((Mode == access::mode::write) ||
                                   (Mode == access::mode::read_write) ||
@@ -188,7 +188,7 @@ public:
   }
 
   template <
-      access::mode Mode = accessMode, size_t D = dimensions,
+      access::mode Mode = accessMode, int D = dimensions,
       typename = std::enable_if_t<(Mode == access::mode::read) && (D > 0)>>
   dataT operator[](id<dimensions> index) const {
     size_t index_val = id2index(index);
@@ -199,7 +199,7 @@ public:
   /* Available only when: (accessMode == access::mode::write || accessMode ==
    * access::mode::read_write || accessMode == access::mode::discard_write ||
    * accessMode == access::mode::discard_read_write) && dimensions == 1) */
-  template <access::mode Mode = accessMode, size_t D = dimensions,
+  template <access::mode Mode = accessMode, int D = dimensions,
             typename =
                 std::enable_if_t<((Mode == access::mode::write) ||
                                   (Mode == access::mode::read_write) ||
@@ -211,14 +211,14 @@ public:
   }
 
   template <
-      access::mode Mode = accessMode, size_t D = dimensions,
+      access::mode Mode = accessMode, int D = dimensions,
       typename = std::enable_if_t<(Mode == access::mode::read) && (D == 1)>>
   dataT operator[](size_t index) const {
     return (*data)[index];
   }
 
   /* Available only when: dimensions > 1 */
-  template <access::mode Mode = accessMode, size_t D = dimensions,
+  template <access::mode Mode = accessMode, int D = dimensions,
             typename =
                 std::enable_if_t<((Mode == access::mode::write) ||
                                   (Mode == access::mode::read_write) ||
@@ -230,14 +230,14 @@ public:
   }
 
   template <
-      access::mode Mode = accessMode, size_t D = dimensions,
+      access::mode Mode = accessMode, int D = dimensions,
       typename = std::enable_if_t<(Mode == access::mode::read) && (D == 2)>>
   const dataT* operator[](size_t index) const {
     return (*data)[index];
   }
 
   /* Available only when: dimensions > 1 */
-  template <access::mode Mode = accessMode, size_t D = dimensions,
+  template <access::mode Mode = accessMode, int D = dimensions,
             typename =
                 std::enable_if_t<((Mode == access::mode::write) ||
                                   (Mode == access::mode::read_write) ||
@@ -249,7 +249,7 @@ public:
   }
 
   template <
-      access::mode Mode = accessMode, size_t D = dimensions,
+      access::mode Mode = accessMode, int D = dimensions,
       typename = std::enable_if_t<(Mode == access::mode::read) && (D == 3)>>
   const dataT** operator[](size_t index) const {
     return (*data)[index];
@@ -258,7 +258,7 @@ public:
   /* Available only when: accessMode == access::mode::read && dimensions == 0
    */
   template <
-      access::mode Mode = accessMode, size_t D = dimensions,
+      access::mode Mode = accessMode, int D = dimensions,
       typename = std::enable_if_t<(Mode == access::mode::read) && (D == 0)>>
   operator dataT() const;
 
@@ -271,14 +271,14 @@ public:
   /* Available only when: accessMode == access::mode::atomic && dimensions ==
   0 */
   template <
-      access::mode Mode = accessMode, size_t D = dimensions,
+      access::mode Mode = accessMode, int D = dimensions,
       typename = std::enable_if_t<(Mode == access::mode::atomic) && (D == 0)>>
   operator atomic<dataT, access::address_space::global_space>() const;
 
   /* Available only when: accessMode == access::mode::atomic && dimensions >
   0 */
   template <
-      access::mode Mode = accessMode, size_t D = dimensions,
+      access::mode Mode = accessMode, int D = dimensions,
       typename = std::enable_if_t<(Mode == access::mode::atomic) && (D > 0)>>
   atomic<dataT, access::address_space::global_space>
   operator[](id<dimensions> index) const;
@@ -286,7 +286,7 @@ public:
   /* Available only when: accessMode == access::mode::atomic && dimensions ==
   1 */
   template <
-      access::mode Mode = accessMode, size_t D = dimensions,
+      access::mode Mode = accessMode, int D = dimensions,
       typename = std::enable_if_t<(Mode == access::mode::atomic) && (D == 1)>>
   atomic<dataT, access::address_space::global_space>
   operator[](size_t index) const;
@@ -320,7 +320,7 @@ private:
   void alloc_(handler& h) /* defined in handler.hpp */;
 };
 
-template <typename T, size_t D, access::mode M, access::target A,
+template <typename T, int D, access::mode M, access::target A,
           access::placeholder P>
 bool operator==(const accessor<T, D, M, A, P>& lhs,
                 const accessor<T, D, M, A, P>& rhs) {
@@ -328,7 +328,7 @@ bool operator==(const accessor<T, D, M, A, P>& lhs,
          lhs.accessOffset == rhs.accessOffset;
 }
 
-template <typename T, size_t D, access::mode M, access::target A,
+template <typename T, int D, access::mode M, access::target A,
           access::placeholder P>
 bool operator!=(const accessor<T, D, M, A, P>& lhs,
                 const accessor<T, D, M, A, P>& rhs) {

@@ -3,7 +3,7 @@
 
 namespace neosycl::sycl {
 
-template <std::size_t dimensions = 1>
+template <int dimensions = 1>
 struct id {
   id() = default;
 
@@ -17,13 +17,13 @@ struct id {
   id(size_t dim0, size_t dim1, size_t dim2) : data{dim0, dim1, dim2} {}
 
   id(const range<dimensions>& range) {
-    for (size_t i = 0; i < dimensions; i++) {
+    for (int i = 0; i < dimensions; i++) {
       this->data[i] = range.get(i);
     }
   }
 
   id(const item<dimensions>& item) {
-    for (size_t i = 0; i < dimensions; i++) {
+    for (int i = 0; i < dimensions; i++) {
       this->data[i] = item[i];
     }
   }

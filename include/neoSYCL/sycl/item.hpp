@@ -15,10 +15,10 @@
 
 namespace neosycl::sycl {
 
-template <std::size_t dimensions>
+template <int dimensions>
 struct id;
 
-template <size_t dimensions = 1, bool with_offset = true>
+template <int dimensions = 1, bool with_offset = true>
 struct item {
   item() = delete;
 
@@ -64,7 +64,7 @@ struct item {
 };
 
 // experimental impl just for testing
-template <size_t dimensions = 1, bool with_offset = true>
+template <int dimensions = 1, bool with_offset = true>
 struct nd_item : public neosycl::sycl::item<dimensions, with_offset> {
   size_t get_global_linear_id() {
     return 0;

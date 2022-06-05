@@ -52,11 +52,11 @@ bool kernel::is_host() const {
   return get_program().is_host();
 }
 
-context kernel::get_context() const{
+context kernel::get_context() const {
   return get_program().get_context();
 }
 
-program kernel::get_program() const{
+program kernel::get_program() const {
   return impl_->prog;
 }
 

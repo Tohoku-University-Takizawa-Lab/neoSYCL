@@ -10,10 +10,10 @@ namespace neosycl::sycl {
   T N(const T& i) {                                                            \
     return F(i);                                                               \
   }                                                                            \
-  template <typename T, size_t D>                                              \
+  template <typename T, int D>                                                 \
   vec<T, D> N(const vec<T, D>& x) {                                            \
     vec<T, D> R;                                                               \
-    for (size_t i = 0; i < D; i++)                                             \
+    for (int i = 0; i < D; i++)                                                \
       R[i] = F(x[i]);                                                          \
     return R;                                                                  \
   }
@@ -23,10 +23,10 @@ namespace neosycl::sycl {
   typename std::make_unsigned<T>::type N(const T& i) {                         \
     return F(i);                                                               \
   }                                                                            \
-  template <typename T, size_t D>                                              \
+  template <typename T, int D>                                                 \
   vec<typename std::make_unsigned<T>::type, D> N(const vec<T, D>& x) {         \
     vec<typename std::make_unsigned<T>::type, D> R;                            \
-    for (size_t i = 0; i < D; i++)                                             \
+    for (int i = 0; i < D; i++)                                                \
       R[i] = F(x[i]);                                                          \
     return R;                                                                  \
   }
@@ -36,10 +36,10 @@ namespace neosycl::sycl {
   T N(const T& x, const T& y) {                                                \
     return F(x, y);                                                            \
   }                                                                            \
-  template <typename T, size_t D>                                              \
+  template <typename T, int D>                                                 \
   vec<T, D> N(const vec<T, D>& x, const vec<T, D>& y) {                        \
     vec<T, D> R;                                                               \
-    for (size_t i = 0; i < D; i++)                                             \
+    for (int i = 0; i < D; i++)                                                \
       R[i] = F(x[i], y[i]);                                                    \
     return R;                                                                  \
   }
@@ -49,11 +49,11 @@ namespace neosycl::sycl {
   typename std::make_unsigned<T>::type N(const T& x, const T& y) {             \
     return F(x, y);                                                            \
   }                                                                            \
-  template <typename T, size_t D>                                              \
+  template <typename T, int D>                                                 \
   vec<typename std::make_unsigned<T>::type, D> N(const vec<T, D>& x,           \
                                                  const vec<T, D>& y) {         \
     vec<typename std::make_unsigned<T>::type, D> R;                            \
-    for (size_t i = 0; i < D; i++)                                             \
+    for (int i = 0; i < D; i++)                                                \
       R[i] = F(x[i], y[i]);                                                    \
     return R;                                                                  \
   }
@@ -63,10 +63,10 @@ namespace neosycl::sycl {
   T N(const T& x, const T& y, const T& z) {                                    \
     return F(x, y, z);                                                         \
   }                                                                            \
-  template <typename T, size_t D>                                              \
+  template <typename T, int D>                                                 \
   vec<T, D> N(const vec<T, D>& x, const vec<T, D>& y, const vec<T, D>& z) {    \
     vec<T, D> R;                                                               \
-    for (size_t i = 0; i < D; i++)                                             \
+    for (int i = 0; i < D; i++)                                                \
       R[i] = F(x[i], y[i], z[i]);                                              \
     return R;                                                                  \
   }
@@ -77,80 +77,80 @@ namespace neosycl::sycl {
   D: dimensions
 */
 #define FRIEND_VEC_BINARY_OPERATOR(OP)                                         \
-  template <typename T, size_t D>                                              \
+  template <typename T, int D>                                                 \
   friend vec<T, D> operator OP(const vec<T, D>& lhs, const vec<T, D>& rhs);    \
-  template <typename T, size_t D>                                              \
+  template <typename T, int D>                                                 \
   friend vec<T, D> operator OP(const vec<T, D>& lhs, const T& rhs);            \
-  template <typename T, size_t D>                                              \
+  template <typename T, int D>                                                 \
   friend vec<T, D> operator OP(const T& lhs, const vec<T, D>& rhs);
 
 #define DEF_VEC_BINARY_OPERATOR(OP)                                            \
-  template <typename T, size_t D>                                              \
+  template <typename T, int D>                                                 \
   vec<T, D> operator OP(const vec<T, D>& lhs, const vec<T, D>& rhs) {          \
     vec<T, D> r;                                                               \
-    for (size_t i(0); i < D; i++) {                                            \
+    for (int i(0); i < D; i++) {                                               \
       r.data_[i] = lhs.data_[i] OP rhs.data_[i];                               \
     }                                                                          \
     return r;                                                                  \
   }                                                                            \
-  template <typename T, size_t D>                                              \
+  template <typename T, int D>                                                 \
   vec<T, D> operator OP(const vec<T, D>& lhs, const T& rhs) {                  \
     vec<T, D> r;                                                               \
-    for (size_t i(0); i < D; i++) {                                            \
+    for (int i(0); i < D; i++) {                                               \
       r.data_[i] = lhs.data_[i] OP rhs;                                        \
     }                                                                          \
     return r;                                                                  \
   }                                                                            \
-  template <typename T, size_t D>                                              \
+  template <typename T, int D>                                                 \
   vec<T, D> operator OP(const T& lhs, const vec<T, D>& rhs) {                  \
     vec<T, D> r;                                                               \
-    for (size_t i(0); i < D; i++) {                                            \
+    for (int i(0); i < D; i++) {                                               \
       r.data_[i] = rhs.data_[i] OP lhs;                                        \
     }                                                                          \
     return r;                                                                  \
   }
 
 #define FRIEND_VEC_ASSIGN_OPERATOR(OP)                                         \
-  template <typename T, size_t D>                                              \
+  template <typename T, int D>                                                 \
   friend vec<T, D>& operator OP(vec<T, D>& lhs, const vec<T, D>& rhs);         \
-  template <typename T, size_t D>                                              \
+  template <typename T, int D>                                                 \
   friend vec<T, D>& operator OP(vec<T, D>& lhs, const T& rhs);
 
 #define DEF_VEC_ASSIGN_OPERATOR(OP)                                            \
-  template <typename T, size_t D>                                              \
+  template <typename T, int D>                                                 \
   vec<T, D>& operator OP(vec<T, D>& lhs, const vec<T, D>& rhs) {               \
-    for (size_t i(0); i < D; i++) {                                            \
+    for (int i(0); i < D; i++) {                                               \
       lhs.data_[i] OP rhs.data_[i];                                            \
     }                                                                          \
     return lhs;                                                                \
   }                                                                            \
-  template <typename T, size_t D>                                              \
+  template <typename T, int D>                                                 \
   vec<T, D>& operator OP(vec<T, D>& lhs, const T& rhs) {                       \
     vec<T, D> r;                                                               \
-    for (size_t i(0); i < D; i++) {                                            \
+    for (int i(0); i < D; i++) {                                               \
       lhs.data_[i] OP rhs;                                                     \
     }                                                                          \
     return lhs;                                                                \
   }
 
 #define FRIEND_VEC_INCDEC_OPERATOR(OP)                                         \
-  template <typename T, size_t D>                                              \
+  template <typename T, int D>                                                 \
   friend vec<T, D>& operator OP(vec<T, D>& lhs);                               \
-  template <typename T, size_t D>                                              \
+  template <typename T, int D>                                                 \
   friend vec<T, D> operator OP(vec<T, D>& lhs, int inc);
 
 #define DEF_VEC_INCDEC_OPERATOR(OP)                                            \
-  template <typename T, size_t D>                                              \
+  template <typename T, int D>                                                 \
   vec<T, D>& operator OP(vec<T, D>& lhs) {                                     \
-    for (size_t i(0); i < D; i++) {                                            \
+    for (int i(0); i < D; i++) {                                               \
       OP(lhs.data_[i]);                                                        \
     }                                                                          \
     return lhs;                                                                \
   }                                                                            \
-  template <typename T, size_t D>                                              \
+  template <typename T, int D>                                                 \
   vec<T, D> operator OP(vec<T, D>& lhs, int inc) {                             \
     vec<T, D> r;                                                               \
-    for (size_t i(0); i < D; i++) {                                            \
+    for (int i(0); i < D; i++) {                                               \
       r[i] = (lhs.data_[i]);                                                   \
       (lhs.daha_[i]) OP;                                                       \
     }                                                                          \
@@ -158,45 +158,45 @@ namespace neosycl::sycl {
   }
 
 #define FRIEND_VEC_BOOLEAN_OPERATOR(OP)                                        \
-  template <typename RET, typename T, size_t D>                                \
+  template <typename RET, typename T, int D>                                   \
   friend vec<RET, D> operator OP(const vec<T, D>& lhs, const vec<T, D>& rhs);  \
-  template <typename RET, typename T, size_t D>                                \
+  template <typename RET, typename T, int D>                                   \
   friend vec<RET, D> operator OP(const vec<T, D>& lhs, const T& rhs);          \
-  template <typename RET, typename T, size_t D>                                \
+  template <typename RET, typename T, int D>                                   \
   friend vec<RET, D> operator OP(const T& lhs, const vec<T, D>& rhs);
 
 #define DEF_VEC_BOOLEAN_OPERATOR(OP)                                           \
-  template <typename RET, typename T, size_t D>                                \
+  template <typename RET, typename T, int D>                                   \
   vec<RET, D> operator OP(const vec<T, D>& lhs, const vec<T, D>& rhs) {        \
     vec<RET, D> r;                                                             \
-    for (size_t i(0); i < D; i++)                                              \
+    for (int i(0); i < D; i++)                                                 \
       r.data_[i] = RET(lhs.data_[i] OP rhs.data_[i]);                          \
     return r;                                                                  \
   }                                                                            \
-  template <typename RET, typename T, size_t D>                                \
+  template <typename RET, typename T, int D>                                   \
   vec<RET, D> operator OP(const vec<T, D>& lhs, const T& rhs) {                \
     vec<RET, D> r;                                                             \
-    for (size_t i(0); i < D; i++)                                              \
+    for (int i(0); i < D; i++)                                                 \
       r.data_[i] = RET(lhs.data_[i] OP rhs);                                   \
     return r;                                                                  \
   }                                                                            \
-  template <typename RET, typename T, size_t D>                                \
+  template <typename RET, typename T, int D>                                   \
   vec<RET, D> operator OP(const T& lhs, const vec<T, D>& rhs) {                \
     vec<RET, D> r;                                                             \
-    for (size_t i(0); i < D; i++)                                              \
+    for (int i(0); i < D; i++)                                                 \
       r.data_[i] = RET(lhs OP rhs.data_[i]);                                   \
     return r;                                                                  \
   }
 
 #define FRIEND_VEC_UNARY_OPERATOR(OP)                                          \
-  template <typename T, size_t D>                                              \
+  template <typename T, int D>                                                 \
   friend vec<T, D> operator OP(const vec<T, D>& v);
 
 #define DEF_VEC_UNARY_OPERATOR(OP)                                             \
-  template <typename T, size_t D>                                              \
+  template <typename T, int D>                                                 \
   vec<T, D> operator OP(const vec<T, D>& v) {                                  \
     vec<T, D> r;                                                               \
-    for (size_t i(0); i < D; i++) {                                            \
+    for (int i(0); i < D; i++) {                                               \
       r.data_[i] = operator OP(v.data_[i]);                                    \
     }                                                                          \
     return r;                                                                  \

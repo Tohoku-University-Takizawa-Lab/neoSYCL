@@ -130,12 +130,12 @@ DEFINE_GEN_FUNC2(fdim, std::fdim);
 DEFINE_GEN_FUNC(floor, std::floor);
 DEFINE_GEN_FUNC3(fma, std::fma);
 DEFINE_GEN_FUNC2(fmax, std::fmax);
-template <typename T, size_t D>
+template <typename T, int D>
 vec<T, D> fmax(const vec<T, D>& x, T y) {
   return fmax(x, y);
 }
 DEFINE_GEN_FUNC2(fmin, std::fmin);
-template <typename T, size_t D>
+template <typename T, int D>
 vec<T, D> fmin(const vec<T, D>& x, T y) {
   return fmin(x, y);
 }
@@ -146,10 +146,10 @@ T fract(const T& x, T* p) {
   *p = std::floor(x);
   return x - *p;
 }
-template <typename T, size_t D>
+template <typename T, int D>
 vec<T, D> fract(const vec<T, D>& x, T* p) {
   vec<T, D> R;
-  for (size_t i(0); i < D; i++)
+  for (int i(0); i < D; i++)
     R[i] = fract(x[i], &p[i]);
   return R;
 }
@@ -158,10 +158,10 @@ template <typename T>
 T frexp(const T& x, int* p) {
   return std::frexp(x, p);
 }
-template <typename T, size_t D>
+template <typename T, int D>
 vec<T, D> frexp(const vec<T, D>& x, int* p) {
   vec<T, D> R;
-  for (size_t i(0); i < D; i++)
+  for (int i(0); i < D; i++)
     R[i] = frexp(x[i], &p[i]);
   return R;
 }
@@ -177,14 +177,14 @@ template <typename T>
 int logb(const T& x) {
   return ilogb(x);
 }
-template <typename T, size_t D>
+template <typename T, int D>
 vec<int, D> ilogb(const vec<T, D>& x) {
   vec<int, D> R;
-  for (size_t i(0); i < D; i++)
+  for (int i(0); i < D; i++)
     R[i] = ilogb(x[i]);
   return R;
 }
-template <typename T, size_t D>
+template <typename T, int D>
 vec<int, D> logb(const vec<T, D>& x) {
   return ilobg(x);
 }
@@ -194,30 +194,30 @@ template <typename T>
 T ldexp(const T& x, const int& y) {
   return x * (1 << y);
 }
-template <typename T, size_t D>
+template <typename T, int D>
 vec<T, D> ldexp(const vec<T, D>& x, const int& y) {
   vec<int, D> R;
-  for (size_t i(0); i < D; i++)
+  for (int i(0); i < D; i++)
     R[i] = ldexp(x[i], y);
   return R;
 }
 
 DEFINE_GEN_FUNC(lgamma, std::lgamma);
 // DEFINE_GEN_FUNC2(lgamma_r,  *);
-template <typename T, size_t D>
+template <typename T, int D>
 T lgamma_r(const T& x, int* y) {
   vec<int, D> R;
-  for (size_t i(0); i < D; i++) {
+  for (int i(0); i < D; i++) {
     R[i] = lgamma(x[i]);
     *y   = R[i] > 0 ? 0 : 1;
   }
   return R;
 }
 
-template <typename T, size_t D>
+template <typename T, int D>
 T lgamma_r(const vec<T, D>& x, int* y) {
   vec<int, D> R;
-  for (size_t i(0); i < D; i++)
+  for (int i(0); i < D; i++)
     R[i] = lgamma_r(x[i], &y[i]);
   return R;
 }
@@ -235,10 +235,10 @@ template <typename T>
 T modf(const T& x, T* y) {
   return std::modf(x, y);
 }
-template <typename T, size_t D>
+template <typename T, int D>
 vec<T, D> modf(const vec<T, D>& x, T* y) {
   vec<T, D> R;
-  for (size_t i(0); i < D; i++)
+  for (int i(0); i < D; i++)
     R[i] = modf(x[i], &y[i]);
   return R;
 }
@@ -247,20 +247,20 @@ vec<T, D> modf(const vec<T, D>& x, T* y) {
 inline float nan(const uint& x) {
   return std::numeric_limits<float>::quiet_NaN();
 }
-template <size_t D>
+template <int D>
 vec<float, D> nan(const vec<uint, D>& x) {
   vec<float, D> R;
-  for (size_t i(0); i < D; i++)
+  for (int i(0); i < D; i++)
     R[i] = nan(x[i]);
   return R;
 }
 inline double nan(const ulonglong& x) {
   return std::numeric_limits<double>::quiet_NaN();
 }
-template <size_t D>
+template <int D>
 vec<double, D> nan(const vec<ulonglong, D>& x) {
   vec<double, D> R;
-  for (size_t i(0); i < D; i++)
+  for (int i(0); i < D; i++)
     R[i] = nan(x[i]);
   return R;
 }
@@ -271,10 +271,10 @@ template <typename T>
 T pown(T x, int y) {
   return pow(x, T((float)y));
 }
-template <typename T, size_t D>
+template <typename T, int D>
 vec<T, D> pown(const vec<T, D>& x, int y) {
   vec<T, D> R;
-  for (size_t i(0); i < D; i++)
+  for (int i(0); i < D; i++)
     R[i] = pown(x[i], y);
 }
 DEFINE_GEN_FUNC2(powr, detail::powr);
@@ -284,10 +284,10 @@ template <typename T>
 T remquo(T x, T y, int* z) {
   return std::remquo(x, y, z);
 }
-template <typename T, size_t D>
+template <typename T, int D>
 vec<T, D> remquo(const vec<T, D>& x, const vec<T, D>& y, int* z) {
   vec<T, D> R;
-  for (size_t i(0); i < D; i++)
+  for (int i(0); i < D; i++)
     R[i] = remquo(x[i], y[i], &z[i]);
   return R;
 }
@@ -297,10 +297,10 @@ template <typename T>
 T rootn(T x, int y) {
   return detail::rootn(x, y);
 }
-template <typename T, size_t D>
+template <typename T, int D>
 vec<T, D> rootn(const vec<T, D>& x, int y) {
   vec<T, D> R;
-  for (size_t i(0); i < D; i++)
+  for (int i(0); i < D; i++)
     R[i] = rootn(x[i], y);
   return R;
 }
@@ -316,10 +316,10 @@ T sincos(T x, T* y) {
   *y = cos(x);
   return sin(x);
 }
-template <typename T, size_t D>
+template <typename T, int D>
 vec<T, D> sincos(const vec<T, D>& x, T* y) {
   vec<T, D> R;
-  for (size_t i(0); i < D; i++) {
+  for (int i(0); i < D; i++) {
     y[i] = cos(x[i]);
     R[i] = sin(x[i]);
   }

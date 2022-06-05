@@ -41,10 +41,10 @@ T sign(T x) {
 } // namespace detail
 
 DEFINE_GEN_FUNC3(clamp, detail::clamp);
-template <typename T, size_t D>
+template <typename T, int D>
 vec<T, D> clamp(vec<T, D> x, T y, T z) {
   vec<T, D> ret;
-  for (size_t i(0); i < D; i++)
+  for (int i(0); i < D; i++)
     ret[i] = clamp(x[i], y, z);
   return ret;
 }
@@ -52,28 +52,28 @@ vec<T, D> clamp(vec<T, D> x, T y, T z) {
 DEFINE_GEN_FUNC(degrees, detail::degrees);
 
 DEFINE_GEN_FUNC2(max, detail::max);
-template <typename T, size_t D>
+template <typename T, int D>
 vec<T, D> max(vec<T, D> x, T y) {
   vec<T, D> ret;
-  for (size_t i(0); i < D; i++)
+  for (int i(0); i < D; i++)
     ret[i] = detail::max(x[i], y);
   return ret;
 }
 
 DEFINE_GEN_FUNC2(min, detail::min);
-template <typename T, size_t D>
+template <typename T, int D>
 vec<T, D> min(vec<T, D> x, T y) {
   vec<T, D> ret;
-  for (size_t i(0); i < D; i++)
+  for (int i(0); i < D; i++)
     ret[i] = detail::min(x[i], y);
   return ret;
 }
 
 DEFINE_GEN_FUNC3(mix, detail::mix);
-template <typename T, size_t D>
+template <typename T, int D>
 vec<T, D> mix(vec<T, D> x, vec<T, D> y, T z) {
   vec<T, D> ret;
-  for (size_t i(0); i < D; i++)
+  for (int i(0); i < D; i++)
     ret[i] = detail::mix(x[i], y[i], z);
   return ret;
 }
@@ -81,19 +81,19 @@ vec<T, D> mix(vec<T, D> x, vec<T, D> y, T z) {
 DEFINE_GEN_FUNC(radians, detail::radians);
 
 DEFINE_GEN_FUNC2(step, detail::step);
-template <typename T, size_t D>
+template <typename T, int D>
 vec<T, D> step(T e, vec<T, D> x) {
   vec<T, D> ret;
-  for (size_t i(0); i < D; i++)
+  for (int i(0); i < D; i++)
     ret[i] = detail::step(e, x[i]);
   return ret;
 }
 
 DEFINE_GEN_FUNC3(smoothstep, detail::smoothstep);
-template <typename T, size_t D>
+template <typename T, int D>
 vec<T, D> smoothstep(T e1, T e2, vec<T, D> x) {
   vec<T, D> ret;
-  for (size_t i(0); i < D; i++)
+  for (int i(0); i < D; i++)
     ret[i] = detail::smoothstep(e1, e2, x[i]);
   return ret;
 }

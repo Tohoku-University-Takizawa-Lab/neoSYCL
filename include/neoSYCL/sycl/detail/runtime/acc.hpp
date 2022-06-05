@@ -22,7 +22,7 @@ struct acc_ {
     return p_[i[0]];
   }
 
-  template <size_t dimensions>
+  template <int dimensions>
   T& operator[](item<dimensions>& i) {
     return this->operator[](i.get_id());
   }

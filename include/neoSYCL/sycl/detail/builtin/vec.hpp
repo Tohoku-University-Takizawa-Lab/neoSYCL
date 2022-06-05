@@ -33,7 +33,7 @@ struct elem {
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-template <typename DataT, size_t NumElems>
+template <typename DataT, int NumElems>
 class vec {
   FRIEND_VEC_BINARY_OPERATOR(+);
   FRIEND_VEC_BINARY_OPERATOR(-);
@@ -68,7 +68,7 @@ class vec {
   FRIEND_VEC_UNARY_OPERATOR(!);
   FRIEND_VEC_UNARY_OPERATOR(~);
 
-  static constexpr size_t size() {
+  static constexpr int size() {
     return NumElems;
   }
 
@@ -83,27 +83,27 @@ public:
   vec(vec<DataT, NumElems>&& Rhs)  = default;
 
   explicit vec(const DataT& x) {
-    for (size_t i(0); i < size(); i++)
+    for (int i(0); i < size(); i++)
       data_[i] = x;
   }
 
-  template <size_t N = size(), typename = std::enable_if_t<(N == 1)>>
+  template <int N = size(), typename = std::enable_if_t<(N == 1)>>
   vec(const DataT& x) {
-    for (size_t i(0); i < size(); i++)
+    for (int i(0); i < size(); i++)
       data_[i] = x;
   }
-  template <size_t N = size(), typename = std::enable_if_t<(N == 2)>>
+  template <int N = size(), typename = std::enable_if_t<(N == 2)>>
   vec(const DataT& x, const DataT& y) {
     data_[0] = x;
     data_[1] = y;
   }
-  template <size_t N = size(), typename = std::enable_if_t<(N == 3)>>
+  template <int N = size(), typename = std::enable_if_t<(N == 3)>>
   vec(const DataT& x, const DataT& y, const DataT& z) {
     data_[0] = x;
     data_[1] = y;
     data_[2] = z;
   }
-  template <size_t N = size(), typename = std::enable_if_t<(N == 4)>>
+  template <int N = size(), typename = std::enable_if_t<(N == 4)>>
   vec(const DataT& x, const DataT& y, const DataT& z, const DataT& w) {
     data_[0] = x;
     data_[1] = y;
@@ -111,7 +111,7 @@ public:
     data_[3] = w;
   }
 
-  template <size_t N = size(), typename = std::enable_if_t<(N == 1)>>
+  template <int N = size(), typename = std::enable_if_t<(N == 1)>>
   operator DataT() const {
     return data_[0];
   }
@@ -127,7 +127,7 @@ public:
   vec<convT, NumElems> convert() const {
     vec<convT, NumElems> r;
     // TODO: rounding mode for casting
-    for (size_t i(0); i < size(); i++) {
+    for (int i(0); i < size(); i++) {
       r[i] = convT(data_[i]);
     }
     return r;
@@ -176,7 +176,7 @@ public:
   vec& operator=(const vec& Rhs) = default;
 
   vec& operator=(const DataT& Rhs) {
-    for (size_t i = 0; i < size(); i++)
+    for (int i = 0; i < size(); i++)
       data_[i] = Rhs;
   }
 
@@ -188,15 +188,15 @@ public:
   element_type& x() {
     return data_[0];
   }
-  template <size_t N = size(), typename = std::enable_if_t<(N > 1)>>
+  template <int N = size(), typename = std::enable_if_t<(N > 1)>>
   element_type& y() {
     return data_[1];
   }
-  template <size_t N = size(), typename = std::enable_if_t<(N > 2)>>
+  template <int N = size(), typename = std::enable_if_t<(N > 2)>>
   element_type& z() {
     return data_[2];
   }
-  template <size_t N = size(), typename = std::enable_if_t<(N > 3)>>
+  template <int N = size(), typename = std::enable_if_t<(N > 3)>>
   element_type& w() {
     return data_[3];
   }

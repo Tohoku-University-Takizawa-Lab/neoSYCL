@@ -14,7 +14,7 @@ namespace neosycl::sycl::detail::container {
  * @tparam dimensions Buffer dimensions
  * @tparam AllocatorT Buffer Allocator
  */
-template <typename T, size_t dimensions, typename AllocatorT>
+template <typename T, int dimensions, typename AllocatorT>
 class DataContainerD : public DataContainer {
 public:
   explicit DataContainerD(ArrayND<dimensions> r) : range(r) {
@@ -102,8 +102,7 @@ private:
   shared_ptr_class<T> allocate_ptr;
 };
 
-template <typename T, size_t dimensions,
-          typename AllocatorT = buffer_allocator<T>>
+template <typename T, int dimensions, typename AllocatorT = buffer_allocator<T>>
 class DataContainerND {};
 
 template <typename T, typename AllocatorT>
@@ -166,7 +165,7 @@ public:
  * @tparam T DataType
  * @tparam dimensions Buffer dimensions
  */
-template <typename T, size_t dimensions>
+template <typename T, int dimensions>
 struct AccessProxyND {};
 
 template <typename T>

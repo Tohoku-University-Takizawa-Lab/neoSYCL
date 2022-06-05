@@ -63,8 +63,16 @@ public:
       free(p);
   }
 
-  void copy_back(void* h, void* d, size_t s) override {
+  void write_mem(void* d, void* h, size_t s) override {
+    std::memcpy(d, h, s);
+  }
+
+  void read_mem(void* h, void* d, size_t s) override {
     std::memcpy(h, d, s);
+  }
+
+  void copy_mem(void* d1, void* d2, size_t s) override {
+    std::memcpy(d1, d2, s);
   }
 
   void set_capture(kernel& k, void* p, size_t sz) override {

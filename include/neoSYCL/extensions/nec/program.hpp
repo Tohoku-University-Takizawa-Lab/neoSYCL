@@ -69,8 +69,16 @@ public:
     util.free_mem(p);
   }
 
-  void copy_back(void* h, void* d, size_t s) override {
+  void write_mem(void* d, void* h, size_t s) override {
+    util.write_mem(d, h, s);
+  }
+
+  void read_mem(void* h, void* d, size_t s) override {
     util.read_mem(h, d, s);
+  }
+
+  void copy_mem(void* d1, void* d2, size_t s) override {
+    util.copy_mem(d1, d2, s);
   }
 
   void set_capture(kernel& k, void* p, size_t sz) override {

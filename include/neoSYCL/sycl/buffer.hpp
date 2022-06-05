@@ -24,7 +24,7 @@ public:
 } // namespace property
 
 ///////////////////////////////////////////////////////////////////////////////
-template <typename T, size_t dimensions = 1,
+template <typename T, int dimensions = 1,
           typename AllocatorT = buffer_allocator<T>>
 class buffer {
 public:
@@ -41,10 +41,10 @@ public:
   buffer& operator=(const buffer& rhs) = default;
   buffer& operator=(buffer&& rhs) = default;
 
-  template <typename Ty, size_t D, typename A>
+  template <typename Ty, int D, typename A>
   friend bool operator==(const buffer<Ty, D, A>& lhs,
                          const buffer<Ty, D, A>& rhs);
-  template <typename Ty, size_t D, typename A>
+  template <typename Ty, int D, typename A>
   friend bool operator!=(const buffer<Ty, D, A>& lhs,
                          const buffer<Ty, D, A>& rhs);
 
@@ -177,7 +177,7 @@ public:
     buffer<ReinterpretT, ReinterpretDim, AllocatorT> r(*this);
     if (ReinterpretDim > get_count())
       throw sycl::invalid_object_error("invalid dimensions");
-    for (size_t i(0); i < ReinterpretDim; i++) {
+    for (int i(0); i < ReinterpretDim; i++) {
       if (r.bufferRage[i] >= reinterpretRange[i])
         r.bufferRage[i] = reinterpretRange[i];
       else
@@ -195,11 +195,11 @@ private:
   std::shared_ptr<container_type> data;
 };
 
-template <typename Ty, size_t D, typename A>
+template <typename Ty, int D, typename A>
 bool operator==(const buffer<Ty, D, A>& lhs, const buffer<Ty, D, A>& rhs) {
   return lhs.data == rhs.data;
 }
-template <typename Ty, size_t D, typename A>
+template <typename Ty, int D, typename A>
 bool operator!=(const buffer<Ty, D, A>& lhs, const buffer<Ty, D, A>& rhs) {
   return !(lhs == rhs);
 }

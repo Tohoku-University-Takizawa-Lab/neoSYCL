@@ -11,18 +11,18 @@ namespace neosycl::sycl {
   inline std::uint64_t F(double p0, double p1) {                               \
     return std::uint64_t(Exp);                                                 \
   }                                                                            \
-  template <size_t D>                                                          \
+  template <int D>                                                             \
   vec<std::uint32_t, D> F(const vec<float, D>& p0, const vec<float, D>& p1) {  \
     vec<std::uint32_t, D> r;                                                   \
-    for (size_t i(0); i < D; i++)                                              \
+    for (int i(0); i < D; i++)                                                 \
       r[i] = F(p0[i], p1[i]);                                                  \
     return r;                                                                  \
   }                                                                            \
-  template <size_t D>                                                          \
+  template <int D>                                                             \
   vec<std::uint64_t, D> F(const vec<double, D>& p0,                            \
                           const vec<double, D>& p1) {                          \
     vec<std::uint64_t, D> r;                                                   \
-    for (size_t i(0); i < D; i++)                                              \
+    for (int i(0); i < D; i++)                                                 \
       r[i] = F(p0[i], p1[i]);                                                  \
     return r;                                                                  \
   }
@@ -34,17 +34,17 @@ namespace neosycl::sycl {
   inline std::uint64_t F(double p) {                                           \
     return std::uint64_t(Exp);                                                 \
   }                                                                            \
-  template <size_t D>                                                          \
+  template <int D>                                                             \
   vec<std::uint32_t, D> F(const vec<float, D>& p) {                            \
     vec<std::uint32_t, D> r;                                                   \
-    for (size_t i(0); i < D; i++)                                              \
+    for (int i(0); i < D; i++)                                                 \
       r[i] = F(p[i]);                                                          \
     return r;                                                                  \
   }                                                                            \
-  template <size_t D>                                                          \
+  template <int D>                                                             \
   vec<std::uint64_t, D> F(const vec<double, D>& p) {                           \
     vec<std::uint64_t, D> r;                                                   \
-    for (size_t i(0); i < D; i++)                                              \
+    for (int i(0); i < D; i++)                                                 \
       r[i] = F(p[i]);                                                          \
     return r;                                                                  \
   }

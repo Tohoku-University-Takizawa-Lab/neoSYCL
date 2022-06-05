@@ -5,7 +5,7 @@
   friend ArrayND<dimensions> operator op(const ArrayND<dimensions>& lhs,       \
                                          const ArrayND<dimensions>& rhs) {     \
     ArrayND<dimensions> ret;                                                   \
-    for (std::size_t i = 0; i < dimensions; ++i) {                             \
+    for (int i = 0; i < dimensions; ++i) {                                     \
       ret[i] = (size_t)(lhs[i] op rhs[i]);                                     \
     }                                                                          \
     return ret;                                                                \
@@ -15,7 +15,7 @@
   friend ArrayND<dimensions> operator op(const ArrayND<dimensions>& lhs,       \
                                          const size_t& rhs) {                  \
     ArrayND<dimensions> ret;                                                   \
-    for (std::size_t i = 0; i < dimensions; ++i) {                             \
+    for (int i = 0; i < dimensions; ++i) {                                     \
       ret[i] = (size_t)(lhs[i] op rhs);                                        \
     }                                                                          \
     return ret;                                                                \
@@ -24,7 +24,7 @@
 #define DEFINE_ARRAY_ND_OP(op)                                                 \
   friend ArrayND<dimensions>& operator op(ArrayND<dimensions>& lhs,            \
                                           const ArrayND<dimensions>& rhs) {    \
-    for (std::size_t i = 0; i < dimensions; ++i) {                             \
+    for (int i = 0; i < dimensions; ++i) {                                     \
       lhs[i] = (size_t)(lhs[i] op rhs[i]);                                     \
     }                                                                          \
     return lhs;                                                                \
@@ -33,7 +33,7 @@
 #define DEFINE_ARRAY_ND_OP_SIZE_T(op)                                          \
   friend ArrayND<dimensions>& operator op(ArrayND<dimensions>& lhs,            \
                                           const size_t& rhs) {                 \
-    for (std::size_t i = 0; i < dimensions; ++i) {                             \
+    for (int i = 0; i < dimensions; ++i) {                                     \
       lhs[i] = (size_t)(lhs[i] op rhs);                                        \
     }                                                                          \
     return lhs;                                                                \
@@ -43,7 +43,7 @@
   friend ArrayND<dimensions> operator op(const size_t& lhs,                    \
                                          ArrayND<dimensions>& rhs) {           \
     ArrayND<dimensions> ret;                                                   \
-    for (std::size_t i = 0; i < dimensions; ++i) {                             \
+    for (int i = 0; i < dimensions; ++i) {                                     \
       ret[i] = (size_t)(rhs[i] op lhs);                                        \
     }                                                                          \
     return ret;                                                                \
@@ -52,7 +52,7 @@
 #define DEFINE_ARRAY_ND_COMMON_BY_VALUE_SEMANTICS()                            \
   friend bool operator==(const ArrayND<dimensions>& lhs,                       \
                          const ArrayND<dimensions>& rhs) {                     \
-    for (std::size_t i = 0; i < dimensions; ++i) {                             \
+    for (int i = 0; i < dimensions; ++i) {                                     \
       if (lhs[i] != rhs[i]) {                                                  \
         return false;                                                          \
       }                                                                        \
@@ -61,7 +61,7 @@
   }                                                                            \
   friend bool operator!=(const ArrayND<dimensions>& lhs,                       \
                          const ArrayND<dimensions>& rhs) {                     \
-    for (std::size_t i = 0; i < dimensions; ++i) {                             \
+    for (int i = 0; i < dimensions; ++i) {                                     \
       if (lhs[i] != rhs[i]) {                                                  \
         return true;                                                           \
       }                                                                        \
@@ -71,7 +71,7 @@
 
 namespace neosycl::sycl::detail::container {
 
-template <size_t dimensions = 1>
+template <int dimensions = 1>
 struct ArrayND {
   ArrayND() : data{} {}
 
