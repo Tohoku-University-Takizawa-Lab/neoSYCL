@@ -48,6 +48,18 @@ kernel::kernel(string_class name, program prog) : impl_(nullptr) {
       new detail::kernel_impl(name, prog)));
 }
 
+bool kernel::is_host() const {
+  return get_program().is_host();
+}
+
+context kernel::get_context() const{
+  return get_program().get_context();
+}
+
+program kernel::get_program() const{
+  return impl_->prog;
+}
+
 shared_ptr_class<detail::kernel_data> kernel::get_kernel_data(device d) {
 #ifndef DISABLE_MULTI_DEVICE_SUPPORT
   return impl_->map.at(d.type());

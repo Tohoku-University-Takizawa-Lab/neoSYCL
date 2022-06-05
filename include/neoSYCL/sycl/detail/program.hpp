@@ -18,6 +18,7 @@ namespace detail {
 const char* DEFAULT_LIB = "./kernel.so";
 const char* ENV_KERNEL  = "NEOSYCL_KERNEL";
 
+/* convet a type to its name in string */
 inline string_class get_kernel_name_from_class(const std::type_info& ti) {
   int status;
   char* pc = abi::__cxa_demangle(ti.name(), 0, 0, &status);
@@ -31,6 +32,8 @@ inline string_class get_kernel_name_from_class(const std::type_info& ti) {
   return in;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// internal program state on each device and interface to handle the device
 class program_data {
 public:
   friend class neosycl::sycl::handler;
@@ -138,6 +141,8 @@ protected:
   }
 };
 
+///////////////////////////////////////////////////////////////////////////////
+// implementation of program class interface
 class program_impl {
   friend class sycl::program;
   using kernel_data_ptr = program_data::kernel_data_ptr;
@@ -229,7 +234,7 @@ public:
   }
 
 private:
-  program_state state;
+  program_state state_;
   program prog_;
   context ctx_;
   vector_class<shared_ptr_class<program_data>> data_;
@@ -278,6 +283,10 @@ void program::init_(context c, vector_class<device> d) {
       new detail::program_impl(*this, c, d));
 }
 
+bool program::is_host() const {
+  return impl_->is_host();
+}
+
 template <typename kernelT>
 bool program::has_kernel() const {
   return impl_->has_kernel<kernelT>();
@@ -287,13 +296,28 @@ bool program::has_kernel(string_class kernelName) const {
   return impl_->has_kernel(kernelName);
 }
 
+kernel program::get_kernel(string_class kernelName) const {
+  return impl_->get_kernel(kernelName);
+}
+
 template <typename kernelT>
 kernel program::get_kernel() const {
   return impl_->get_kernel<kernelT>();
 }
 
-kernel program::get_kernel(string_class kernelName) const {
-  return impl_->get_kernel(kernelName);
+context program::get_context() const {
+  return impl_->get_context();
+}
+
+vector_class<device> program::get_devices() const {
+  vector_class<device> ret;
+  for (const auto& dat : impl_->data_)
+    ret.push_back(dat->get_device());
+  return ret;
+}
+
+program_state program::get_state() const {
+  return impl_->state_;
 }
 
 shared_ptr_class<detail::program_data> program::get_data(device dev) const {

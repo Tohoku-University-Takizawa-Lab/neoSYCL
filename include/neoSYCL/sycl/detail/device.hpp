@@ -49,10 +49,12 @@ using default_device_impl = device_impl_host;
 device device::get_default_device() {
 #if defined(USE_VE) && defined(BUILD_VE)
   return platform::get_default_platform().get_devices()[2];
-#elif defined(USE_CPU)
+#else
+#if defined(USE_CPU)
   return platform::get_default_platform().get_devices()[1];
 #else
   return platform::get_default_platform().get_devices()[0];
+#endif
 #endif
 }
 

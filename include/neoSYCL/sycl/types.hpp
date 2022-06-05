@@ -41,4 +41,5 @@ using cl_platform_id = u_int64_t;
 using cl_device_id   = u_int64_t;
 using cl_context     = u_int64_t;
 using cl_program     = u_int64_t;
+using cl_kernel      = u_int64_t;
 } // namespace neosycl::sycl

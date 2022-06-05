@@ -1,6 +1,7 @@
 #pragma once
 #include "neoSYCL/sycl/access.hpp"
 #include "neoSYCL/sycl/detail/accessor_data.hpp"
+#include "neoSYCL/sycl/info/kernel.hpp"
 
 namespace neosycl::sycl {
 
@@ -24,6 +25,25 @@ public:
   kernel(string_class name, program prog);
   kernel(const kernel& k) : impl_(k.impl_) {}
   ~kernel() = default;
+
+  /* -- common interface members -- */
+  cl_kernel get() const {
+    return 0;
+  }
+
+  bool is_host() const;
+
+  context get_context() const;
+
+  program get_program() const;
+
+  template <info::kernel param>
+  typename info::param_traits<info::kernel, param>::return_type
+  get_info() const;
+
+  template <info::kernel_work_group param>
+  typename info::param_traits<info::kernel_work_group, param>::return_type
+  get_work_group_info(const device& dev) const;
 
   // INTERNAL USE ONLY: for debugging
   const char* get_name() const;
