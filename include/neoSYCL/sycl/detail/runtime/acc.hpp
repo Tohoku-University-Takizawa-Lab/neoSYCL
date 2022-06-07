@@ -13,10 +13,10 @@ struct acc_ {
     return p_[i];
   }
   inline T& operator[](const id<3> i) {
-    return p_[(i[2] * r_[1] + i[1]) * r_[0] + i[0]];
+    return p_[(i[0] * r_[1] + i[1]) * r_[2] + i[2]];
   }
   inline T& operator[](const id<2> i) {
-    return p_[i[1] * r_[0] + i[0]];
+    return p_[i[0] * r_[1] + i[1]];
   }
   inline T& operator[](const id<1> i) {
     return p_[i[0]];

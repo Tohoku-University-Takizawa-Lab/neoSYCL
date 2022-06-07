@@ -101,14 +101,14 @@ static void printLoop(str& st, CXXMethodDecl* func, Decl* d, Data& data) {
     return;
   auto vname = vd->getIdentifier()->getName();
   auto vtype = string(vd->getType().getBaseTypeIdentifier()->getNameStart());
-  for (int i(dim - 1); i > -1; i--) {
+  for (int i(0); i < dim; i++) {
     st << "size_t i" << i << "_;\n";
     st << "size_t r" << i << "_ = r_[" << i << "]  ;\n";
     st << "size_t o" << i << "_ = r_[" << i + 3 << "]  ;\n";
   }
   st << pragma_omp_parallel_for;
   st << pragma_NEC_ivdep;
-  for (int i(dim - 1); i > -1; i--) {
+  for (int i(0); i < dim; i++) {
     st << "for(i" << i << "_";
     st << "=o" << i << "_;";
     st << "i" << i << "_";
