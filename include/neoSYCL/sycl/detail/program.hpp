@@ -178,7 +178,7 @@ public:
   kernel get_kernel() {
     const std::type_info& tinfo = typeid(KernelName*);
     if (hash_map_.count(tinfo.hash_code())) {
-      DEBUG_INFO("kernel found: hash=%lu", tinfo.has_code());
+      DEBUG_INFO("kernel found: hash=%lu", tinfo.hash_code());
       return hash_map_.at(tinfo.hash_code());
     }
 

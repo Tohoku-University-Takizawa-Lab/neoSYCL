@@ -22,9 +22,7 @@ class kernel_impl {
   friend class kernel;
 
 public:
-  using accessor_list = kernel::accessor_list;
-
-  kernel_impl(string_class n, program p) : name(n), prog(p), acc_() {}
+  kernel_impl(string_class n, program p) : name(n), prog(std::move(p)) {}
   virtual ~kernel_impl() = default;
 
   string_class name;
@@ -36,7 +34,6 @@ public:
 #else
   shared_ptr_class<kernel_data> data;
 #endif
-  accessor_list acc_;
 };
 
 } // namespace detail
@@ -70,14 +67,6 @@ shared_ptr_class<detail::kernel_data> kernel::get_kernel_data(device d) {
 
 const char* kernel::get_name() const {
   return impl_->name.c_str();
-}
-
-void kernel::set_acc(accessor_list& acc) {
-  impl_->acc_ = acc;
-}
-
-kernel::accessor_list& kernel::kernel::get_acc() {
-  return impl_->acc_;
 }
 
 } // namespace neosycl::sycl

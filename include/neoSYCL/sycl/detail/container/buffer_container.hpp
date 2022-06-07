@@ -9,6 +9,10 @@ class program_data;
 };
 
 namespace detail::container {
+struct device_ptr_type {
+  void* ptr;
+  access::mode mode;
+};
 
 template <typename T, int dimensions, typename AllocatorT = buffer_allocator<T>>
 class BufferContainer : public DataContainerND<T, dimensions, AllocatorT> {
@@ -33,13 +37,8 @@ public:
 
   ~BufferContainer();
 
-  struct device_ptr {
-    void* ptr;
-    access::mode mode;
-  };
-
   /* {program_data*, device_ptr} */
-  std::map<shared_ptr_class<program_data>, device_ptr> map;
+  std::map<shared_ptr_class<program_data>, device_ptr_type> map;
 };
 } // namespace detail::container
 } // namespace neosycl::sycl

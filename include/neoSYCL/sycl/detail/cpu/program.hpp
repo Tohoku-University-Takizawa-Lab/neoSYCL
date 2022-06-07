@@ -33,9 +33,6 @@ public:
   void run(kernel k) override {
     auto kdc = cast<kernel_data_cpu>(k);
 
-    for (const auto& acc : k.get_acc()) {
-      acc.acquire_access();
-    }
     try {
       DEBUG_INFO("-- KENREL EXEC BEGIN --");
       [[maybe_unused]] int ret_val = kdc->func_();
@@ -44,9 +41,6 @@ public:
     catch (exception& e) {
       PRINT_ERR("kernel execution failed: %s", e.what());
       throw;
-    }
-    for (const auto& acc : k.get_acc()) {
-      acc.release_access();
     }
   }
 

@@ -74,10 +74,35 @@ public:
   template <info::queue param>
   typename info::param_traits<info::queue, param>::return_type get_info() const;
 
+#ifndef DISABLE_MULTI_THREAD_SUPPORT
+  template <typename T>
+  event submit(T cgf) {
+    counter->incr();
+    std::thread t([f = cgf, d = bind_device, p = prog, c = counter]() {
+      try {
+        handler command_group_handler(d, p, c);
+        f(command_group_handler);
+      }
+      catch (std::exception& e) {
+        PRINT_ERR("%s", e.what());
+        throw;
+      }
+      catch (...) {
+        PRINT_ERR("unknown exception");
+        throw;
+      }
+      c->decr();
+    });
+    t.detach();
+    return event();
+  }
+#else
+  /* this may run each command group faster but all command groups will be
+   * executed sequencially (i.e. no task parallelism) */
   template <typename T>
   event submit(T cgf) {
     try {
-      handler command_group_handler(ctx, bind_device, prog, counter);
+      handler command_group_handler(bind_device, prog, counter);
       cgf(command_group_handler);
     }
     catch (std::exception& e) {
@@ -90,9 +115,12 @@ public:
     }
     return event();
   }
+#endif
 
   template <typename T>
-  event submit(T cgf, const queue& secondaryQueue);
+  event submit(T cgf, const queue& secondaryQueue) {
+    throw unimplemented();
+  }
 
   void wait() {
     counter->wait();

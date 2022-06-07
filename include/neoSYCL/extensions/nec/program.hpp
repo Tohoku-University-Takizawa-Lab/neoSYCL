@@ -34,9 +34,6 @@ public:
   void run(kernel k) override {
     auto kdv = cast<kernel_data_ve>(k);
 
-    for (const auto& acc : k.get_acc()) {
-      acc.acquire_access();
-    }
     try {
       DEBUG_INFO("-- KENREL EXEC BEGIN --");
       [[maybe_unused]] int rt = util.call_func(kdv->func_, kdv->argp_);
@@ -44,9 +41,6 @@ public:
     }
     catch (exception& e) {
       PRINT_ERR("kernel execution failed: %s", e.what());
-    }
-    for (const auto& acc : k.get_acc()) {
-      acc.release_access();
     }
   }
 

@@ -1,6 +1,5 @@
 #pragma once
 #include "neoSYCL/sycl/access.hpp"
-#include "neoSYCL/sycl/detail/accessor_data.hpp"
 #include "neoSYCL/sycl/info/kernel.hpp"
 
 namespace neosycl::sycl {
@@ -20,8 +19,6 @@ class kernel {
   explicit kernel();
 
 public:
-  using accessor_list = vector_class<detail::accessor_data>;
-
   kernel(string_class name, program prog);
   kernel(const kernel& k) : impl_(k.impl_) {}
   ~kernel() = default;
@@ -51,8 +48,6 @@ public:
   shared_ptr_class<detail::kernel_impl> get_impl() {
     return impl_;
   }
-  void set_acc(accessor_list& acc);
-  accessor_list& get_acc();
 
 private:
   shared_ptr_class<detail::kernel_impl> impl_;

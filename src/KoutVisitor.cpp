@@ -229,7 +229,8 @@ static void writeHostCode(str& os, Data& data, VarDeclFinder& finder) {
     os << ")";
   }
   os << "};\n";
-  os << data.handler << ".copy_capture(&__" << cls << "_obj__);\n});\n";
+  os << "return std::make_tuple((void*)&__" << cls << "_obj__,";
+  os << "sizeof(__" << cls << "_obj__));\n});\n";
 }
 
 #if 0

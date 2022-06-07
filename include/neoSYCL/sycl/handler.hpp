@@ -1,6 +1,7 @@
 #pragma once
 #include "neoSYCL/sycl/detail/task_counter.hpp"
 #include "neoSYCL/sycl/detail/handler.hpp"
+#include "neoSYCL/sycl/detail/accessor_data.hpp"
 
 namespace neosycl::sycl {
 
@@ -10,65 +11,67 @@ class handler {
   using handler_type = shared_ptr_class<detail::program_data>;
 
   friend class queue;
-  explicit handler(context c, device d, program p, counter_type counter)
-      : ctx_(c), dev_(d), prog_(p), cntr_(std::move(counter)), kernel_() {
-    hndl_ = prog_.get_data(dev_);
+
+  explicit handler(device d, program p, counter_type counter)
+      : dev_(std::move(d)), prog_(std::move(p)), cntr_(std::move(counter)),
+        hndl_(prog_.get_data(dev_)) {}
+
+  ~handler() {
+    for (size_t i(0); i < acc_.size(); i++) {
+      // DEBUG_INFO("memory unlock: %p", acc_[i].data.get());
+      if (acc_[i].mode != access::mode::read)
+        acc_[i].data->unlock_write();
+      else
+        acc_[i].data->unlock_read();
+    }
   }
 
 public:
   template <typename KernelName, typename KernelType, int dimensions>
   void run(range<dimensions> kernelRange, id<dimensions> kernelOffset,
            KernelType kernelFunc) {
-    kernel_ = prog_.get_kernel<KernelName>();
-    kernel_.get_acc().clear();
-    hndl_->set_range(kernel_, kernelRange, kernelOffset);
+    kernel k = prog_.get_kernel<KernelName>();
+    hndl_->set_range(k, kernelRange, kernelOffset);
 
-    kernelFunc();
-
-    // hndl_->run(kernel_);
-    submit_task([h = hndl_, k = kernel_]() { h->run(k); });
+    auto [ptr, sz] = kernelFunc();
+    // DEBUG_INFO("kernel %s %p %lu", k.get_name(),ptr,sz);
+    hndl_->set_capture(k, ptr, sz);
+    hndl_->run(k);
   }
 
   template <typename KernelName, typename KernelType, int dimensions>
   void run(range<dimensions> kernelRange, KernelType kernelFunc) {
-    kernel_ = prog_.get_kernel<KernelName>();
-    kernel_.get_acc().clear();
-    hndl_->set_range(kernel_, kernelRange);
+    kernel k = prog_.get_kernel<KernelName>();
+    hndl_->set_range(k, kernelRange);
 
-    kernelFunc();
-
-    // hndl_->run(kernel_);
-    submit_task([h = hndl_, k = kernel_]() { h->run(k); });
+    auto [ptr, sz] = kernelFunc();
+    // DEBUG_INFO("kernel %s %p %lu", k.get_name(),ptr,sz);
+    hndl_->set_capture(k, ptr, sz);
+    hndl_->run(k);
   }
 
   template <typename KernelName, typename KernelType>
   void run(KernelType kernelFunc) {
-    kernel_ = prog_.get_kernel<KernelName>();
-    kernel_.get_acc().clear();
+    kernel k = prog_.get_kernel<KernelName>();
 
-    kernelFunc();
-
-    // hndl_->run(kernel_);
-    submit_task([h = hndl_, k = kernel_]() { h->run(k); });
-  }
-
-  template <typename KernelName>
-  void copy_capture(KernelName* p) {
-    hndl_->set_capture(kernel_, p, sizeof(KernelName));
+    auto [ptr, sz] = kernelFunc();
+    // DEBUG_INFO("kernel %s %p %lu", k.get_name(),ptr,sz);
+    hndl_->set_capture(k, ptr, sz);
+    hndl_->run(k);
   }
 
   template <typename KernelName, typename KernelType>
   void single_task(KernelType kernelFunc) {
     if (!dev_.is_host())
       return;
-    detail::single_task(kernel_, kernelFunc);
+    detail::single_task(kernelFunc);
   }
 
   template <typename KernelName, typename KernelType, int dimensions>
   void parallel_for(range<dimensions> numWorkItems, KernelType kernelFunc) {
     if (!dev_.is_host())
       return;
-    detail::parallel_for(kernel_, numWorkItems, kernelFunc, id<dimensions>{},
+    detail::parallel_for(numWorkItems, kernelFunc, id<dimensions>{},
                          get_index_type(kernelFunc));
   }
 
@@ -77,7 +80,7 @@ public:
                     id<dimensions> workItemOffset, KernelType kernelFunc) {
     if (!dev_.is_host())
       return;
-    detail::parallel_for(kernel_, numWorkItems, kernelFunc, workItemOffset,
+    detail::parallel_for(numWorkItems, kernelFunc, workItemOffset,
                          get_index_type(kernelFunc));
   }
 
@@ -114,9 +117,8 @@ public:
 
   template <typename T, int D, access::mode m, access::target t>
   void require(sycl::accessor<T, D, m, t, access::placeholder::true_t> acc) {
-    hndl_->alloc_mem(*acc.data, m);
-    // -- need something but not implemented yet
-    // acc_.push_back(detail::accessor_data(acc, m));
+    /* allocate and lock a device buffer for this placeholder */
+    this->alloc_mem_(acc);
   }
 
   //------ Explicit memory operation APIs   //
@@ -203,58 +205,69 @@ public:
     else if (buf->map.count(hndl_))
       return (T*)buf->map.at(hndl_).ptr;
     throw runtime_error("invalid BufferContainer object");
-    // return (T*)hndl_->get_ptr_(*acc.data);
   }
 
   template <typename T, int D, access::mode m, access::target t,
             access::placeholder p>
   void* alloc_mem_(accessor<T, D, m, t, p>& acc) {
-    if (dev_.is_host())
-      return acc.data->get_raw_ptr();
-
-    using container_type = typename accessor<T, D, m, t, p>::container_type;
-    using device_ptr     = typename container_type::device_ptr;
+    using container_type  = typename accessor<T, D, m, t, p>::container_type;
+    using device_ptr_type = detail::container::device_ptr_type;
     shared_ptr_class<container_type> buf = acc.data;
 
-    int count = buf->map.count(hndl_);
-    if (count == 1)
-      // multiple accessors use the same buffer
-      acc.device_ptr = buf->map.at(hndl_).ptr;
-    else if (count == 0) {
-      void* dp       = hndl_->alloc_mem(buf->get_raw_ptr(), buf->get_size(), m);
-      device_ptr cdp = {dp, m};
-      buf->map.insert(std::make_pair(hndl_, cdp));
-      acc.device_ptr = dp;
+    // allocate a device memory chunk if not allocated yet
+    int count = 0;
+    if (dev_.is_host() == false) {
+      count = buf->map.count(hndl_);
+      if (count == 1)
+        // multiple accessors would use the same buffer
+        acc.device_ptr = buf->map.at(hndl_).ptr;
+      else if (count == 0) {
+        void* dp = hndl_->alloc_mem(buf->get_raw_ptr(), buf->get_size(), m);
+        device_ptr_type cdp = {dp, m};
+        buf->map.insert(std::make_pair(hndl_, cdp));
+        acc.device_ptr = dp;
+      }
+      else
+        throw runtime_error("invalid BufferContainer object");
+      // DEBUG_INFO("device ptr %p", acc.device_ptr);
     }
-    else
-      throw runtime_error("invalid BufferContainer object");
-    DEBUG_INFO("device ptr %p", acc.device_ptr);
-    // acc.device_ptr = hndl_->alloc_mem(*acc.data, m);
-    //  avoid deleting program_data before buffer destruction.
-    // acc.data->progs.push_back(prog_);
+
+    // check if the buffer is already locked
+    size_t i = 0;
+    if (count > 0) {
+      // (count > 0) does not mean it is already locked by this handler.
+      // so let's check if it has been locked so far.
+      for (i = 0; i < acc_.size(); i++)
+        if (acc_[i].data.get() == acc.data.get()) {
+          if (acc_[i].mode == access::mode::read && m != access::mode::read) {
+            // not sure if this is a thread-safe way...
+            acc_[i].data->unlock_read();
+            acc_[i].data->lock_write();
+            acc_[i].mode            = m; // this is used for unlocking
+            buf->map.at(hndl_).mode = m; // this is used for buffer copy back
+          }
+          break;
+        }
+    }
+    // lock the buffer because it's not locked by this handler
+    if (i == acc_.size()) {
+      // DEBUG_INFO("memory lock: %p", acc.data.get());
+      acc_.push_back(detail::accessor_data(acc.data, m));
+      if (m != access::mode::read)
+        acc.data->lock_write();
+      else
+        acc.data->lock_read();
+    }
+
+    if (dev_.is_host())
+      return acc.data->get_raw_ptr();
     return acc.device_ptr;
   }
-
-  // context& get_context() {
-  //   return ctx_;
-  // }
-
-  // accessor_list& get_acc_() { return acc_; }
 
   template <typename T, int D, access::mode m, access::target t,
             access::placeholder p>
   neosycl::sycl::rt::acc_<T> map_(sycl::accessor<T, D, m, t, p> acc) {
     size_t sz[6] = {1, 1, 1, 0, 0, 0};
-    size_t i;
-    for (i = 0; i < kernel_.get_acc().size(); i++)
-      if (kernel_.get_acc()[i].data.get() == acc.data.get()) {
-        if (m != access::mode::read)
-          kernel_.get_acc()[i].mode = m;
-        break;
-      }
-    if (i == kernel_.get_acc().size()) {
-      kernel_.get_acc().push_back(detail::accessor_data(acc.data, m));
-    }
     std::memcpy(sz + 0, &acc.get_range()[0], sizeof(size_t) * D);
     std::memcpy(sz + 3, &acc.get_offset()[0], sizeof(size_t) * D);
     return neosycl::sycl::rt::acc_<T>{
@@ -262,27 +275,11 @@ public:
   }
 
 private:
-  context ctx_;
   device dev_;
   program prog_;
   counter_type cntr_;
-  kernel kernel_;
   handler_type hndl_;
-
-  template <typename Func>
-  void submit_task(Func func) {
-    cntr_->incr();
-    std::thread t([f = func, c = cntr_]() {
-      try {
-        f();
-      }
-      catch (...) {
-        throw;
-      }
-      c->decr();
-    });
-    t.detach();
-  }
+  vector_class<detail::accessor_data> acc_;
 
   template <typename F, typename retT, typename argT>
   auto index_type_ptr(retT (F::*)(argT)) {
