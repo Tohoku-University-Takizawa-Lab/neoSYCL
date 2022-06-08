@@ -48,6 +48,11 @@ public:
 
   vector_class<device> get_devices() const;
 
+  // INTERNAL USE ONLY
+  long use_count_() const {
+    return impl_.use_count();
+  }
+
 private:
   void init(vector_class<device>);
 

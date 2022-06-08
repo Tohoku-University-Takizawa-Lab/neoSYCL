@@ -31,4 +31,11 @@ enum class platform : unsigned int {
   extensions
 };
 
+DEF_STR_INFO_TRAIT(info::platform, info::platform::profile, "FULL PROFILE");
+DEF_STR_INFO_TRAIT(info::platform, info::platform::version, "0.1.0");
+DEF_STR_INFO_TRAIT(info::platform, info::platform::name, "neoSYCL");
+DEF_STR_INFO_TRAIT(info::platform, info::platform::vendor,
+                   "Tohoku University HPC Lab");
+DEF_STR_INFO_TRAIT(info::platform, info::platform::extensions, "");
+
 } // namespace neosycl::sycl::info

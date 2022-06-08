@@ -17,6 +17,14 @@ struct device_impl_ve : public detail::device_impl {
   bool is_accelerator() override {
     return true;
   }
+  const void* get_info(info::device param) const override {
+    switch (param) {
+    case info::device::device_type:
+    default:
+      PRINT_ERR("device::get_info(%d) not implemented", param);
+      throw unimplemented();
+    }
+  }
   info::device_type type() override {
     return info::device_type::accelerator;
   }

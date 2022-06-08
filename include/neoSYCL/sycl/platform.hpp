@@ -1,8 +1,8 @@
 #pragma once
+#include "neoSYCL/sycl/info/param_traits.hpp"
 #include "neoSYCL/sycl/info/device_type.hpp"
 #include "neoSYCL/sycl/info/platform.hpp"
 #include "neoSYCL/sycl/info/device.hpp"
-#include "neoSYCL/sycl/info/param_traits.hpp"
 
 namespace neosycl::sycl {
 
@@ -49,7 +49,7 @@ public:
   template <info::platform param>
   typename info::param_traits<info::platform, param>::return_type
   get_info() const {
-    throw unimplemented();
+    return info::param_traits<info::platform, param>::value;
   }
 
   bool has_extension(const string_class& extension) const;
