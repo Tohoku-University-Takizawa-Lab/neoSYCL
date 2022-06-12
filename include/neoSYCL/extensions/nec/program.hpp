@@ -44,18 +44,9 @@ public:
     }
   }
 
-  void* alloc_mem(void* p, size_t s, access::mode m) override {
+  void* alloc_mem(void* p, size_t s) override {
     void* dptr = util.alloc_mem(s);
-    DEBUG_INFO("memory alloc: vaddr=%lx, size=%lu", (size_t)dptr, s);
-
-    if (m != access::mode::discard_write &&
-        m != access::mode::discard_read_write) {
-      DEBUG_INFO("memory copy (h2v): "
-                 "vaddr=%lx, haddr=%lx, size=%lu",
-                 (size_t)dptr, (size_t)p, s);
-      util.write_mem(dptr, p, s);
-    }
-
+    DEBUG_INFO("memory alloc: daddr=%p, size=%lu", dptr, s);
     return dptr;
   }
 
@@ -79,12 +70,16 @@ public:
     auto kdv = cast<kernel_data_ve>(k);
     if (kdv->capt_)
       util.write_mem((void*)kdv->capt_, p, sz);
+    else
+      throw runtime_error("set_capture() failed");
   }
 
   void set_range(kernel& k, size_t r[6]) override {
     auto kdv = cast<kernel_data_ve>(k);
     if (kdv->rnge_)
       util.write_mem((void*)kdv->rnge_, r, sizeof(size_t) * 6);
+    else
+      throw runtime_error("set_range() failed");
   }
 
   kernel_data_ptr create_kernel_data(const char* s) override {
@@ -102,6 +97,7 @@ public:
 
     data->rnge_ = util.get_sym(rnge.c_str()); // this call could fail
 
+    // DEBUG_INFO("prog_data: %p %p %p", data->func_, data->capt_, data->rnge_);
     kernel_data_ptr ret(data);
     return ret;
   }

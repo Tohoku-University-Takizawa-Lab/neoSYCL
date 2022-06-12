@@ -33,9 +33,9 @@ public:
     kernel k = prog_.get_kernel<KernelName>();
     hndl_->set_range(k, kernelRange, kernelOffset);
 
-    auto [ptr, sz] = kernelFunc();
-    // DEBUG_INFO("kernel %s %p %lu", k.get_name(),ptr,sz);
-    hndl_->set_capture(k, ptr, sz);
+    kernelFunc(k);
+    // DEBUG_INFO("kernel %s %p %lu", k.get_name(), ptr, sz);
+    // hndl_->set_capture(k, ptr, sz);
     hndl_->run(k);
   }
 
@@ -44,9 +44,9 @@ public:
     kernel k = prog_.get_kernel<KernelName>();
     hndl_->set_range(k, kernelRange);
 
-    auto [ptr, sz] = kernelFunc();
-    // DEBUG_INFO("kernel %s %p %lu", k.get_name(),ptr,sz);
-    hndl_->set_capture(k, ptr, sz);
+    kernelFunc(k);
+    // DEBUG_INFO("kernel %s %p %lu", k.get_name(), ptr, sz);
+    // hndl_->set_capture(k, ptr, sz);
     hndl_->run(k);
   }
 
@@ -54,9 +54,9 @@ public:
   void run(KernelType kernelFunc) {
     kernel k = prog_.get_kernel<KernelName>();
 
-    auto [ptr, sz] = kernelFunc();
-    // DEBUG_INFO("kernel %s %p %lu", k.get_name(),ptr,sz);
-    hndl_->set_capture(k, ptr, sz);
+    kernelFunc(k);
+    // DEBUG_INFO("kernel %s %p %lu", k.get_name(), ptr, sz);
+    // hndl_->set_capture(k, ptr, sz);
     hndl_->run(k);
   }
 
@@ -194,13 +194,15 @@ public:
   template <typename T, int D, access::mode m, access::target t,
             access::placeholder p>
   T* get_ptr_(sycl::accessor<T, D, m, t, p> acc) {
-    if (acc.device_ptr)
-      return (T*)acc.device_ptr;
-
     using container_type = typename accessor<T, D, m, t, p>::container_type;
     shared_ptr_class<container_type> buf = acc.data;
 
-    if (dev_.is_host())
+    DEBUG_INFO("is_host %d daddr %p haddr %p %d %p", (int)dev_.is_host(),
+               acc.device_ptr, buf->get_raw_ptr(), (int)buf->map.count(hndl_),
+               buf->map.at(hndl_).ptr);
+    if (acc.device_ptr)
+      return (T*)acc.device_ptr;
+    else if (dev_.is_host())
       return (T*)buf->get_raw_ptr();
     else if (buf->map.count(hndl_))
       return (T*)buf->map.at(hndl_).ptr;
@@ -222,10 +224,18 @@ public:
         // multiple accessors would use the same buffer
         acc.device_ptr = buf->map.at(hndl_).ptr;
       else if (count == 0) {
-        void* dp = hndl_->alloc_mem(buf->get_raw_ptr(), buf->get_size(), m);
+        void* dp = hndl_->alloc_mem(buf->get_raw_ptr(), buf->get_size());
         device_ptr_type cdp = {dp, m};
         buf->map.insert(std::make_pair(hndl_, cdp));
         acc.device_ptr = dp;
+
+        if (m != access::mode::discard_write &&
+            m != access::mode::discard_read_write) {
+          DEBUG_INFO("memory copy (h2d): "
+                     "daddr=%p, haddr=%p, size=%lu",
+                     acc.device_ptr, buf->get_raw_ptr(), buf->get_size());
+          hndl_->write_mem(acc.device_ptr, buf->get_raw_ptr(), buf->get_size());
+        }
       }
       else
         throw runtime_error("invalid BufferContainer object");
@@ -272,6 +282,10 @@ public:
     std::memcpy(sz + 3, &acc.get_offset()[0], sizeof(size_t) * D);
     return neosycl::sycl::rt::acc_<T>{
         get_ptr_(acc), {sz[0], sz[1], sz[2], sz[3], sz[4], sz[5]}};
+  }
+
+  void set_capture_(kernel k, void* p, size_t sz) {
+    hndl_->set_capture(k, p, sz);
   }
 
 private:

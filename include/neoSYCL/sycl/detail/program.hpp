@@ -61,7 +61,7 @@ public:
 protected:
   device dev_;
 
-  virtual void* alloc_mem(void*, size_t, access::mode)  = 0;
+  virtual void* alloc_mem(void*, size_t)                = 0;
   virtual void free_mem(void*)                          = 0;
   virtual void write_mem(void*, void*, size_t)          = 0;
   virtual void read_mem(void*, void*, size_t)           = 0;
@@ -94,7 +94,7 @@ protected:
   auto cast(kernel k) {
     auto kd  = k.get_kernel_data(get_device());
     auto kdc = std::dynamic_pointer_cast<T>(kd);
-    if (kdc.get() == nullptr) {
+    if (kdc.use_count() == 0) {
       PRINT_ERR("invalid kernel_data: %lx", (size_t)kd.get());
       throw runtime_error("program_data::cast() failed");
     }
@@ -219,7 +219,7 @@ public:
 
   void run(kernel k) override {}
 
-  void* alloc_mem(void* p, size_t s, access::mode m) override {
+  void* alloc_mem(void* p, size_t s) override {
     return nullptr;
   }
 

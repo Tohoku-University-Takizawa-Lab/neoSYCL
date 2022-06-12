@@ -26,6 +26,10 @@ struct acc_ {
   T& operator[](item<dimensions>& i) {
     return this->operator[](i.get_id());
   }
+
+  T* get() const {
+    return p_;
+  }
 };
 
 inline item<1> id2item(size_t s[6], size_t i0) {

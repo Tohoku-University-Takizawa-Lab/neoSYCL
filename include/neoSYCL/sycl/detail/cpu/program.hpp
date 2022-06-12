@@ -44,11 +44,8 @@ public:
     }
   }
 
-  void* alloc_mem(void* p, size_t s, access::mode m) override {
+  void* alloc_mem(void* p, size_t s) override {
     void* ret = malloc(s);
-    if (m != access::mode::discard_write &&
-        m != access::mode::discard_read_write)
-      std::memcpy(ret, p, s);
     return ret;
   }
 
@@ -73,12 +70,16 @@ public:
     auto kdc = cast<kernel_data_cpu>(k);
     if (kdc->capt_)
       std::memcpy(kdc->capt_, p, sz);
+    else
+      throw runtime_error("set_capture() failed");
   }
 
   void set_range(kernel& k, size_t r[6]) override {
     auto kdc = cast<kernel_data_cpu>(k);
     if (kdc->rnge_)
       std::memcpy(kdc->rnge_, r, sizeof(size_t) * 6);
+    else
+      throw runtime_error("set_range() failed");
   }
 
   kernel_data_ptr create_kernel_data(const char* s) override {

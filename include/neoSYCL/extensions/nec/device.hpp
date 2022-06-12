@@ -21,7 +21,7 @@ struct device_impl_ve : public detail::device_impl {
     switch (param) {
     case info::device::device_type:
     default:
-      PRINT_ERR("device::get_info(%d) not implemented", param);
+      PRINT_ERR("device::get_info(%d) not implemented", (int)param);
       throw unimplemented();
     }
   }

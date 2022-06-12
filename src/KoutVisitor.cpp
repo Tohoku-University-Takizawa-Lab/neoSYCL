@@ -121,7 +121,8 @@ static void printLoop(str& st, CXXMethodDecl* func, Decl* d, Data& data) {
     else if (dim == 2)
       st << "{ [[maybe_unused]] cl::sycl::id<2> " << vname << "(i0_,i1_);\n";
     else if (dim == 3)
-      st << "{ [[maybe_unused]] cl::sycl::id<3> " << vname << "(i0_,i1_,i2_);\n";
+      st << "{ [[maybe_unused]] cl::sycl::id<3> " << vname
+         << "(i0_,i1_,i2_);\n";
   }
   else if (vtype == "item") {
     if (dim == 1)
@@ -160,8 +161,8 @@ static void printRunFunc(CXXMethodDecl* functor_op, Data& data) {
 
 static void writeDevCode(str& os, Data& data) {
   string& cls = data.kernel;
-  //if (data.dim != 0)
-    os << "size_t  __" << cls << "_range__[6]={1,1,1,0,0,0};\n";
+  // if (data.dim != 0)
+  os << "size_t  __" << cls << "_range__[6]={1,1,1,0,0,0};\n";
 
   os << "class " << cls << " {\n";
   os << "public:\n";
@@ -185,7 +186,7 @@ static void writeHostCode(str& os, Data& data, VarDeclFinder& finder) {
     if (data.offset.empty() == false)
       os << data.offset << ",";
   }
-  os << "[&](){\n";
+  os << "[&](cl::sycl::kernel& __kern__){\n";
   os << "class " << cls << " {\n";
   os << "public:\n";
   os << data.var << "\n";
@@ -229,7 +230,8 @@ static void writeHostCode(str& os, Data& data, VarDeclFinder& finder) {
     os << ")";
   }
   os << "};\n";
-  os << "return std::make_tuple((void*)&__" << cls << "_obj__,";
+  os << data.handler << ".set_capture_(__kern__, ";
+  os << "(void*)&__" << cls << "_obj__,";
   os << "sizeof(__" << cls << "_obj__));\n});\n";
 }
 
