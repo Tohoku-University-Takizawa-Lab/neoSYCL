@@ -21,7 +21,6 @@ add_definitions(${LLVM_DEFINITIONS})
 add_definitions(
 -D__STDC_LIMIT_MACROS
 -D__STDC_CONSTANT_MACROS
--DXEV_INCLUDE_PATH="-I${EXTRA_INCLUDE_DIR}"
 )
 include_directories(${LLVM_INCLUDE_DIRS})
 list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
@@ -40,8 +39,12 @@ set(SOURCE_FILES
   VarDeclFinder.cpp 
  )
 
+
 # add executable file 
 add_executable(kout ${SOURCE_FILES})
+
+#set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 target_link_libraries(kout
   clangTooling
@@ -91,4 +94,14 @@ target_link_libraries(kout
   LLVMSupport
 )
 
+add_custom_target(nsc++.py
+ALL 
+COMMAND "sed" 
+"-e" "\"s|@NEOSYCL_DIR@|NEOSYCL_DIR=\'${CMAKE_INSTALL_PREFIX}/\'|g\""
+"-e" "\"s|@CLANG_DIR@|CLANG_DIR=\'${Clang_DIR}/../../clang/${LLVM_PACKAGE_VERSION}/\'|g\""
+"-e" "\"s|@VEOS_DIR@|VEOS_DIR=\'${VEO_HEADER_PATH}\'|g\""
+ "${PROJECT_SOURCE_DIR}/src/nsc++.py.in" ">" "nsc++.py"
+)
+
 install (TARGETS kout DESTINATION bin)
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/nsc++.py DESTINATION bin)

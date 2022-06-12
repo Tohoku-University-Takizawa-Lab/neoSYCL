@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.4)
-project(neoSYCL C CXX)
+project("neoSYCL" LANGUAGES CXX VERSION 0.5.0)
+add_library(neoSYCL INTERFACE)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -36,4 +37,12 @@ endif ()
 
 include_directories(include)
 
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lpthread")
+#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lpthread")
+
+target_include_directories(
+  neoSYCL
+  INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/neoSYCL DESTINATION include)
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/CL DESTINATION include)
