@@ -1,129 +1,155 @@
 #!/usr/bin/env python3
 import argparse
 import os
+import shutil
 import subprocess
 import sys
 
-NEOSYCL_DIR="@CMAKE_INSTALL_PREFIX@"
-CLANG_DIR="@Clang_DIR@/../../clang/${LLVM_PACKAGE_VERSION}"
-VEOS_DIR="@VEO_DIR@"
+NEOSYCL_DIR = "@CMAKE_INSTALL_PREFIX@"
+CLANG_DIR = "@Clang_DIR@/../../clang/${LLVM_PACKAGE_VERSION}"
+VEOS_DIR = "@VEO_DIR@"
 
-DEVICE_COMPILER=os.getenv("DEVICE_COMPILER", "nc++")
-HOST_COMPILER=os.getenv("HOST_COMPILER", "g++")
-CFLAGS="-w -fopenmp -std=c++17 -DBUILD_VE"
-LFLAGS="-shared -fpic -Wno-unused-variable -DBUILD_VE"
-HOST_OPTS="-O4 -march=native"
-HOST_DEBUG_OPTS="-g -Wall -DDEBUG"
-HOST_LIBS="-L@VEO_LIB_PATH@ -Wl,-rpath=@VEO_LIB_PATH@ -lveo -ldl"
-DEVICE_OPTS="-finline-functions"
-DEVICE_DEBUG_OPTS="-g -DDEBUG  -Wall -Wno-unused-variable"
-DEVICE_LIBS=""
+DEVICE_COMPILER = os.getenv("DEVICE_COMPILER", "nc++")
+HOST_COMPILER = os.getenv("HOST_COMPILER", "g++")
+CFLAGS = "-w -fopenmp -std=c++17 -DBUILD_VE"
+LFLAGS = "-shared -fpic -Wno-unused-variable -DBUILD_VE"
+HOST_OPTS = "-O4 -march=native"
+HOST_DEBUG_OPTS = "-g -Wall -DDEBUG"
+HOST_LIBS = "-L@VEO_LIB_PATH@ -Wl,-rpath=@VEO_LIB_PATH@ -lveo -ldl"
+DEVICE_OPTS = "-finline-functions"
+DEVICE_DEBUG_OPTS = "-g -DDEBUG  -Wall -Wno-unused-variable"
+DEVICE_LIBS = ""
 
-VEO_INCLUDE_PATH="-I@VEO_HEADER_PATH@"
-CLANG_INCLUDE_PATH="-I"+CLANG_DIR+"/include"
-NEOSYCL_INCLUDE_PATH="-I"+NEOSYCL_DIR+"/include"
+VEO_INCLUDE_PATH = "-I@VEO_HEADER_PATH@"
+CLANG_INCLUDE_PATH = f"-I{CLANG_DIR}/include"
+NEOSYCL_INCLUDE_PATH = f"-I{NEOSYCL_DIR}/include"
 
-KOUT=os.path.dirname(os.path.abspath(sys.argv[0]))+"/kout"
+KOUT = os.path.dirname(os.path.abspath(sys.argv[0])) + "/kout"
 
 # nsc++ options
-parser = argparse.ArgumentParser(description='neoSYCL compilation helper', epilog='Unrecognized options are simply passed to compilers.')
+parser = argparse.ArgumentParser(
+    description="neoSYCL compilation helper",
+    epilog="Unrecognized options are simply passed to compilers.",
+)
 parser.add_argument("file", help="SYCL source filename")
-parser.add_argument("--hcode", type=ascii, metavar="filename", help="specify the output host code filename")
-parser.add_argument("--dcode", type=ascii, metavar="filename", help="specify the output device code filename")
-parser.add_argument("--soname", type=ascii, metavar="filename", help="specify the output shared object filename")
-parser.add_argument("--debug", type=int, default=0, metavar="filename", help="enable debug options")
+parser.add_argument(
+    "--hcode",
+    type=ascii,
+    metavar="filename",
+    help="Specify the output host code filename",
+)
+parser.add_argument(
+    "--dcode",
+    type=ascii,
+    metavar="filename",
+    help="Specify the output device code filename",
+)
+parser.add_argument(
+    "--soname",
+    type=ascii,
+    metavar="filename",
+    help="Specify the output shared object filename",
+)
+parser.add_argument(
+    "--debug", type=int, default=0, metavar="filename", help="Enable debug options"
+)
 
 # commandline options passed to the compiler
 parser.add_argument("-o", type=ascii, default="a.out", help=argparse.SUPPRESS)
-parser.add_argument("-B", type=ascii,help=argparse.SUPPRESS)
+parser.add_argument("-B", type=ascii, help=argparse.SUPPRESS)
 parser.add_argument("-x", type=ascii, default="c++", help=argparse.SUPPRESS)
 parser.add_argument("-Xassembler", type=ascii, help=argparse.SUPPRESS)
 parser.add_argument("-Xpreprocessor", type=ascii, help=argparse.SUPPRESS)
 parser.add_argument("-Xlinker", type=ascii, help=argparse.SUPPRESS)
 
-#parser.parse_args() # including known args
 args, unknown = parser.parse_known_args()
 
-
-name,ext = os.path.splitext(os.path.basename(args.file))
-if(ext != ".cpp" and ext != ".cc" and ext != ".C" ):
-    print ("unknown file ext: ", ext)
+name, ext = os.path.splitext(os.path.basename(args.file))
+if ext not in {".cpp", ".cc", ".C"}:
+    print("unknown file ext: ", ext)
     exit(1)
 
-if(args.hcode == None):
-    args.hcode=name+"-host"+ext
-if(args.dcode == None):
-    args.dcode=name+"-device"+ext
-if(args.soname == None):
-    args.soname =os.path.splitext(args.dcode)[0]+".so"
+if args.hcode is None:
+    args.hcode = f"{name}-host{ext}"
+if args.dcode is None:
+    args.dcode = f"{name}-device{ext}"
+if args.soname is None:
+    args.soname = os.path.splitext(args.dcode)[0] + ".so"
 
-#    "--soname", args.soname,\
+# Run kout
+kout_opts = [
+    args.file,
+    "--host",
+    args.hcode,
+    "--device",
+    args.dcode,
+    " -- -w -fopenmp -DBUILD_VE ",
+    NEOSYCL_INCLUDE_PATH,
+    CLANG_INCLUDE_PATH,
+    VEO_INCLUDE_PATH,
+] + unknown
+kout_command = KOUT + " "
+kout_command += " ".join(kout_opts)
 
-kout_opts=[args.file, \
-    '--host',args.hcode,\
-    "--device", args.dcode, \
-    " -- -w -fopenmp -DBUILD_VE ",\
-    NEOSYCL_INCLUDE_PATH,\
-    CLANG_INCLUDE_PATH,\
-    VEO_INCLUDE_PATH]+unknown
-kout_command = KOUT+" "
-kout_command += ' '.join(kout_opts)
-#kout_command += ' '.join(unknown)
+print(kout_command)
+try:
+    subprocess.run(kout_command, shell=True, check=True)
+except subprocess.CalledProcessError as e:
+    print("kout failed")
+    exit(e.returncode)
 
-# kout_command += unknown
-print (kout_command)
-p = subprocess.run(kout_command, shell=True)
-# print (p)
-if p.returncode == 0:
-    p1 = subprocess.run("clang-format -i "+args.hcode, shell=True)
-    p2 = subprocess.run("clang-format -i "+args.dcode, shell=True)
-else:
-    print ("kout failed")
-    exit(0)
-#    CLANG_INCLUDE_PATH ,\
+# Run clang-format
+if shutil.which("clang-format"):
+    try:
+        subprocess.run(f"clang-format -i {args.hcode}", shell=True, check=True)
+        subprocess.run(f"clang-format -i {args.dcode}", shell=True, check=True)
+    except subprocess.CalledProcessError as e:
+        print("clang-format failed")
+        exit(e.returncode)
 
-host_opts =[args.hcode, \
-    CFLAGS, HOST_LIBS, \
-    ("-o "+args.o), \
-    NEOSYCL_INCLUDE_PATH ,\
-    VEO_INCLUDE_PATH]+unknown
+# Run host compiler
+host_opts = [
+    args.hcode,
+    CFLAGS,
+    HOST_LIBS,
+    ("-o " + args.o),
+    NEOSYCL_INCLUDE_PATH,
+    VEO_INCLUDE_PATH,
+] + unknown
 if args.debug != 0:
     host_opts += [HOST_DEBUG_OPTS]
 else:
     host_opts += [HOST_OPTS]
 
-if p1.returncode == 0:
-    host_command = HOST_COMPILER+" "
-    host_command += ' '.join(host_opts)
-    print (host_command)
-    ph = subprocess.run(host_command, shell=True)
-else:
-    print ("clang-format failed")
-    exit(p1.returncode)
+host_command = HOST_COMPILER + " "
+host_command += " ".join(host_opts)
+print(host_command)
 
-if ph.returncode != 0:
-    print ("host code compilation failed")
-    exit(ph.returncode)
+try:
+    subprocess.run(host_command, shell=True, check=True)
+except subprocess.CalledProcessError as e:
+    print("host code compilation failed")
+    exit(e.returncode)
 
-dev_opts =[args.dcode, \
-    LFLAGS, DEVICE_LIBS, \
-    ("-o "+args.soname), \
-    NEOSYCL_INCLUDE_PATH ,\
-    VEO_INCLUDE_PATH]+unknown
+# Run device compiler
+dev_opts = [
+    args.dcode,
+    LFLAGS,
+    DEVICE_LIBS,
+    ("-o " + args.soname),
+    NEOSYCL_INCLUDE_PATH,
+    VEO_INCLUDE_PATH,
+] + unknown
 if args.debug != 0:
     dev_opts += [DEVICE_DEBUG_OPTS]
 else:
     dev_opts += [DEVICE_OPTS]
 
-if p2.returncode == 0:
-    device_command = DEVICE_COMPILER+" "
-    device_command += ' '.join(dev_opts)
-    print (device_command)
-    pd = subprocess.run(device_command, shell=True)
-else:
-    print ("clang-format failed")
-    exit(p2.returncode)
-
-if pd.returncode != 0:
-    print ("deive code compilation failed")
-    exit(pd.returncode)
+device_command = DEVICE_COMPILER + " "
+device_command += " ".join(dev_opts)
+print(device_command)
+try:
+    subprocess.run(device_command, shell=True, check=True)
+except subprocess.CalledProcessError as e:
+    print("deive code compilation failed")
+    exit(e.returncode)
