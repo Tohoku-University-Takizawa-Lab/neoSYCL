@@ -2,10 +2,10 @@
 import argparse
 import os
 import subprocess
-from sys import argv
+import sys
 
 NEOSYCL_DIR="@CMAKE_INSTALL_PREFIX@"
-CLANG_DIR="@Clang_DIR@"
+CLANG_DIR="@Clang_DIR@/../../clang/${LLVM_PACKAGE_VERSION}"
 VEOS_DIR="@VEO_DIR@"
 
 DEVICE_COMPILER="nc++"
@@ -14,16 +14,16 @@ CFLAGS="-w -fopenmp -std=c++17 -DBUILD_VE"
 LFLAGS="-shared -fpic -Wno-unused-variable -DBUILD_VE"
 HOST_OPTS="-O4 -march=native"
 HOST_DEBUG_OPTS="-g -Wall -DDEBUG"
-HOST_LIBS="-L"+VEOS_DIR+"/lib64 -lveo -ldl"
+HOST_LIBS="-L@VEO_LIB_PATH@ -Wl,-rpath=@VEO_LIB_PATH@ -lveo -ldl"
 DEVICE_OPTS="-finline-functions"
 DEVICE_DEBUG_OPTS="-g -DDEBUG  -Wall -Wno-unused-variable"
 DEVICE_LIBS=""
 
-VEO_INCLUDE_PATH="-I"+VEOS_DIR+"/include"
-CLANG_INCLUDE_PATH="-I"+CLANG_DIR+"include/"
+VEO_INCLUDE_PATH="-I@VEO_HEADER_PATH@"
+CLANG_INCLUDE_PATH="-I"+CLANG_DIR+"/include"
 NEOSYCL_INCLUDE_PATH="-I"+NEOSYCL_DIR+"/include"
 
-KOUT=os.path.dirname(os.path.abspath(argv[0]))+"/kout"
+KOUT=os.path.dirname(os.path.abspath(sys.argv[0]))+"/kout"
 
 # nsc++ options
 parser = argparse.ArgumentParser(description='neoSYCL compilation helper', epilog='Unrecognized options are simply passed to compilers.')

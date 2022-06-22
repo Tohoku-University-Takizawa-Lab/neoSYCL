@@ -9,14 +9,14 @@ option(BUILD_KERNEL_OUTLINER "Build SYCL kernel outliner" ON)
 option(BUILD_VE "Enable SX-Aurora support" OFF)
 
 if (BUILD_VE)
-    ADD_DEFINITIONS(-DBUILD_VE)
+    add_definitions(-DBUILD_VE)
     # find VEOS headers and libs
     set(VEO_DIR "/opt/nec/ve/veos" CACHE PATH "VEO installation path")
     set(VEO_HEADER_PATH "${VEO_DIR}/include" CACHE PATH "VEO headers path")
     set(VEO_LIB_PATH "${VEO_DIR}/lib64" CACHE PATH "VEO libs path")
     message(STATUS "Enable SX-Aurora support")
-    message(STATUS "Use veo headers path: ${VEO_HEADER_PATH}")
-    message(STATUS "Use veo libs path:  ${VEO_LIB_PATH}")
+    message(STATUS "Use VEO headers path: ${VEO_HEADER_PATH}")
+    message(STATUS "Use VEO libs path:    ${VEO_LIB_PATH}")
 
     include_directories(${VEO_HEADER_PATH} ${CMAKE_SOURCE_DIR}/include/neoSYCL/)
 endif ()

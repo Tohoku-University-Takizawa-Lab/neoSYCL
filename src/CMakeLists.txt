@@ -2,7 +2,7 @@
 find_package(Clang REQUIRED)
 include_directories(${CLANG_INCLUDE_DIRS})
 add_definitions(${CLANG_DEFINITIONS})
-message(STATUS "Clang_FOUND ${Clang_FOUND}")
+message(STATUS "Found Clang")
 message(STATUS "Clang_DIR ${Clang_DIR}")
 message(STATUS "Using ClangConfig.cmake in: ${Clang_DIR}")
 
@@ -21,7 +21,7 @@ add_executable(kout ${SOURCE_FILES})
 
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-target_link_libraries(kout PRIVATE clang-cpp LLVM z)
+target_link_libraries(kout PRIVATE clang-cpp LLVM)
 
 configure_file(nsc++.py.in nsc++.py)
 
