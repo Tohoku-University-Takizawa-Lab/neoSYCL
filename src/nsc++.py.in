@@ -8,8 +8,8 @@ NEOSYCL_DIR="@CMAKE_INSTALL_PREFIX@"
 CLANG_DIR="@Clang_DIR@/../../clang/${LLVM_PACKAGE_VERSION}"
 VEOS_DIR="@VEO_DIR@"
 
-DEVICE_COMPILER="nc++"
-HOST_COMPILER="g++"
+DEVICE_COMPILER=os.getenv("DEVICE_COMPILER", "nc++")
+HOST_COMPILER=os.getenv("HOST_COMPILER", "g++")
 CFLAGS="-w -fopenmp -std=c++17 -DBUILD_VE"
 LFLAGS="-shared -fpic -Wno-unused-variable -DBUILD_VE"
 HOST_OPTS="-O4 -march=native"
