@@ -1,0 +1,56 @@
+name: build
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    container:
+      image: rockylinux/rockylinux:8
+
+    steps:
+    - name: Install dependencies
+      run: |
+        yum install -y git gcc gcc-c++ cmake make clang-devel llvm-devel python3 libffi-devel
+
+    - name: Checkout veo-stubs
+      uses: actions/checkout@v3
+      with:
+        repository: keichi/veo-stubs
+        path: veo-stubs
+        submodules: true
+
+    - name: Build and install veo-stubs
+      run: |
+        cmake -B build-veo-stubs -S veo-stubs -DCMAKE_INSTALL_PREFIX=/opt/nec/ve/veos
+        cmake --build build-veo-stubs --parallel $(nproc)
+        cmake --install build-veo-stubs
+
+    - name: Checkout neoSYCL
+      uses: actions/checkout@v3
+      with:
+        path: neoSYCL
+
+    - name: Build and install neoSYCL
+      run: |
+        cmake -B build-neoSYCL -DBUILD_VE=ON -DBUILD_KERNEL_OUTLINER=ON -S neoSYCL
+        cmake --build build-neoSYCL --parllel $(nproc)
+        cmake --install build-neoSYCL
+
+    - name: Checkout veo-sycl-bench
+      uses: actions/checkout@v3
+      with:
+        repository: Tohoku-University-Takizawa-Lab/veo-sycl-bench
+        path: veo-sycl-bench
+
+    - name: Build and run veo-sycl-bench
+      run: |
+        cp neoSYCL/tests/test_veosycl.sh veo-sycl-bench/
+        cd veo-sycl-bench
+        ./test_veosycl.sh
+      env:
+        DEVICE_COMPILER: g++
