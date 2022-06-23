@@ -17,14 +17,30 @@ jobs:
         git ls-files '*.cpp' '*.hpp' | xargs clang-format-13 --dry-run --Werror
 
   build-and-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - rockylinux/rockylinux:8
+          - ubuntu:20.04
+
     runs-on: ubuntu-latest
     container:
-      image: rockylinux/rockylinux:8
+      image: ${{ matrix.os }}
 
     steps:
     - name: Install dependencies
       run: |
         yum install -y git gcc gcc-c++ cmake make clang-devel llvm-devel python3 libffi-devel
+      if: ${{ startsWith(matrix.os, 'rockylinux') }}
+
+    - name: Install dependencies
+      run: |
+        apt-get update
+        apt-get install -y git gcc g++ cmake make pkg-config clang-12 libclang-12-dev llvm-12-dev python3 libffi-dev
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      if: ${{ startsWith(matrix.os, 'ubuntu') }}
 
     - name: Checkout veo-stubs
       uses: actions/checkout@v3
@@ -47,7 +63,7 @@ jobs:
     - name: Build and install neoSYCL
       run: |
         cmake -B build-neoSYCL -DBUILD_VE=ON -DBUILD_KERNEL_OUTLINER=ON -S neoSYCL
-        cmake --build build-neoSYCL --parllel $(nproc)
+        cmake --build build-neoSYCL --parallel $(nproc)
         cmake --install build-neoSYCL
 
     - name: Checkout veo-sycl-bench
