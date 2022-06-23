@@ -1,4 +1,7 @@
 # neoSYCL
+
+[![build](https://github.com/keichi/neoSYCL/actions/workflows/build.yml/badge.svg)](https://github.com/keichi/neoSYCL/actions/workflows/build.yml)
+
 SYCL Implementation for CPU / NEC SX-Aurora TSUBASA (SX-AT)
 
 
