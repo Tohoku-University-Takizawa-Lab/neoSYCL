@@ -6,7 +6,7 @@ import subprocess
 import sys
 
 NEOSYCL_DIR = "@CMAKE_INSTALL_PREFIX@"
-CLANG_DIR = "@Clang_DIR@/../../clang/${LLVM_PACKAGE_VERSION}"
+CLANG_DIR = "@Clang_DIR@/../../clang/@LLVM_PACKAGE_VERSION@"
 VEOS_DIR = "@VEO_DIR@"
 
 DEVICE_COMPILER = os.getenv("DEVICE_COMPILER", "nc++")
@@ -74,7 +74,7 @@ if args.hcode is None:
 if args.dcode is None:
     args.dcode = f"{name}-device{ext}"
 if args.soname is None:
-    args.soname = os.path.splitext(args.dcode)[0] + ".so"
+    args.soname = "kernel-ve.so"
 
 # Run kout
 kout_opts = [
@@ -112,7 +112,7 @@ host_opts = [
     args.hcode,
     CFLAGS,
     HOST_LIBS,
-    ("-o " + args.o),
+    f"-o {args.o}",
     NEOSYCL_INCLUDE_PATH,
     VEO_INCLUDE_PATH,
 ] + unknown
