@@ -46,6 +46,7 @@ jobs:
       uses: actions/checkout@v3
       with:
         repository: keichi/veo-stubs
+        ref: v0.1.0
         path: veo-stubs
         submodules: true
 
@@ -59,6 +60,7 @@ jobs:
       uses: actions/checkout@v3
       with:
         path: neoSYCL
+        ref: 2670124d4aed0b867c78c27aa9780a21a21aebd1
 
     - name: Build and install neoSYCL
       run: |
