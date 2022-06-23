@@ -22,7 +22,6 @@ TEST(buffer, container_test) {
   }
 
   EXPECT_TRUE(container.get_ptr() != copy_container.get_ptr());
-
 }
 
 TEST(buffer, container_create_from_arr) {
@@ -44,7 +43,6 @@ TEST(buffer, container_create_from_arr) {
   for (int i = 0; i < 10; i++) {
     EXPECT_EQ(val[i], i + 1);
   }
-
 }
 
 TEST(buffer, buffer_basic_tests) {
@@ -57,6 +55,3 @@ TEST(buffer, buffer_basic_tests) {
   EXPECT_EQ(buf.get_size(), SIZE * sizeof(float));
   EXPECT_EQ(buf.get_range(), range<1>(SIZE));
 }
-
-
-

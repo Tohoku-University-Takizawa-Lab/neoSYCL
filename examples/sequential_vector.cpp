@@ -5,7 +5,7 @@
 using namespace cl::sycl;
 
 int main() {
-  const int N = 3;
+  const int N  = 3;
   using Vector = float[N];
 
   Vector a = {1, 2, 3};
@@ -28,7 +28,7 @@ int main() {
 
     /* The command group describing all operations needed for the kernel
        execution */
-    myQueue.submit([&](handler &cgh) {
+    myQueue.submit([&](handler& cgh) {
       // In the kernel A and B are read, but C is written
       auto ka = A.get_access<access::mode::read>(cgh);
       auto kb = B.get_access<access::mode::read>(cgh);

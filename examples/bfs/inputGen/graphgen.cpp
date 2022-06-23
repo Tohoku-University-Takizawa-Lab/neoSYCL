@@ -51,7 +51,7 @@ struct edge {
   uint weight;
 };
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   // Parse command lined
   ulong numNodes;
   string s;
@@ -64,11 +64,11 @@ int main(int argc, char **argv) {
     cerr << "Error: Invalid argument: " << argv[1] << "\n";
     exit(1);
   }
-  s = argc > 2 ? argv[2] : argv[1]; // filename bit
+  s               = argc > 2 ? argv[2] : argv[1]; // filename bit
   string filename = "graph" + s + ".txt";
 
   cout << "Generating graph with " << numNodes << " nodes...\n";
-  node *graph;
+  node* graph;
   graph = new node[numNodes];
 
   // Initialize random number generators
@@ -90,10 +90,10 @@ int main(int argc, char **argv) {
       nodeID = randNode(gen);
       weight = rand() % (MAX_WEIGHT - MIN_WEIGHT + 1) + MIN_WEIGHT;
       graph[i].push_back(edge());
-      graph[i].back().dest = nodeID;
+      graph[i].back().dest   = nodeID;
       graph[i].back().weight = weight;
       graph[nodeID].push_back(edge());
-      graph[nodeID].back().dest = i;
+      graph[nodeID].back().dest   = i;
       graph[nodeID].back().weight = weight;
     }
   }

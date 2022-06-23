@@ -3,7 +3,6 @@
 
 using namespace cl::sycl;
 
-
 TEST(accessor, basic_tests) {
   size_t X = 2;
   size_t Y = 10;
@@ -43,4 +42,3 @@ TEST(accessor, buffer_3d) {
   EXPECT_EQ(acc[1][1][1], 233);
   EXPECT_EQ(acc.get_range(), range<3>(2, 3, 3));
 }
-

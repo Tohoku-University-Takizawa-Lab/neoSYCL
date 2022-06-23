@@ -38,5 +38,4 @@ TEST(range, copy_test) {
   EXPECT_EQ(range_3d.get(0), cpy.get(0));
   EXPECT_EQ(range_3d.get(1), cpy.get(1));
   EXPECT_EQ(range_3d.get(2), cpy.get(2));
-
 }

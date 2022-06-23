@@ -48,7 +48,7 @@ int main() {
      * defined above and a range specifying a single element. */
     buffer<int, 1> buf(&data, range<1>(1));
 
-    myQueue.submit([&](handler &cgh) {
+    myQueue.submit([&](handler& cgh) {
       /* We define accessors for requiring access to a buffer on the host or on
        * a device. Accessors are are like pointers to data we can use in
        * kernels to access the data. When constructing the accessor you must
@@ -70,8 +70,8 @@ int main() {
     /* queue::wait() will block until kernel execution finishes,
      * successfully or otherwise. */
     myQueue.wait();
-
-  } catch (exception const &e) {
+  }
+  catch (exception const& e) {
     std::cout << "SYCL exception caught: " << e.what() << '\n';
     return 1;
   }

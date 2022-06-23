@@ -9,11 +9,9 @@ TEST(queue, single_task) {
   float val[10];
   buffer<float, 1> buf(val, range<1>(SIZE));
 
-  q.submit([&](handler &cgh) {
+  q.submit([&](handler& cgh) {
     auto acc = buf.get_access<access::mode::read_write>(cgh);
-    cgh.single_task<class simple_test>([=]() {
-      acc[0] = 233;
-    });
+    cgh.single_task<class simple_test>([=]() { acc[0] = 233; });
   });
   q.wait();
 
@@ -27,11 +25,9 @@ TEST(queue, data_consistency) {
   buffer<float, 1> buf(val, range<1>(SIZE));
 
   for (int i = 0; i < 10; i++) {
-    q.submit([&](handler &cgh) {
+    q.submit([&](handler& cgh) {
       auto acc = buf.get_access<access::mode::read_write>(cgh);
-      cgh.single_task<class simple_test>([=]() {
-        acc[0] += 1;
-      });
+      cgh.single_task<class simple_test>([=]() { acc[0] += 1; });
     });
   }
 
