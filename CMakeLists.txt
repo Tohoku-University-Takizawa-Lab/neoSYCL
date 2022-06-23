@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.10)
 project("neoSYCL" LANGUAGES CXX VERSION 0.5.0)
 add_library(neoSYCL INTERFACE)
 
