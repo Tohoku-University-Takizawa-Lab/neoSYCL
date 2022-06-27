@@ -1,5 +1,9 @@
 #pragma once
 
+#include "neoSYCL/sycl/detail/cpu/kernel.hpp"
+#include "neoSYCL/sycl/detail/cpu/program.hpp"
+#include "neoSYCL/sycl/detail/cpu/device.hpp"
+
 namespace neosycl::sycl {
 
 namespace detail {
@@ -113,7 +117,11 @@ platform platform::register_all_devices() {
   initial_platform_builder builder;
   platform p(builder.create());
   // register all available devices
+#ifdef USE_CPU
   builder.add<detail::device_impl_cpu>(p);
+#else
+  builder.add<detail::device_impl_host>(p);
+#endif
   return p;
 }
 #endif
