@@ -86,3 +86,4 @@ jobs:
         ./test_veosycl.sh ${{ matrix.device }}
       env:
         DEVICE_COMPILER: g++
+        LD_PRELOAD: /lib/x86_64-linux-gnu/libSegFault.so
