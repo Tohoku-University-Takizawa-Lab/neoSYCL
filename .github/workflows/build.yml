@@ -23,6 +23,9 @@ jobs:
         os:
           - rockylinux/rockylinux:8
           - ubuntu:20.04
+        device:
+          - cpu
+          - ve
 
     runs-on: ubuntu-latest
     container:
@@ -78,6 +81,6 @@ jobs:
       run: |
         cp neoSYCL/tests/test_veosycl.sh veo-sycl-bench/
         cd veo-sycl-bench
-        ./test_veosycl.sh
+        ./test_veosycl.sh ${{ matrix.device }}
       env:
         DEVICE_COMPILER: g++

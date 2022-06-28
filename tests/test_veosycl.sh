@@ -4,6 +4,8 @@
 
 set -eu
 
+DEVICE="$1"
+
 for i in sycl/*; do
     name=$(basename "$i")
     # We skip the lin_reg_coeff benchmark for now
@@ -15,10 +17,9 @@ for i in sycl/*; do
 
     # Compile benchmark
     # If using veo-stubs, set DEVICE_COMPILER to a host compiler (e.g. g++)
-    nsc++.py -I../include "$name.cpp"
+    nsc++.py -I../include --device "$DEVICE" --debug "$name.cpp"
 
     # Run benchmark
-    # If using veo-stubs, SPDLOG_LEVEL=debug will enable verbose logging
     ./a.out 10
 
     popd
