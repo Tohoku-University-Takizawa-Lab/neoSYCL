@@ -52,12 +52,14 @@ jobs:
         ref: v0.1.0
         path: veo-stubs
         submodules: true
+      if: ${{ matrix.device == 've' }}
 
     - name: Build and install veo-stubs
       run: |
         cmake -B build-veo-stubs -S veo-stubs -DCMAKE_INSTALL_PREFIX=/opt/nec/ve/veos
         cmake --build build-veo-stubs --parallel $(nproc)
         cmake --install build-veo-stubs
+      if: ${{ matrix.device == 've' }}
 
     - name: Checkout neoSYCL
       uses: actions/checkout@v3
