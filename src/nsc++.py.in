@@ -5,28 +5,42 @@ import shutil
 import subprocess
 import sys
 
+# neoSYCL installation path
 NEOSYCL_DIR = "@CMAKE_INSTALL_PREFIX@"
+# Clang installation path
 CLANG_DIR = "@Clang_DIR@/../../clang/@LLVM_PACKAGE_VERSION@"
+# VEOS installation path
 VEOS_DIR = "@VEO_DIR@"
 
-DEVICE_COMPILER = os.getenv("DEVICE_COMPILER", "nc++")
+CLANG_INCLUDE_PATH = f"{CLANG_DIR}/include"
+NEOSYCL_INCLUDE_PATH = f"{NEOSYCL_DIR}/include"
+
+# Path to neoSYCL kernel outliner
+KOUT = f"{NEOSYCL_DIR}/bin/kout"
+# Path to device compiler
+DEVICE_COMPILER = "nc++"
+# Path to host compiler
 HOST_COMPILER = os.getenv("HOST_COMPILER", "g++")
-CFLAGS = "-w -fopenmp -std=c++17 -DBUILD_VE"
-LFLAGS = "-shared -fpic -Wno-unused-variable -DBUILD_VE"
-HOST_OPTS = "-O4 -march=native"
-HOST_DEBUG_OPTS = "-g -Wall -DDEBUG"
-HOST_LIBS = "-L@VEO_LIB_PATH@ -Wl,-rpath=@VEO_LIB_PATH@ -lveo -ldl"
-DEVICE_OPTS = "-finline-functions"
-DEVICE_DEBUG_OPTS = "-g -DDEBUG  -Wall -Wno-unused-variable"
+# Common flags for host and device compilers
+COMMON_CFLAGS = f"-w -fopenmp -std=c++17 -I{NEOSYCL_INCLUDE_PATH}"
+# Compiler flags for host compiler
+HOST_CFLAGS = ""
+# Compiler flags for device compiler
+DEVICE_CFLAGS = "-shared -fpic"
+# Optimization flags for host compiler
+HOST_OPT_FLAGS = "-O3 -march=native"
+# Optimization flags for device compiler
+HOST_DEBUG_FLAGS = "-g -Wall -DDEBUG"
+# Linker options for the host compiler
+HOST_LIBS = ""
+# Optimization flags for device compiler
+DEVICE_OPT_FLAGS = "-O4 -finline-functions"
+# Debug flags for device compiler
+DEVICE_DEBUG_FLAGS = "-g -Wall -DDEBUG"
+# Linker options for the device compiler
 DEVICE_LIBS = ""
 
-VEO_INCLUDE_PATH = "-I@VEO_HEADER_PATH@"
-CLANG_INCLUDE_PATH = f"-I{CLANG_DIR}/include"
-NEOSYCL_INCLUDE_PATH = f"-I{NEOSYCL_DIR}/include"
-
-KOUT = os.path.dirname(os.path.abspath(sys.argv[0])) + "/kout"
-
-# nsc++ options
+# Define nsc++ options
 parser = argparse.ArgumentParser(
     description="neoSYCL compilation helper",
     epilog="Unrecognized options are simply passed to compilers.",
@@ -34,33 +48,40 @@ parser = argparse.ArgumentParser(
 parser.add_argument("file", help="SYCL source filename")
 parser.add_argument(
     "--hcode",
-    type=ascii,
+    type=str,
     metavar="filename",
-    help="Specify the output host code filename",
+    help="specify the output host code filename",
 )
 parser.add_argument(
     "--dcode",
-    type=ascii,
+    type=str,
     metavar="filename",
-    help="Specify the output device code filename",
+    help="specify the output device code filename",
 )
 parser.add_argument(
     "--soname",
-    type=ascii,
+    type=str,
     metavar="filename",
-    help="Specify the output shared object filename",
+    help="specify the output shared object filename",
 )
 parser.add_argument(
-    "--debug", type=int, default=0, metavar="filename", help="Enable debug options"
+    "--device",
+    type=str,
+    choices=["ve", "cpu"],
+    default="ve",
+    help="specify the device to use",
+)
+parser.add_argument(
+    "--debug", action="store_true", help="enable debug options"
 )
 
-# commandline options passed to the compiler
-parser.add_argument("-o", type=ascii, default="a.out", help=argparse.SUPPRESS)
-parser.add_argument("-B", type=ascii, help=argparse.SUPPRESS)
-parser.add_argument("-x", type=ascii, default="c++", help=argparse.SUPPRESS)
-parser.add_argument("-Xassembler", type=ascii, help=argparse.SUPPRESS)
-parser.add_argument("-Xpreprocessor", type=ascii, help=argparse.SUPPRESS)
-parser.add_argument("-Xlinker", type=ascii, help=argparse.SUPPRESS)
+# commandline options forwarded to the compiler
+parser.add_argument("-o", type=str, default="a.out", help=argparse.SUPPRESS)
+parser.add_argument("-B", type=str, help=argparse.SUPPRESS)
+parser.add_argument("-x", type=str, default="c++", help=argparse.SUPPRESS)
+parser.add_argument("-Xassembler", type=str, help=argparse.SUPPRESS)
+parser.add_argument("-Xpreprocessor", type=str, help=argparse.SUPPRESS)
+parser.add_argument("-Xlinker", type=str, help=argparse.SUPPRESS)
 
 args, unknown = parser.parse_known_args()
 
@@ -71,27 +92,40 @@ if ext not in {".cpp", ".cc", ".C"}:
 
 if args.hcode is None:
     args.hcode = f"{name}-host{ext}"
+
 if args.dcode is None:
     args.dcode = f"{name}-device{ext}"
-if args.soname is None:
-    args.soname = "kernel-ve.so"
 
-# Run kout
-kout_opts = [
-    args.file,
-    "--host",
-    args.hcode,
-    "--device",
-    args.dcode,
-    " -- -w -fopenmp -DBUILD_VE ",
-    NEOSYCL_INCLUDE_PATH,
-    CLANG_INCLUDE_PATH,
-    VEO_INCLUDE_PATH,
+if args.soname is None:
+    if args.device =="ve":
+        args.soname = "kernel-ve.so"
+    elif args.device == "cpu":
+        args.soname = "kernel.so"
+
+if args.device =="ve":
+    DEVICE_COMPILER = os.getenv("DEVICE_COMPILER", "nc++")
+    COMMON_CFLAGS += " -DBUILD_VE -DUSE_VE -I@VEO_HEADER_PATH@"
+    HOST_LIBS = "-L@VEO_LIB_PATH@ -Wl,-rpath=@VEO_LIB_PATH@ -lveo -ldl"
+elif args.device == "cpu":
+    DEVICE_COMPILER = os.getenv("DEVICE_COMPILER", "g++")
+    COMMON_CFLAGS += " -DUSE_CPU"
+    HOST_LIBS = "-ldl"
+
+# Run kernel outliner
+kout_command = [
+    KOUT, args.file,
+    f"--host {args.hcode}",
+    f"--device {args.dcode}",
+    "--",
+    COMMON_CFLAGS,
+    HOST_CFLAGS,
+    f"-I{CLANG_INCLUDE_PATH}"
 ] + unknown
-kout_command = KOUT + " "
-kout_command += " ".join(kout_opts)
+
+kout_command = " ".join(kout_command)
 
 print(kout_command)
+
 try:
     subprocess.run(kout_command, shell=True, check=True)
 except subprocess.CalledProcessError as e:
@@ -108,21 +142,22 @@ if shutil.which("clang-format"):
         exit(e.returncode)
 
 # Run host compiler
-host_opts = [
+host_command = [
+    HOST_COMPILER,
     args.hcode,
-    CFLAGS,
+    COMMON_CFLAGS,
+    HOST_CFLAGS,
     HOST_LIBS,
     f"-o {args.o}",
-    NEOSYCL_INCLUDE_PATH,
-    VEO_INCLUDE_PATH,
 ] + unknown
-if args.debug != 0:
-    host_opts += [HOST_DEBUG_OPTS]
-else:
-    host_opts += [HOST_OPTS]
 
-host_command = HOST_COMPILER + " "
-host_command += " ".join(host_opts)
+if args.debug:
+    host_command += [HOST_DEBUG_FLAGS]
+else:
+    host_command += [HOST_OPT_FLAGS]
+
+host_command = " ".join(host_command)
+
 print(host_command)
 
 try:
@@ -132,21 +167,22 @@ except subprocess.CalledProcessError as e:
     exit(e.returncode)
 
 # Run device compiler
-dev_opts = [
+device_command = [
+    DEVICE_COMPILER,
     args.dcode,
-    LFLAGS,
+    COMMON_CFLAGS,
+    DEVICE_CFLAGS,
     DEVICE_LIBS,
-    ("-o " + args.soname),
-    NEOSYCL_INCLUDE_PATH,
-    VEO_INCLUDE_PATH,
+    f"-o {args.soname}",
 ] + unknown
-if args.debug != 0:
-    dev_opts += [DEVICE_DEBUG_OPTS]
-else:
-    dev_opts += [DEVICE_OPTS]
 
-device_command = DEVICE_COMPILER + " "
-device_command += " ".join(dev_opts)
+if args.debug:
+    device_command += [DEVICE_DEBUG_FLAGS]
+else:
+    device_command += [DEVICE_OPT_FLAGS]
+
+device_command = " ".join(device_command)
+
 print(device_command)
 try:
     subprocess.run(device_command, shell=True, check=True)
