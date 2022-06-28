@@ -13,14 +13,9 @@ for i in sycl/*; do
 
     pushd "$i"
 
-    # Patch source code to use VE
-    sed -i -e 's/queue q;/queue q(ve_selector{});/g' "$name.cpp"
-    sed -i -e 's/queue device_queue;/queue device_queue(ve_selector{});/g' "$name.cpp"
-    sed -i -e 's/bitmap.h/..\/include\/bitmap.h/g' "$name.cpp"
-
     # Compile benchmark
     # If using veo-stubs, set DEVICE_COMPILER to a host compiler (e.g. g++)
-    nsc++.py "$name.cpp"
+    nsc++.py -I../include "$name.cpp"
 
     # Run benchmark
     # If using veo-stubs, SPDLOG_LEVEL=debug will enable verbose logging
