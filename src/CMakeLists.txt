@@ -23,7 +23,7 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 target_link_libraries(kout PRIVATE clang-cpp LLVM)
 
-configure_file(nsc++.py.in nsc++.py)
+configure_file(nsc++.in nsc++)
 
 install(TARGETS kout DESTINATION bin)
-install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/nsc++.py DESTINATION bin)
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/nsc++ DESTINATION bin)

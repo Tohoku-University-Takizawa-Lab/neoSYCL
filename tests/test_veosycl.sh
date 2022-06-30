@@ -21,7 +21,7 @@ for i in sycl/*; do
         g++ -std=c++17 -I../include -o a.out "$name.cpp" -lpthread
     else
         # If using veo-stubs, set DEVICE_COMPILER to a host compiler (e.g. g++)
-        nsc++.py -I../include --device "$DEVICE" --debug "$name.cpp"
+        nsc++ -I../include --device "$DEVICE" --debug "$name.cpp"
     fi
 
     # Run benchmark
