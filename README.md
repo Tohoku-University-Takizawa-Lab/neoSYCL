@@ -1,6 +1,6 @@
 # neoSYCL
 
-[![build](https://github.com/Tohoku-University-Takizawa-Lab/neoSYCL/actions/workflows/build.yml/badge.svg)](https://github.com/Tohoku-University-Takizawa-Lab/neoSYCL/actions/workflows/build.yml)
+[![build](https://github.com/Tohoku-University-Takizawa-Lab/neoSYCL/actions/workflows/ci.yml/badge.svg)](https://github.com/Tohoku-University-Takizawa-Lab/neoSYCL/actions/workflows/ci.yml)
 
 SYCL Implementation for CPU and NEC SX-Aurora TSUBASA (SX-AT)
 
@@ -33,3 +33,14 @@ sudo make install
 - If Clang and LLVM are installed to non-standard locations, their paths
   should be given via the options `-DCLang_DIR=` and `-DLLVM_DIR=` when
   invoking CMake.
+
+## Usage
+
+neoSYCL supports three types of execution:
+
+- Host: In this mode, the host
+- CPU:
+- VE:
+
+To facilitate the CPU and VE, neoSYCL provides a compiler wrapper named
+`nsc++`. `nsc++` extracts the kernel
