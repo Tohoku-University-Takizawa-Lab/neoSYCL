@@ -31,7 +31,7 @@ sudo make install
 
 neoSYCL supports three types of devices:
 
-- Host: Kernels are executed the host. This device is always available.
+- Host: Kernels are executed on the host. This device is always available.
 - CPU: Kernels are compiled to a shared library and executed
   on the host CPU. To use this device, add the `-DBUILD_KERNEL_OUTLINER=ON`
   option when invoking CMake.
@@ -49,3 +49,11 @@ options, respectively.
 When using the CPU or VE device, the SYCL source file needs to be compiled
 using the `nsc++` compiler wrapper. The target device can be specified using
 the `--device` option. Accepted values are ` cpu` or `ve`.
+
+## Citing
+
+If you use neoSYCL in your work, please cite the following paper:
+
+Yinan Ke, Mulya Agung, Hiroyuki Takizawa, "neoSYCL: a SYCL implementation for
+SX-Aurora TSUBASA," The International Conference on High Performance Computing
+in Asia-Pacific Region (HPC Asia 2021), pp. 50-57, Jan. 2021.
