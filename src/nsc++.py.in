@@ -22,17 +22,17 @@ DEVICE_COMPILER = "nc++"
 # Path to host compiler
 HOST_COMPILER = os.getenv("HOST_COMPILER", "g++")
 # Common flags for host and device compilers
-COMMON_CFLAGS = f"-w -fopenmp -std=c++17 -I{NEOSYCL_INCLUDE_PATH}"
+COMMON_CFLAGS = f"-w -std=c++17 -I{NEOSYCL_INCLUDE_PATH}"
 # Compiler flags for host compiler
 HOST_CFLAGS = ""
 # Compiler flags for device compiler
-DEVICE_CFLAGS = "-shared -fpic"
+DEVICE_CFLAGS = "-shared -fpic -fopenmp"
 # Optimization flags for host compiler
 HOST_OPT_FLAGS = "-O3 -march=native"
 # Optimization flags for device compiler
 HOST_DEBUG_FLAGS = "-g -Wall -DDEBUG"
 # Linker options for the host compiler
-HOST_LIBS = ""
+HOST_LIBS = "-ldl -lpthread"
 # Optimization flags for device compiler
 DEVICE_OPT_FLAGS = "-O4 -finline-functions"
 # Debug flags for device compiler
@@ -105,11 +105,10 @@ if args.soname is None:
 if args.device =="ve":
     DEVICE_COMPILER = os.getenv("DEVICE_COMPILER", "nc++")
     COMMON_CFLAGS += " -DBUILD_VE -DUSE_VE -I@VEO_HEADER_PATH@"
-    HOST_LIBS = "-L@VEO_LIB_PATH@ -Wl,-rpath=@VEO_LIB_PATH@ -lveo -ldl"
+    HOST_LIBS += " -L@VEO_LIB_PATH@ -Wl,-rpath=@VEO_LIB_PATH@ -lveo"
 elif args.device == "cpu":
     DEVICE_COMPILER = os.getenv("DEVICE_COMPILER", "g++")
     COMMON_CFLAGS += " -DUSE_CPU"
-    HOST_LIBS = "-ldl"
 
 # Run kernel outliner
 kout_command = [

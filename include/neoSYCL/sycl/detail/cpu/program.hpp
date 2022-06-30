@@ -10,8 +10,11 @@ public:
   program_data_cpu(device d) : program_data(d), dll_(nullptr) {}
 
   ~program_data_cpu() {
-    if (dll_)
-      dlclose(dll_);
+    // FIXME Here, we intentionally do not unload the kernel library because
+    // unloading libgomp.so causes a segfault.
+    // c.f. https://github.com/libocca/occa/issues/208
+    // if (dll_)
+    //   dlclose(dll_);
   }
 
   bool open() override {
