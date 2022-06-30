@@ -18,4 +18,4 @@ BraceWrapping:
   BeforeElse:      true
   IndentBraces:    false
 PointerAlignment: Left
-SortIncludes: Never
+SortIncludes: false
