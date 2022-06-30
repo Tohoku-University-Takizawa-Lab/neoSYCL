@@ -67,9 +67,23 @@ jobs:
       with:
         path: neoSYCL
 
-    - name: Build and install neoSYCL
+    - name: Configure and install neoSYCL
+      run: |
+        cmake -B build-neoSYCL -S neoSYCL
+      if: ${{ matrix.device == 'host' }}
+
+    - name: Configure and install neoSYCL
+      run: |
+        cmake -B build-neoSYCL -DBUILD_KERNEL_OUTLINER=ON -S neoSYCL
+      if: ${{ matrix.device == 'cpu' }}
+
+    - name: Configure and install neoSYCL
       run: |
         cmake -B build-neoSYCL -DBUILD_VE=ON -DBUILD_KERNEL_OUTLINER=ON -S neoSYCL
+      if: ${{ matrix.device == 've' }}
+
+    - name: Build and install neoSYCL
+      run: |
         cmake --build build-neoSYCL --parallel $(nproc)
         cmake --install build-neoSYCL
 

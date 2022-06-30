@@ -6,7 +6,7 @@ add_library(neoSYCL INTERFACE)
 set(CMAKE_CXX_STANDARD 17)
 
 option(BUILD_KERNEL_OUTLINER "Build SYCL kernel outliner" ON)
-option(BUILD_VE "Enable SX-Aurora support" OFF)
+option(BUILD_VE "Enable SX-Aurora TSUBASA support" OFF)
 
 if (BUILD_VE)
     add_definitions(-DBUILD_VE)
