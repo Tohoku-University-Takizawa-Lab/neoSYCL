@@ -1,5 +1,4 @@
-#ifndef NEOSYCL_INCLUDE_CL_SYCL_INFO_DEVICE_HPP_
-#define NEOSYCL_INCLUDE_CL_SYCL_INFO_DEVICE_HPP_
+#pragma once
 
 namespace neosycl::sycl::info {
 
@@ -87,6 +86,4 @@ enum class partition_property : int {
   partition_by_affinity_domain
 };
 
-}
-
-#endif //NEOSYCL_INCLUDE_CL_SYCL_INFO_DEVICE_HPP_
+} // namespace neosycl::sycl::info

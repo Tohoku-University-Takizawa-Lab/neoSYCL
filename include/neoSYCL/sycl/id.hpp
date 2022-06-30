@@ -1,35 +1,29 @@
-#ifndef SYCL_INCLUDE_CL_SYCL_ID_HPP_
-#define SYCL_INCLUDE_CL_SYCL_ID_HPP_
-
-#include "neoSYCL/sycl/types.hpp"
-#include "neoSYCL/sycl/range.hpp"
-#include "neoSYCL/sycl/item.hpp"
-#include "neoSYCL/sycl/op_def.hpp"
+#pragma once
 #include "neoSYCL/sycl/detail/container/array_nd.hpp"
 
 namespace neosycl::sycl {
 
-template<std::size_t dimensions = 1>
+template <int dimensions = 1>
 struct id {
   id() = default;
 
-  template<int D = dimensions, typename = std::enable_if_t<D == 1>>
+  template <int D = dimensions, typename = std::enable_if_t<D == 1>>
   id(size_t dim0) : data{dim0} {}
 
-  template<int D = dimensions, typename = std::enable_if_t<D == 2>>
+  template <int D = dimensions, typename = std::enable_if_t<D == 2>>
   id(size_t dim0, size_t dim1) : data{dim0, dim1} {}
 
-  template<int D = dimensions, typename = std::enable_if_t<D == 3>>
+  template <int D = dimensions, typename = std::enable_if_t<D == 3>>
   id(size_t dim0, size_t dim1, size_t dim2) : data{dim0, dim1, dim2} {}
 
-  id(const range<dimensions> &range) {
-    for (size_t i = 0; i < dimensions; i++) {
+  id(const range<dimensions>& range) {
+    for (int i = 0; i < dimensions; i++) {
       this->data[i] = range.get(i);
     }
   }
 
-  id(const item<dimensions> &item) {
-    for (size_t i = 0; i < dimensions; i++) {
+  id(const item<dimensions>& item) {
+    for (int i = 0; i < dimensions; i++) {
       this->data[i] = item[i];
     }
   }
@@ -38,14 +32,13 @@ struct id {
     return data[dimension];
   }
 
-  size_t &operator[](int dimension) {
+  size_t& operator[](int dimension) {
     return data[dimension];
   }
 
   size_t operator[](int dimension) const {
     return data[dimension];
   }
-
 
   // Where OP is: +, -, *, /, %, <<, >>, &, |, ˆ, &&, ||, <, >, <=, >=.
   DEFINE_OP_CONST(id, +);
@@ -130,6 +123,4 @@ struct id {
   detail::container::ArrayND<dimensions> data;
 };
 
-}
-
-#endif //SYCL_INCLUDE_CL_SYCL_ID_HPP_
+} // namespace neosycl::sycl

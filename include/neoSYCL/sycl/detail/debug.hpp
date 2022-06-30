@@ -1,15 +1,31 @@
 #ifndef SYCL_INCLUDE_CL_SYCL_DETAIL_DEBUG_HPP_
 #define SYCL_INCLUDE_CL_SYCL_DETAIL_DEBUG_HPP_
 
-
+#include <cstdio>
 #ifdef DEBUG
-#include <iostream>
-#define DEBUG_INFO(...) std::cout<< "[DEBUG] "<< printf(__VA_ARGS__) <<std::endl
+#define DEBUG_INFO(...)                                                        \
+  {                                                                            \
+    std::fprintf(stderr, "[DEBUG] ");                                          \
+    std::fprintf(stderr, __VA_ARGS__);                                         \
+    std::fprintf(stderr, "\n");                                                \
+  }
+
+#define PRINT_ERR(...)                                                         \
+  {                                                                            \
+    std::fprintf(stderr, "[ERROR] ");                                          \
+    std::fprintf(stderr, __VA_ARGS__);                                         \
+    std::fprintf(stderr, "\n");                                                \
+    std::fprintf(stderr, "[SOURCE LOC] Line %d in %s\n", __LINE__, __FILE__);  \
+  }
+
 #else
 #define DEBUG_INFO(format, ...)
+
+#define PRINT_ERR(...)                                                         \
+  {                                                                            \
+    std::fprintf(stderr, "[ERROR] ");                                          \
+    std::fprintf(stderr, __VA_ARGS__);                                         \
+    std::fprintf(stderr, "\n");                                                \
+  }
 #endif
-
-#define PRINT_INFO(...) std::cout<< "[INFO] "<< __VA_ARGS__ <<std::endl
-#define PRINT_ERR(...) std::cout<< "[ERROR] "<< __VA_ARGS__ <<std::endl
-
-#endif //SYCL_INCLUDE_CL_SYCL_DETAIL_DEBUG_HPP_
+#endif // SYCL_INCLUDE_CL_SYCL_DETAIL_DEBUG_HPP_

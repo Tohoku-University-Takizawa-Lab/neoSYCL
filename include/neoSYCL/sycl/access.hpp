@@ -1,5 +1,4 @@
-#ifndef CUSTOM_SYCL_INCLUDE_SYCL_ACCESS_HPP_
-#define CUSTOM_SYCL_INCLUDE_SYCL_ACCESS_HPP_
+#pragma once
 
 namespace neosycl::sycl {
 
@@ -24,10 +23,7 @@ enum class mode {
   atomic
 };
 
-enum placeholder {
-  false_t,
-  true_t
-};
+enum placeholder { false_t, true_t };
 
 enum class address_space : int {
   global_space,
@@ -36,8 +32,6 @@ enum class address_space : int {
   private_space
 };
 
-}
+} // namespace access
 
-}
-
-#endif //CUSTOM_SYCL_INCLUDE_SYCL_ACCESS_HPP_
+} // namespace neosycl::sycl

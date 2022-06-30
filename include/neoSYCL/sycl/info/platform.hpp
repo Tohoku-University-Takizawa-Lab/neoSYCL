@@ -1,5 +1,4 @@
-#ifndef CUSTOM_SYCL_INCLUDE_SYCL_INFO_PLATFORM_HPP_
-#define CUSTOM_SYCL_INCLUDE_SYCL_INFO_PLATFORM_HPP_
+#pragma once
 
 namespace neosycl::sycl::info {
 
@@ -21,10 +20,10 @@ enum class platform : unsigned int {
   */
   version,
   /** Returns the name of the platform (as a string_class)
-  */
+   */
   name,
   /** Returns the string provided by the platform vendor (as a string_class)
-  */
+   */
   vendor,
   /** Returns a space-separated list of extension names supported by the
       platform (as a string_class)
@@ -32,6 +31,11 @@ enum class platform : unsigned int {
   extensions
 };
 
-}
+DEF_STR_INFO_TRAIT(info::platform, info::platform::profile, "FULL PROFILE");
+DEF_STR_INFO_TRAIT(info::platform, info::platform::version, "0.1.0");
+DEF_STR_INFO_TRAIT(info::platform, info::platform::name, "neoSYCL");
+DEF_STR_INFO_TRAIT(info::platform, info::platform::vendor,
+                   "Tohoku University HPC Lab");
+DEF_STR_INFO_TRAIT(info::platform, info::platform::extensions, "");
 
-#endif //CUSTOM_SYCL_INCLUDE_SYCL_INFO_PLATFORM_HPP_
+} // namespace neosycl::sycl::info

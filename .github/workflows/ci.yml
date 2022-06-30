@@ -1,0 +1,103 @@
+name: CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  format:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Check coding style
+      run: |
+        git ls-files '*.cpp' '*.hpp' | xargs clang-format-13 --dry-run --Werror
+
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - rockylinux/rockylinux:8
+          - ubuntu:20.04
+        device:
+          - host
+          - cpu
+          - ve
+
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ matrix.os }}
+
+    steps:
+    - name: Install dependencies (Rocky Linux)
+      run: |
+        yum install -y git gcc gcc-c++ cmake make clang-devel llvm-devel python3 libffi-devel
+      if: ${{ startsWith(matrix.os, 'rockylinux') }}
+
+    - name: Install dependencies (Ubuntu)
+      run: |
+        apt-get update
+        apt-get install -y git gcc g++ cmake make pkg-config clang-12 libclang-12-dev llvm-12-dev python3 libffi-dev
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      if: ${{ startsWith(matrix.os, 'ubuntu') }}
+
+    - name: Checkout veo-stubs
+      uses: actions/checkout@v3
+      with:
+        repository: keichi/veo-stubs
+        ref: v0.1.0
+        path: veo-stubs
+        submodules: true
+      if: ${{ matrix.device == 've' }}
+
+    - name: Build and install veo-stubs
+      run: |
+        cmake -B build-veo-stubs -S veo-stubs -DCMAKE_INSTALL_PREFIX=/opt/nec/ve/veos
+        cmake --build build-veo-stubs --parallel $(nproc)
+        cmake --install build-veo-stubs
+      if: ${{ matrix.device == 've' }}
+
+    - name: Checkout neoSYCL
+      uses: actions/checkout@v3
+      with:
+        path: neoSYCL
+
+    - name: Configure and install neoSYCL
+      run: |
+        cmake -B build-neoSYCL -S neoSYCL
+      if: ${{ matrix.device == 'host' }}
+
+    - name: Configure and install neoSYCL
+      run: |
+        cmake -B build-neoSYCL -DBUILD_KERNEL_OUTLINER=ON -S neoSYCL
+      if: ${{ matrix.device == 'cpu' }}
+
+    - name: Configure and install neoSYCL
+      run: |
+        cmake -B build-neoSYCL -DBUILD_VE=ON -DBUILD_KERNEL_OUTLINER=ON -S neoSYCL
+      if: ${{ matrix.device == 've' }}
+
+    - name: Build and install neoSYCL
+      run: |
+        cmake --build build-neoSYCL --parallel $(nproc)
+        cmake --install build-neoSYCL
+
+    - name: Checkout veo-sycl-bench
+      uses: actions/checkout@v3
+      with:
+        repository: Tohoku-University-Takizawa-Lab/veo-sycl-bench
+        path: veo-sycl-bench
+        ref: 2670124d4aed0b867c78c27aa9780a21a21aebd1
+
+    - name: Build and run veo-sycl-bench
+      run: |
+        cp neoSYCL/tests/test_veosycl.sh veo-sycl-bench/
+        cd veo-sycl-bench
+        ./test_veosycl.sh ${{ matrix.device }}
+      env:
+        DEVICE_COMPILER: g++

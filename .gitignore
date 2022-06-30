@@ -31,13 +31,18 @@
 *.out
 *.app
 
-# CLion tmp dirs
-build
-.idea
-cmake-build-debug
-cmake-build-release
-node_modules
-package-lock.json
-package.json
+# CMake
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
 
+build
 .DS_Store

@@ -24,9 +24,8 @@ private:
     std::unique_lock<std::mutex> ul{lock};
     cond.wait(ul, [&] { return !waiting; });
   }
-
 };
 
-}
+} // namespace neosycl::sycl::detail
 
-#endif //NEOSYCL_INCLUDE_NEOSYCL_SYCL_DETAIL_TASK_HPP
+#endif // NEOSYCL_INCLUDE_NEOSYCL_SYCL_DETAIL_TASK_HPP

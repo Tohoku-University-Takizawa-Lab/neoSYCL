@@ -1,14 +1,4 @@
-#ifndef CUSTOM_SYCL_INCLUDE_SYCL_BUFFER_HPP_
-#define CUSTOM_SYCL_INCLUDE_SYCL_BUFFER_HPP_
-
-#include "neoSYCL/sycl/types.hpp"
-#include "neoSYCL/sycl/range.hpp"
-#include "neoSYCL/sycl/access.hpp"
-#include "neoSYCL/sycl/accessor.hpp"
-#include "neoSYCL/sycl/allocator.hpp"
-#include "neoSYCL/sycl/handler.hpp"
-#include "neoSYCL/sycl/context.hpp"
-#include "neoSYCL/sycl/property_list.hpp"
+#pragma once
 #include "neoSYCL/sycl/detail/container/data_container.hpp"
 #include "neoSYCL/sycl/detail/container/data_container_nd.hpp"
 
@@ -22,8 +12,8 @@ public:
 };
 class use_mutex {
 public:
-  use_mutex(mutex_class &mutexRef);
-  mutex_class *get_mutex_ptr() const;
+  use_mutex(mutex_class& mutexRef);
+  mutex_class* get_mutex_ptr() const;
 };
 class context_bound {
 public:
@@ -33,78 +23,96 @@ public:
 } // namespace buffer
 } // namespace property
 
-
-template<typename T, size_t dimensions = 1, typename AllocatorT = buffer_allocator<T>>
+///////////////////////////////////////////////////////////////////////////////
+template <typename T, int dimensions = 1,
+          typename AllocatorT = buffer_allocator<T>>
 class buffer {
-  friend accessor<T, dimensions, access::mode::read, access::target::global_buffer>;
-  friend accessor<T, dimensions, access::mode::read, access::target::host_buffer>;
-  friend accessor<T, dimensions, access::mode::write, access::target::global_buffer>;
-  friend accessor<T, dimensions, access::mode::write, access::target::host_buffer>;
-  friend accessor<T, dimensions, access::mode::read_write, access::target::global_buffer>;
-  friend accessor<T, dimensions, access::mode::read_write, access::target::host_buffer>;
-
 public:
-  using value_type = T;
-  using reference = value_type &;
-  using const_reference = const value_type &;
-  using allocator_type = AllocatorT;
+  using value_type      = T;
+  using reference       = value_type&;
+  using const_reference = const value_type&;
+  using allocator_type  = AllocatorT;
+  using container_type  = detail::container::BufferContainer<T, dimensions>;
 
-  buffer(const range<dimensions> &bufferRange, const property_list &propList = {}) :
-      buffer(bufferRange, allocator_type(), propList) {}
+  buffer(const buffer& rhs) = default;
+  buffer(buffer&& rhs)      = default;
+  ~buffer()                 = default;
 
-  buffer(const range<dimensions> &bufferRange, AllocatorT allocator, const property_list &propList = {})
+  buffer& operator=(const buffer& rhs) = default;
+  buffer& operator=(buffer&& rhs) = default;
+
+  template <typename Ty, int D, typename A>
+  friend bool operator==(const buffer<Ty, D, A>& lhs,
+                         const buffer<Ty, D, A>& rhs);
+  template <typename Ty, int D, typename A>
+  friend bool operator!=(const buffer<Ty, D, A>& lhs,
+                         const buffer<Ty, D, A>& rhs);
+
+  buffer(const range<dimensions>& bufferRange,
+         const property_list& propList = {})
+      : buffer(bufferRange, allocator_type(), propList) {}
+
+  buffer(const range<dimensions>& bufferRange, AllocatorT allocator,
+         const property_list& propList = {})
       : bufferRange(bufferRange),
-        data(new detail::container::DataContainerND<T, dimensions>(bufferRange.data, allocator)) {}
+        data(new container_type(bufferRange.data, allocator)) {}
 
-  buffer(T *hostData, const range<dimensions> &bufferRange, const property_list &propList = {}) :
-      buffer(hostData, bufferRange, allocator_type(), propList) {}
+  buffer(T* hostData, const range<dimensions>& bufferRange,
+         const property_list& propList = {})
+      : buffer(hostData, bufferRange, allocator_type(), propList) {}
 
-  buffer(T *hostData, const range<dimensions> &bufferRange, AllocatorT allocator, const property_list &propList = {}) :
-      bufferRange(bufferRange),
-      data(new detail::container::DataContainerND<T, dimensions>(hostData, bufferRange.data, allocator)) {}
-
-  buffer(const T *hostData, const range<dimensions> &bufferRange, const property_list &propList = {}) :
-      buffer(hostData, bufferRange, allocator_type(), propList) {}
-
-  buffer(const T *hostData,
-         const range<dimensions> &bufferRange,
-         AllocatorT allocator,
-         const property_list &propList = {}) :
-      bufferRange(bufferRange),
-      data(new detail::container::DataContainerND<T, dimensions, AllocatorT>(hostData, bufferRange.data)) {}
-
-  buffer(const shared_ptr_class<T> &hostData,
-         const range<dimensions> &bufferRange, AllocatorT allocator, const property_list &propList = {}) :
-      bufferRange(bufferRange),
-      data(new detail::container::DataContainerND<T, dimensions>(hostData, bufferRange.data, allocator)) {}
-
-  buffer(const shared_ptr_class<T> &hostData, const range<dimensions> &bufferRange, const property_list &propList = {})
+  buffer(T* hostData, const range<dimensions>& bufferRange,
+         AllocatorT allocator, const property_list& propList = {})
       : bufferRange(bufferRange),
-        data(new detail::container::DataContainerND<T, dimensions>(hostData.get(), bufferRange.data)) {}
+        data(new container_type(hostData, bufferRange.data, allocator)) {}
 
-  template<typename InputIterator, int D = dimensions, typename = std::enable_if_t<D == 1>>
-  buffer(InputIterator first,
-         InputIterator last,
-         AllocatorT allocator,
-         const property_list &propList = {}) :
-      bufferRange((last - first) / sizeof(T)),
-      data(new detail::container::DataContainerND<T, dimensions>
-               (first, detail::container::ArrayND<1>((last - first) / sizeof(T)), allocator)) {}
+  buffer(const T* hostData, const range<dimensions>& bufferRange,
+         const property_list& propList = {})
+      : buffer(hostData, bufferRange, allocator_type(), propList) {}
 
-  template<typename InputIterator, int D = dimensions, typename = std::enable_if_t<D == 1>>
-  buffer(InputIterator first, InputIterator last, const property_list &propList = {}) :
-      bufferRange((last - first) / sizeof(T)),
-      data(new detail::container::DataContainerND<T, dimensions>
-               (first, detail::container::ArrayND<1>(last - first) / sizeof(T))) {}
+  buffer(const T* hostData, const range<dimensions>& bufferRange,
+         AllocatorT allocator, const property_list& propList = {})
+      : bufferRange(bufferRange),
+        data(new container_type(hostData, bufferRange.data)) {}
 
-  buffer(buffer<T, dimensions, AllocatorT> b, const id<dimensions> &baseIndex,
-         const range<dimensions> &subRange);
+  buffer(const shared_ptr_class<T>& hostData,
+         const range<dimensions>& bufferRange, AllocatorT allocator,
+         const property_list& propList = {})
+      : bufferRange(bufferRange),
+        data(new container_type(hostData, bufferRange.data, allocator)) {}
+
+  buffer(const shared_ptr_class<T>& hostData,
+         const range<dimensions>& bufferRange,
+         const property_list& propList = {})
+      : bufferRange(bufferRange),
+        data(new container_type(hostData.get(), bufferRange.data)) {}
+
+  template <typename InputIterator, int D = dimensions,
+            typename = std::enable_if_t<D == 1>>
+  buffer(InputIterator first, InputIterator last, AllocatorT allocator,
+         const property_list& propList = {})
+      : bufferRange((last - first) / sizeof(T)),
+        data(new container_type(
+            first, detail::container::ArrayND<1>((last - first) / sizeof(T)),
+            allocator)) {}
+
+  template <typename InputIterator, int D = dimensions,
+            typename = std::enable_if_t<D == 1>>
+  buffer(InputIterator first, InputIterator last,
+         const property_list& propList = {})
+      : bufferRange((last - first) / sizeof(T)),
+        data(new container_type(
+            first, detail::container::ArrayND<1>(last - first) / sizeof(T))) {}
+
+  buffer(buffer<T, dimensions, AllocatorT> b, const id<dimensions>& baseIndex,
+         const range<dimensions>& subRange);
 
   /* Available only when: dimensions == 1. */
-//  buffer(cl_mem clMemObject, const context &syclContext, event availableEvent = {});
+  //  buffer(cl_mem clMemObject, const context &syclContext, event
+  //  availableEvent = {});
 
-/* -- common interface members -- */
-/* -- property interface members -- */
+  /* -- common interface members -- */
+  /* -- property interface members -- */
   range<dimensions> get_range() const {
     return bufferRange;
   }
@@ -121,62 +129,79 @@ public:
     return AllocatorT();
   }
 
-  template<access::mode mode, access::target target = access::target::global_buffer>
-  accessor<T, dimensions, mode, target> get_access(handler &commandGroupHandler) {
-    commandGroupHandler.get_kernel()->args.push_back(detail::KernelArg(data, mode));
-    return accessor<T, dimensions, mode, target>(*this);
+  template <access::mode mode,
+            access::target target = access::target::global_buffer>
+  accessor<T, dimensions, mode, target>
+  get_access(handler& commandGroupHandler) {
+    accessor<T, dimensions, mode, target> acc(*this);
+    commandGroupHandler.alloc_mem_(acc);
+    return acc;
   }
 
-  template<access::mode mode>
+  template <access::mode mode>
   accessor<T, dimensions, mode, access::target::host_buffer> get_access() {
     return accessor<T, dimensions, mode, access::target::host_buffer>(*this);
   }
 
-  template<access::mode mode, access::target target = access::target::global_buffer>
-  accessor<T, dimensions, mode, target> get_access(
-      handler &commandGroupHandler, range<dimensions> accessRange, id<dimensions> accessOffset = {}) {
-    commandGroupHandler.get_kernel()->args.push_back(detail::KernelArg(data, mode));
-    return accessor<T, dimensions, mode, target>
-        (*this, commandGroupHandler, accessRange, accessOffset);
+  template <access::mode mode,
+            access::target target = access::target::global_buffer>
+  accessor<T, dimensions, mode, target>
+  get_access(handler& commandGroupHandler, range<dimensions> accessRange,
+             id<dimensions> accessOffset = {}) {
+    accessor<T, dimensions, mode, target> acc(*this, commandGroupHandler,
+                                              accessRange, accessOffset);
+    commandGroupHandler.alloc_mem_(acc);
+    return acc;
   }
 
-  template<access::mode mode>
-  accessor<T, dimensions, mode, access::target::host_buffer> get_access(
-      range<dimensions> accessRange, id<dimensions> accessOffset = {}) {
-    return accessor<T, dimensions, mode, access::target::host_buffer>
-        (*this, accessRange, accessOffset);
+  template <access::mode mode>
+  accessor<T, dimensions, mode, access::target::host_buffer>
+  get_access(range<dimensions> accessRange, id<dimensions> accessOffset = {}) {
+    return accessor<T, dimensions, mode, access::target::host_buffer>(
+        *this, accessRange, accessOffset);
   }
 
-  template<typename Destination = std::nullptr_t>
+  template <typename Destination = std::nullptr_t>
   void set_final_data(Destination finalData = nullptr);
 
   void set_write_back(bool flag = true);
 
-  bool is_sub_buffer() const;
-
-  template<typename ReinterpretT, int ReinterpretDim>
-  buffer<ReinterpretT, ReinterpretDim, AllocatorT> reinterpret(range<ReinterpretDim> reinterpretRange) const;
-
-  buffer(const buffer &rhs) : data(rhs.data), bufferRange(rhs.bufferRange) {}
-
-  buffer(buffer &&rhs) : data(rhs.data), bufferRange(rhs.bufferRange) {}
-
-  buffer &operator=(const buffer &rhs) {
-    data = rhs.data;
-    bufferRange = rhs.bufferRange;
+  /* TODO: sub-buffer is not supported yet */
+  bool is_sub_buffer() const {
+    return false;
   }
 
-  buffer &operator=(buffer &&rhs) {
-    data = rhs.data;
-    bufferRange = rhs.bufferRange;
+  template <typename ReinterpretT, int ReinterpretDim>
+  buffer<ReinterpretT, ReinterpretDim, AllocatorT>
+  reinterpret(range<ReinterpretDim> reinterpretRange) const {
+    buffer<ReinterpretT, ReinterpretDim, AllocatorT> r(*this);
+    if (ReinterpretDim > get_count())
+      throw sycl::invalid_object_error("invalid dimensions");
+    for (int i(0); i < ReinterpretDim; i++) {
+      if (r.bufferRage[i] >= reinterpretRange[i])
+        r.bufferRage[i] = reinterpretRange[i];
+      else
+        throw sycl::invalid_object_error("invalid range");
+    }
+    return r;
   }
 
-  ~buffer() = default;
+  std::shared_ptr<container_type> get_data() {
+    return data;
+  }
 
 private:
-  std::shared_ptr<detail::container::DataContainerND<T, dimensions>> data;
   range<dimensions> bufferRange;
+  std::shared_ptr<container_type> data;
 };
+
+template <typename Ty, int D, typename A>
+bool operator==(const buffer<Ty, D, A>& lhs, const buffer<Ty, D, A>& rhs) {
+  return lhs.data == rhs.data;
+}
+template <typename Ty, int D, typename A>
+bool operator!=(const buffer<Ty, D, A>& lhs, const buffer<Ty, D, A>& rhs) {
+  return !(lhs == rhs);
 }
 
-#endif //CUSTOM_SYCL_INCLUDE_SYCL_BUFFER_HPP_
+} // namespace neosycl::sycl

@@ -1,92 +1,120 @@
-#ifndef CUSTOM_SYCL_INCLUDE_SYCL_DEVICE_HPP_
-#define CUSTOM_SYCL_INCLUDE_SYCL_DEVICE_HPP_
-
-#include "neoSYCL/sycl/exception.hpp"
-#include "neoSYCL/sycl/types.hpp"
-#include "neoSYCL/sycl/platform.hpp"
-#include "neoSYCL/sycl/info/device_type.hpp"
-#include "neoSYCL/sycl/info/device.hpp"
-#include "neoSYCL/sycl/info/param_traits.hpp"
-#include "neoSYCL/sycl/detail/device_info.hpp"
+#pragma once
 
 namespace neosycl::sycl {
 
+namespace detail {
+class device_impl;
+class program_data;
+} // namespace detail
+
+///////////////////////////////////////////////////////////////////////////////
 class device {
   friend class handler;
+  friend class context;
+  friend class platform;
+  friend class initial_platform_builder;
 
 public:
-  device() : device_info(new detail::default_device_info()) {};
+  device(const device& rhs) = default;
+  device(device&& rhs)      = default;
+  ~device()                 = default;
 
-  device(const shared_ptr_class<detail::device_info> &info) : device_info(info) {}
+  device& operator=(const device& rhs) = default;
+  device& operator=(device&& rhs) = default;
 
-//  explicit device(cl_device_id deviceId);
+  friend bool operator==(const device& lhs, const device& rhs);
+  friend bool operator!=(const device& lhs, const device& rhs);
+  friend bool operator<(const device& lhs, const device& rhs);
 
-  explicit device(const device_selector &deviceSelector) {};
+  explicit device() : impl_(nullptr), plt_() {
+    *this = device::get_default_device();
+  }
+
+  explicit device(cl_device_id deviceId) {
+    throw feature_not_supported("OpenCL interop not supported.");
+  }
+
+  explicit device(const device_selector& deviceSelector)
+      : impl_(nullptr), plt_() {
+    *this = deviceSelector.select_device();
+  }
 
   /* -- common interface members -- */
-//  cl_device_id get() const;
+  //  cl_device_id get() const;
 
-  bool is_host() const {
-    return device_info->is_host();
+  bool is_host() const;
+
+  bool is_cpu() const;
+
+  bool is_gpu() const;
+
+  bool is_accelerator() const;
+
+  platform get_platform() const {
+    return plt_;
   }
 
-  bool is_cpu() const {
-    return device_info->is_cpu();
+  template <info::device param>
+  typename info::param_traits<info::device, param>::return_type
+  get_info() const;
+
+  bool has_extension(const string_class& extension) const;
+
+  // Available only when prop == info::partition_property::partition_equally
+  template <info::partition_property prop>
+  vector_class<device> create_sub_devices(size_t nbSubDev) const {
+    throw unimplemented();
   }
 
-  bool is_gpu() const {
-    return device_info->is_gpu();
+  // Available only when prop == info::partition_property::partition_by_counts
+  template <info::partition_property prop>
+  vector_class<device>
+  create_sub_devices(const vector_class<size_t>& counts) const {
+    throw unimplemented();
   }
 
-  bool is_accelerator() const {
-    return device_info->is_accelerator();
-  }
+#if 0
+  // Available only when prop ==
+  // info::partition_property::partition_by_affinity_domain
+  template <info::partition_property prop>
+  vector_class<device>
+  create_sub_devices(info::affinity_domain affinityDomain) const;
+#endif
 
-  platform get_platform() const;
-  template<info::device param>
-  typename info::param_traits<info::device, param>::return_type get_info() const;
+  static device get_default_device();
 
-  bool has_extension(const string_class &extension) const;
-
-// Available only when prop == info::partition_property::partition_equally
-  template<info::partition_property prop>
-  vector_class<device> create_sub_devices(size_t nbSubDev) const;
-
-// Available only when prop == info::partition_property::partition_by_counts
-  template<info::partition_property prop>
-  vector_class<device> create_sub_devices(const vector_class<size_t> &counts) const;
-
-// Available only when prop == info::partition_property::partition_by_affinity_domain
-//  template<info::partition_property prop>
-//  vector_class<device> create_sub_devices(info::affinity_domain affinityDomain) const;
-
-  static vector_class<device> get_devices(
-      info::device_type deviceType = info::device_type::all) {
-    vector_class<device> ret;
-    for (const platform &info: platform::get_platforms()) {
-      for (const device &dev:info.get_devices()) {
-        ret.push_back(dev);
-      }
-    }
-    return ret;
+  // INTERNAL USE ONLY
+  info::device_type type() const;
+  detail::program_data* create_program() const;
+  shared_ptr_class<detail::device_impl> get_impl() const {
+    return impl_;
   }
 
 private:
-  shared_ptr_class<detail::device_info> device_info;
+  // INTERNAL USE ONLY
+  void set_platform(platform p) {
+    plt_ = p;
+  }
+  explicit device(detail::device_impl* impl, platform* p = nullptr)
+      : impl_(impl), plt_() {
+    if (impl == nullptr) {
+      DEBUG_INFO("empty device created");
+    }
+    else if (p != nullptr)
+      plt_ = *p;
+  }
+
+  shared_ptr_class<detail::device_impl> impl_;
+  platform plt_;
 };
 
-device device_selector::select_device() const {
-  return device();
+bool operator==(const device& lhs, const device& rhs) {
+  return (lhs.impl_ == rhs.impl_);
 }
-
-vector_class<device> platform::get_devices(info::device_type) const {
-  vector_class<device> ret;
-  for (shared_ptr_class<detail::device_info> info:platform_info->list_devices()) {
-    ret.push_back(device(info));
-  }
-  return ret;
+bool operator!=(const device& lhs, const device& rhs) {
+  return !(lhs == rhs);
 }
-
+bool operator<(const device& lhs, const device& rhs) {
+  return (lhs.impl_ < rhs.impl_);
 }
-
-#endif //CUSTOM_SYCL_INCLUDE_SYCL_DEVICE_HPP_
+} // namespace neosycl::sycl

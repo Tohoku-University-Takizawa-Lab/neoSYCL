@@ -1,26 +1,32 @@
-#ifndef CUSTOM_SYCL_INCLUDE_SYCL_INFO_PARAM_TRAITS_HPP_
-#define CUSTOM_SYCL_INCLUDE_SYCL_INFO_PARAM_TRAITS_HPP_
-
-#include "neoSYCL/sycl/info/platform.hpp"
-#include "neoSYCL/sycl/info/device.hpp"
+#pragma once
 
 namespace neosycl::sycl::info {
 
-template<typename T, T Param>
-class param_traits {
-  using return_type = T;
+template <typename T, T Param>
+struct param_traits {
+  using return_type = int;
+  static const return_type value;
 };
 
-template<info::platform Param>
-class param_traits<info::platform, Param> {
-  using type = string_class;
-};
+#define DEF_STR_INFO_TRAIT(Info, Param, Value)                                 \
+  template <>                                                                  \
+  struct param_traits<Info, Param> {                                           \
+    using return_type             = string_class;                              \
+    static constexpr char value[] = Value;                                     \
+  };                                                                           \
+  // const char param_traits<Info, Param>::value[] = Value;
 
-template<info::device Param>
-class param_traits<info::device, Param> {
-  using type = string_class;
-};
+#define DEF_INFO_TRAIT(Info, Param, Type, Value)                               \
+  template <>                                                                  \
+  struct param_traits<Info, Param> {                                           \
+    using return_type                  = Type;                                 \
+    inline static constexpr Type value = Type(Value);                          \
+  };
 
-}
+#define DEF_INFO_TYPE_TRAIT(Info, Param, Type)                                 \
+  template <>                                                                  \
+  struct param_traits<Info, Param> {                                           \
+    using return_type = Type;                                                  \
+  };
 
-#endif //CUSTOM_SYCL_INCLUDE_SYCL_INFO_PARAM_TRAITS_HPP_
+} // namespace neosycl::sycl::info

@@ -1,46 +1,37 @@
-cmake_minimum_required(VERSION 3.4)
-project(neoSYCL C CXX)
+cmake_minimum_required(VERSION 3.10)
+
+project(neoSYCL LANGUAGES CXX VERSION 0.5.0)
+add_library(neoSYCL INTERFACE)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 
-option(BUILD_KERNEL_GENERATOR "build sycl kernel generator" OFF)
-option(BUILD_VE "Enable SX-Aurora support" OFF)
-#option(BUILD_TESTING "Enable build tests" OFF)
-
-
-if (BUILD_KERNEL_GENERATOR)
-    add_subdirectory(kernel_generator)
-endif ()
-
+option(BUILD_KERNEL_OUTLINER "Build SYCL kernel outliner" ON)
+option(BUILD_VE "Enable SX-Aurora TSUBASA support" OFF)
 
 if (BUILD_VE)
-    ADD_DEFINITIONS(-DBUILD_VE)
+    add_definitions(-DBUILD_VE)
     # find VEOS headers and libs
-    set(VEO_HEADER_PATH "/opt/nec/ve/veos/include" CACHE PATH "veo headers path")
-    set(VEO_LIB_PATH "/opt/nec/ve/veos/lib64" CACHE PATH "veo libs path")
-    message(STATUS "Enable SX-Aurora support")
-    message(STATUS "Use veo headers path: ${VEO_HEADER_PATH}")
-    message(STATUS "Use veo libs path:  ${VEO_LIB_PATH}")
+    set(VEO_DIR "/opt/nec/ve/veos" CACHE PATH "VEO installation path")
+    find_path(VEO_HEADER_PATH ve_offload.h HINTS ${VEO_DIR} PATH_SUFFIXES include)
+    find_path(VEO_LIB_PATH libveo.so HINTS ${VEO_DIR} PATH_SUFFIXES lib64)
 
-    include_directories(${VEO_HEADER_PATH})
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L${VEO_LIB_PATH} -Wl,-rpath=${VEO_LIB_PATH} -lveo")
+    message(STATUS "Enable SX-Aurora support")
+    message(STATUS "Use VEO headers path: ${VEO_HEADER_PATH}")
+    message(STATUS "Use VEO libs path:    ${VEO_LIB_PATH}")
+
+    include_directories(${VEO_HEADER_PATH} include/neoSYCL/)
 endif ()
 
-# debug info
-if (CMAKE_BUILD_TYPE STREQUAL Debug)
-    message(STATUS "Enable debug mode")
-    ADD_DEFINITIONS(-DDEBUG)
-    include_directories(third_party/fmt/include)
+if (BUILD_KERNEL_OUTLINER)
+    add_subdirectory(src)
 endif ()
 
 include_directories(include)
 
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lpthread")
+target_include_directories(
+    neoSYCL
+    INTERFACE $<BUILD_INTERFACE:include>
+              $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
-# add examples
-add_subdirectory(examples)
-
-# add tests
-add_subdirectory(tests)
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/neoSYCL DESTINATION include)
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/CL DESTINATION include)

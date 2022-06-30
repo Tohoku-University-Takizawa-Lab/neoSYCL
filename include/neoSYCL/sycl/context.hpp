@@ -1,40 +1,62 @@
-#ifndef CUSTOM_SYCL_INCLUDE_SYCL_CONTEXT_HPP_
-#define CUSTOM_SYCL_INCLUDE_SYCL_CONTEXT_HPP_
-
-#include "neoSYCL/sycl/exception.hpp"
-#include "neoSYCL/sycl/info/context.hpp"
+#pragma once
 #include "neoSYCL/sycl/property_list.hpp"
+#include "neoSYCL/sycl/info/context.hpp"
 
 namespace neosycl::sycl {
 
-class context {
-
-public:
-  explicit context(const property_list &propList = {});
-
-  context(async_handler asyncHandler,
-          const property_list &propList = {});
-
-  context(const device &dev, const property_list &propList = {});
-
-  context(const device &dev, async_handler asyncHandler, const property_list &propList = {});
-
-  context(const platform &plt, const property_list &propList = {});
-
-  context(const platform &plt, async_handler asyncHandler, const property_list &propList = {});
-
-  context(const vector_class<device> &deviceList, const property_list &propList = {});
-
-  context(const vector_class<device> &deviceList,
-          async_handler asyncHandler, const property_list &propList = {});
-
-//  context(cl_context clContext, async_handler asyncHandler = {});
-
-  template<info::context param>
-  typename info::param_traits<info::context, param>::return_type get_info() const;
-
-};
-
+namespace detail {
+class context_impl;
 }
 
-#endif //CUSTOM_SYCL_INCLUDE_SYCL_CONTEXT_HPP_
+///////////////////////////////////////////////////////////////////////////////
+class context {
+public:
+  explicit context(const property_list& propList = {}) {
+    init({});
+  }
+
+  ~context() = default;
+
+  context(async_handler asyncHandler, const property_list& propList = {});
+
+  context(const device& dev, const property_list& propList = {}) {
+    init({dev});
+  }
+
+  context(const device& dev, async_handler asyncHandler,
+          const property_list& propList = {});
+
+  context(const platform& plt, const property_list& propList = {});
+
+  context(const platform& plt, async_handler asyncHandler,
+          const property_list& propList = {});
+
+  context(const vector_class<device>& deviceList,
+          const property_list& propList = {});
+
+  context(const vector_class<device>& deviceList, async_handler asyncHandler,
+          const property_list& propList = {});
+
+  context(cl_context clContext, async_handler asyncHandler = {}) {
+    throw unimplemented();
+  }
+
+  /* -- common interface members -- */
+  template <info::context param>
+  typename info::param_traits<info::context, param>::return_type
+  get_info() const;
+
+  vector_class<device> get_devices() const;
+
+  // INTERNAL USE ONLY
+  long use_count_() const {
+    return impl_.use_count();
+  }
+
+private:
+  void init(vector_class<device>);
+
+  shared_ptr_class<detail::context_impl> impl_;
+};
+
+} // namespace neosycl::sycl

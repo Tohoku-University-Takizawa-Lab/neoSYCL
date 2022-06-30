@@ -1,5 +1,4 @@
-#ifndef CUSTOM_SYCL_INCLUDE_SYCL_INFO_DEVICE_TYPE_HPP_
-#define CUSTOM_SYCL_INCLUDE_SYCL_INFO_DEVICE_TYPE_HPP_
+#pragma once
 
 namespace neosycl::sycl::info {
 
@@ -13,7 +12,4 @@ enum class device_type : unsigned int {
   all
 };
 
-
 }
-
-#endif //CUSTOM_SYCL_INCLUDE_SYCL_INFO_DEVICE_TYPE_HPP_

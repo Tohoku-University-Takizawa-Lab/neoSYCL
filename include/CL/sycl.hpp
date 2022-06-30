@@ -9,5 +9,4 @@ using namespace neosycl::sycl;
 
 }
 
-#endif //CUSTOM_SYCL_INCLUDE_SYCL_SYCL_H_
-
+#endif // CUSTOM_SYCL_INCLUDE_SYCL_SYCL_H_
