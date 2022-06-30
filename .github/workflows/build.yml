@@ -24,6 +24,7 @@ jobs:
           - rockylinux/rockylinux:8
           - ubuntu:20.04
         device:
+          - host
           - cpu
           - ve
 

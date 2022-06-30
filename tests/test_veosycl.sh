@@ -16,8 +16,13 @@ for i in sycl/*; do
     pushd "$i"
 
     # Compile benchmark
-    # If using veo-stubs, set DEVICE_COMPILER to a host compiler (e.g. g++)
-    nsc++.py -I../include --device "$DEVICE" --debug "$name.cpp"
+
+    if [ "$DEVICE" == "host" ]; then
+        g++ -std=c++17 -I../include -o a.out "$name.cpp" -lpthread
+    else
+        # If using veo-stubs, set DEVICE_COMPILER to a host compiler (e.g. g++)
+        nsc++.py -I../include --device "$DEVICE" --debug "$name.cpp"
+    fi
 
     # Run benchmark
     ./a.out 10
