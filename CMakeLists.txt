@@ -13,7 +13,7 @@ if (BUILD_VE)
     # find VEOS headers and libs
     set(VEO_DIR "/opt/nec/ve/veos" CACHE PATH "VEO installation path")
     find_path(VEO_HEADER_PATH ve_offload.h HINTS ${VEO_DIR} PATH_SUFFIXES include)
-    find_library(VEO_LIB_PATH libveo.so HINTS ${VEO_DIR} PATH_SUFFIXES lib64)
+    find_path(VEO_LIB_PATH libveo.so HINTS ${VEO_DIR} PATH_SUFFIXES lib64)
 
     message(STATUS "Enable SX-Aurora support")
     message(STATUS "Use VEO headers path: ${VEO_HEADER_PATH}")
