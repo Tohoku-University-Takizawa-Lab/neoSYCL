@@ -39,6 +39,7 @@ public:
   }
 
   bool VisitTypeAliasDecl(TypeAliasDecl* d);
+  bool VisitUsingDirectiveDecl(UsingDirectiveDecl* d);
 
 private:
   Rewriter& TheRewriter;

@@ -386,3 +386,19 @@ bool KoutVisitor::VisitTypeAliasDecl(TypeAliasDecl* d) {
   }
   return true;
 }
+
+bool KoutVisitor::VisitUsingDirectiveDecl(UsingDirectiveDecl* d) {
+  PrintingPolicy policy(TheRewriter.getLangOpts());
+  SourceManager& smgr = ast_.getSourceManager();
+
+  // now only global declaratios are considered
+  if (d->getParentFunctionOrMethod() != nullptr)
+    return true;
+  // TODO: non-global ones
+
+  if (isInMainFile(d, smgr)) {
+    d->print(kernCode, policy);
+    kernCode << ";\n";
+  }
+  return true;
+}
