@@ -36,11 +36,29 @@ using exception_ptr_class = std::exception_ptr;
 template <class T>
 using buffer_allocator = std::allocator<T>;
 
+using half      = float; // TODO: is there any other option?
+using ulonglong = unsigned long long;
+using longlong  = long long;
+using uchar     = unsigned char;
+using schar     = signed char;
+
 /* OpenCL interop (minimum type definition only) */
 using cl_platform_id = u_int64_t;
 using cl_device_id   = u_int64_t;
 using cl_context     = u_int64_t;
 using cl_program     = u_int64_t;
 using cl_kernel      = u_int64_t;
-using cl_uint        = uint;
+
+using cl_char   = char;
+using cl_uchar  = unsigned char;
+using cl_schar  = signed char;
+using cl_short  = short;
+using cl_ushort = unsigned short;
+using cl_int    = int;
+using cl_uint   = uint;
+using cl_long   = long;
+using cl_ulong  = unsigned long;
+using cl_float  = float;
+using cl_double = double;
+using cl_half   = half;
 } // namespace neosycl::sycl
