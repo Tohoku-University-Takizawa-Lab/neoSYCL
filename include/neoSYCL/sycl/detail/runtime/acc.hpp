@@ -49,3 +49,14 @@ inline item<3> id2item(size_t s[6], size_t i0, size_t i1, size_t i2) {
 }
 
 } // namespace neosycl::sycl::rt
+
+#ifdef ___NEOSYCL_KERNEL_RUNTIME_ONLY___
+#include "neoSYCL/sycl/access.hpp"
+
+namespace neosycl::sycl {
+template <typename dataT, int dimensions, access::mode accessMode,
+          access::target accessTarget       = access::target::global_buffer,
+          access::placeholder isPlaceholder = access::placeholder::false_t>
+using accessor = rt::acc_<dataT>;
+}
+#endif

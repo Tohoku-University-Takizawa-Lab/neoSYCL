@@ -162,7 +162,9 @@ public:
   }
 
   template <typename Destination = std::nullptr_t>
-  void set_final_data(Destination finalData = nullptr);
+  void set_final_data(Destination finalData = nullptr){
+    data->set_final_data(finalData);
+  }
 
   void set_write_back(bool flag = true);
 

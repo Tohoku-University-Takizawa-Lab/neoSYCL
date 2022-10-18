@@ -200,6 +200,21 @@ public:
   element_type& w() {
     return data_[3];
   }
+  element_type s0() const {
+    return data_[0];
+  }
+  template <int N = size(), typename = std::enable_if_t<(N > 1)>>
+  element_type s1() const {
+    return data_[1];
+  }
+  template <int N = size(), typename = std::enable_if_t<(N > 2)>>
+  element_type s2() const {
+    return data_[2];
+  }
+  template <int N = size(), typename = std::enable_if_t<(N > 3)>>
+  element_type s3() const {
+    return data_[3];
+  }
   inline element_type& operator[](size_t i) {
     return data_[i];
   }
@@ -244,21 +259,39 @@ DEF_VEC_BOOLEAN_OPERATOR(>=);
 DEF_VEC_UNARY_OPERATOR(!);
 DEF_VEC_UNARY_OPERATOR(~);
 
-using float4     = vec<float, 4>;
-using float3     = vec<float, 3>;
-using float2     = vec<float, 2>;
-using double4    = vec<double, 4>;
-using double3    = vec<double, 3>;
-using double2    = vec<double, 2>;
-using int4       = vec<int, 4>;
-using int3       = vec<int, 3>;
-using int2       = vec<int, 2>;
-using uint4      = vec<uint, 4>;
-using uint3      = vec<uint, 3>;
-using uint2      = vec<uint, 2>;
-using ulonglong  = unsigned long long;
-using ulonglong4 = vec<ulonglong, 4>;
-using ulonglong3 = vec<ulonglong, 3>;
-using ulonglong2 = vec<ulonglong, 2>;
+#define DEF_VECx_CLASS(x)                                                       \
+  using x##2  = vec<x, 2>;                                                     \
+  using x##3  = vec<x, 3>;                                                     \
+  using x##4  = vec<x, 4>;                                                     \
+  using x##8  = vec<x, 8>;                                                     \
+  using x##16 = vec<x, 16>;
 
+DEF_VECx_CLASS(char);
+DEF_VECx_CLASS(uchar);
+DEF_VECx_CLASS(schar);
+DEF_VECx_CLASS(short);
+DEF_VECx_CLASS(ushort);
+DEF_VECx_CLASS(int);
+DEF_VECx_CLASS(uint);
+DEF_VECx_CLASS(long);
+DEF_VECx_CLASS(ulong);
+DEF_VECx_CLASS(longlong);
+DEF_VECx_CLASS(ulonglong);
+DEF_VECx_CLASS(float);
+DEF_VECx_CLASS(double);
+DEF_VECx_CLASS(half);
+
+DEF_VECx_CLASS(cl_char);
+DEF_VECx_CLASS(cl_uchar);
+DEF_VECx_CLASS(cl_schar);
+DEF_VECx_CLASS(cl_short);
+DEF_VECx_CLASS(cl_ushort);
+DEF_VECx_CLASS(cl_int);
+DEF_VECx_CLASS(cl_uint);
+DEF_VECx_CLASS(cl_long);
+DEF_VECx_CLASS(cl_ulong);
+DEF_VECx_CLASS(cl_float);
+DEF_VECx_CLASS(cl_double);
+DEF_VECx_CLASS(cl_half);
 } // namespace neosycl::sycl
+

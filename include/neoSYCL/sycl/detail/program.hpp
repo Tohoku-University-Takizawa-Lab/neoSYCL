@@ -310,7 +310,7 @@ public:
       return;
     if (buf.map.count(p)) {
       auto [devp, mode] = buf.map.at(p);
-      if (mode != access::mode::read)
+      if (mode != access::mode::read && buf.get_raw_ptr() != nullptr)
         p->read_mem(buf.get_raw_ptr(), devp, buf.get_size());
       // buf.map.erase(p);
       if (free_mem_flag)
