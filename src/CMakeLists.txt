@@ -17,13 +17,13 @@ set(SOURCE_FILES
 )
 
 # add executable file
-#add_library(clang13 SHARED /usr/local/lib/libclang-cpp.so.13)
+
 
 add_executable(kout ${SOURCE_FILES})
 
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-target_link_libraries(kout PRIVATE clang-cpp /usr/local/lib/libclang-cpp.so.13)
+target_link_libraries(kout PRIVATE clang-cpp)
 
 configure_file(nsc++.in nsc++)
 
