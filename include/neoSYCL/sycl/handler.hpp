@@ -52,19 +52,25 @@ public:
 
   template <typename KernelName, typename KernelType>
   void run(KernelType kernelFunc) {
+    cntr_->incr();
     kernel k = prog_.get_kernel<KernelName>();
-
     kernelFunc(k);
-    // DEBUG_INFO("kernel %s %p %lu", k.get_name(), ptr, sz);
-    // hndl_->set_capture(k, ptr, sz);
-    hndl_->run(k);
+    std::thread t([kn = std::move(k), h = hndl_, cntr__ = cntr_]() {
+      h->run(kn);
+      cntr__->decr();
+    });
+    t.detach();
+    return;
   }
 
   template <typename KernelName, typename KernelType>
   void single_task(KernelType kernelFunc) {
     if (!dev_.is_host())
       return;
-    detail::single_task(kernelFunc);
+
+    std::thread t([k = kernelFunc]() { detail::single_task(k); });
+    t.detach();
+    return;
   }
 
   template <typename KernelName, typename KernelType, int dimensions>

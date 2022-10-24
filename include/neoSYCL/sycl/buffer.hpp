@@ -1,4 +1,5 @@
 #pragma once
+#include <future>
 #include "neoSYCL/sycl/detail/container/data_container.hpp"
 #include "neoSYCL/sycl/detail/container/data_container_nd.hpp"
 
@@ -39,7 +40,7 @@ public:
   ~buffer()                 = default;
 
   buffer& operator=(const buffer& rhs) = default;
-  buffer& operator=(buffer&& rhs) = default;
+  buffer& operator=(buffer&& rhs)      = default;
 
   template <typename Ty, int D, typename A>
   friend bool operator==(const buffer<Ty, D, A>& lhs,
@@ -162,7 +163,7 @@ public:
   }
 
   template <typename Destination = std::nullptr_t>
-  void set_final_data(Destination finalData = nullptr){
+  void set_final_data(Destination finalData = nullptr) {
     data->set_final_data(finalData);
   }
 
