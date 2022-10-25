@@ -28,7 +28,7 @@ public:
   ~accessor()                   = default;
 
   accessor& operator=(const accessor& rhs) = default;
-  accessor& operator=(accessor&& rhs) = default;
+  accessor& operator=(accessor&& rhs)      = default;
 
   template <typename T, int D, access::mode M, access::target A,
             access::placeholder P>
@@ -86,6 +86,8 @@ public:
            handler& commandGroupHandlerRef, const property_list& propList = {})
       : data(bufferRef.get_data()), accessRange(bufferRef.get_range()),
         accessOffset(), device_ptr(nullptr) {
+    // TODO(Kaneko): send the pointer of buffer to handler;
+    //std::cout << "Hello" << std::endl;
     alloc_(commandGroupHandlerRef);
   }
 

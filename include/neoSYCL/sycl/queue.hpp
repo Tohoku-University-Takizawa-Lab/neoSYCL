@@ -77,11 +77,12 @@ public:
 #ifndef DISABLE_MULTI_THREAD_SUPPORT
   template <typename T>
   event submit(T cgf) {
-    counter->incr();
-    // std::thread t([f = cgf, d = bind_device, p = prog, c = counter]() {
+    // counter->incr();
+    //  std::thread t([f = cgf, d = bind_device, p = prog, c = counter]() {
     try {
       handler command_group_handler(bind_device, prog, counter);
       cgf(command_group_handler);
+      command_group_handler.reflesh_buffers();
     }
     catch (std::exception& e) {
       PRINT_ERR("%s", e.what());
@@ -91,9 +92,9 @@ public:
       PRINT_ERR("unknown exception");
       throw;
     }
-    counter->decr();
-    //});
-    // t.detach();
+    // counter->decr();
+    // });
+    //  t.detach();
     return event();
   }
 #else

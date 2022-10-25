@@ -1,4 +1,6 @@
 #pragma once
+#include <future>
+#include <set>
 #include "neoSYCL/sycl/detail/task_counter.hpp"
 #include "neoSYCL/sycl/detail/handler.hpp"
 #include "neoSYCL/sycl/detail/accessor_data.hpp"
@@ -17,6 +19,7 @@ class handler {
         hndl_(prog_.get_data(dev_)) {}
 
   ~handler() {
+    /*
     for (size_t i(0); i < acc_.size(); i++) {
       // DEBUG_INFO("memory unlock: %p", acc_[i].data.get());
       if (acc_[i].mode != access::mode::read)
@@ -24,6 +27,7 @@ class handler {
       else
         acc_[i].data->unlock_read();
     }
+    */
   }
 
 public:
@@ -53,12 +57,31 @@ public:
   template <typename KernelName, typename KernelType>
   void run(KernelType kernelFunc) {
     cntr_->incr();
+    std::promise<size_t> p;
+    std::shared_future<size_t> sf = p.get_future().share();
+
     kernel k = prog_.get_kernel<KernelName>();
     kernelFunc(k);
-    std::thread t([kn = std::move(k), h = hndl_, cntr__ = cntr_]() {
-      h->run(kn);
-      cntr__->decr();
-    });
+    std::vector<std::shared_future<size_t>> futurev;
+    if (InitialTask) {
+      futurev     = ExternalFutures;
+      InitialTask = false;
+    }
+    else {
+      futurev.push_back(InternalFuture);
+    }
+    InternalFuture = sf;
+    std::thread t(
+        [fv = futurev, kn = std::move(k), h = hndl_,
+         cntr__ = cntr_](std::promise<size_t> pr) {
+          for (auto& i : fv) {
+            i.wait();
+          }
+          h->run(kn);
+          pr.set_value(0);
+          cntr__->decr();
+        },
+        std::move(p));
     t.detach();
     return;
   }
@@ -249,6 +272,7 @@ public:
     }
 
     // check if the buffer is already locked
+    /*
     size_t i = 0;
     if (count > 0) {
       // (count > 0) does not mean it is already locked by this handler.
@@ -274,6 +298,7 @@ public:
       else
         acc.data->lock_read();
     }
+    */
 
     if (dev_.is_host())
       return acc.data->get_raw_ptr();
@@ -294,12 +319,39 @@ public:
     hndl_->set_capture(k, p, sz);
   }
 
+  ////RE////
+  void add_futures(std::vector<std::shared_future<size_t>> ft) {
+    ExternalFutures.insert(ExternalFutures.end(), ft.begin(), ft.end());
+    return;
+  }
+
+  template <access::mode mode>
+  void GetBufferFutureInfo(detail::Futures* fp) {
+    relations.push_back({fp, mode});
+    return;
+  }
+
+  void reflesh_buffers() {
+    for (auto& i : relations) {
+      i.first->reflesh(InternalFuture, i.second);
+    }
+    return;
+  }
+  ////RE////
 private:
   device dev_;
   program prog_;
   counter_type cntr_;
   handler_type hndl_;
   vector_class<detail::accessor_data> acc_;
+  ////RE/////
+  std::vector<std::pair<detail::Futures*, access::mode>> relations;
+  bool InitialTask = true;
+  std::shared_future<size_t> InternalFuture;
+  // TODO(kaneko):vectorだとそれなりに重複するはず、setを使いたいけど比較演算子...
+  std::vector<std::shared_future<size_t>> ExternalFutures;
+
+  ////RE////
 
   template <typename F, typename retT, typename argT>
   auto index_type_ptr(retT (F::*)(argT)) {
