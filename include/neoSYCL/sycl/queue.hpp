@@ -77,24 +77,37 @@ public:
 #ifndef DISABLE_MULTI_THREAD_SUPPORT
   template <typename T>
   event submit(T cgf) {
-    // counter->incr();
-    //  std::thread t([f = cgf, d = bind_device, p = prog, c = counter]() {
-    try {
-      handler command_group_handler(bind_device, prog, counter);
-      cgf(command_group_handler);
-      command_group_handler.reflesh_buffers();
-    }
-    catch (std::exception& e) {
-      PRINT_ERR("%s", e.what());
-      throw;
-    }
-    catch (...) {
-      PRINT_ERR("unknown exception");
-      throw;
-    }
-    // counter->decr();
-    // });
-    //  t.detach();
+    std::promise<size_t> p;
+    std::shared_future<size_t> sf = p.get_future().share();
+    handler command_group_handler(bind_device, prog, counter);
+    cgf(command_group_handler);
+    std::vector<std::shared_future<size_t>> futurev =
+        command_group_handler.GetFutures();
+    command_group_handler.reflesh_buffers(sf);
+    counter->incr();
+    std::thread t(
+        [fv = futurev, f = cgf,
+         d = bind_device, p = prog, c = counter](std::promise<size_t> pr) {
+          for (auto& i : fv) {
+            i.wait();
+          }
+          try {
+            handler command_group_handler(d, p, c,false);
+            f(command_group_handler);
+          }
+          catch (std::exception& e) {
+            PRINT_ERR("%s", e.what());
+            throw;
+          }
+          catch (...) {
+            PRINT_ERR("unknown exception");
+            throw;
+          }
+          pr.set_value(0);
+          c->decr();
+        },
+        std::move(p));
+    t.detach();
     return event();
   }
 #else

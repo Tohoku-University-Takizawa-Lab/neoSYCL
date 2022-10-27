@@ -136,8 +136,13 @@ public:
             access::target target = access::target::global_buffer>
   accessor<T, dimensions, mode, target>
   get_access(handler& commandGroupHandler) {
-    get_futures<mode>(commandGroupHandler);
-    commandGroupHandler.GetBufferFutureInfo<mode>(&fs);
+    if (commandGroupHandler.access_readonly()) {
+      get_futures<mode>(commandGroupHandler);
+      commandGroupHandler.GetBufferFutureInfo<mode>(&fs);
+      accessor<T, dimensions, mode, target> acc(*this);
+      return acc;
+    }
+
     accessor<T, dimensions, mode, target> acc(*this);
     commandGroupHandler.alloc_mem_(acc);
     return acc;
@@ -153,8 +158,12 @@ public:
   accessor<T, dimensions, mode, target>
   get_access(handler& commandGroupHandler, range<dimensions> accessRange,
              id<dimensions> accessOffset = {}) {
-    get_futures<mode>(commandGroupHandler);
-    commandGroupHandler.GetBufferFutureInfo<mode>(&fs);
+    if (commandGroupHandler.access_readonly()) {
+      get_futures<mode>(commandGroupHandler);
+      commandGroupHandler.GetBufferFutureInfo<mode>(&fs);
+      accessor<T, dimensions, mode, target> acc(*this);
+      return acc;
+    }
     accessor<T, dimensions, mode, target> acc(*this, commandGroupHandler,
                                               accessRange, accessOffset);
     commandGroupHandler.alloc_mem_(acc);

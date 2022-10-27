@@ -14,9 +14,9 @@ class handler {
 
   friend class queue;
 
-  explicit handler(device d, program p, counter_type counter)
+  explicit handler(device d, program p, counter_type counter,bool b = true)
       : dev_(std::move(d)), prog_(std::move(p)), cntr_(std::move(counter)),
-        hndl_(prog_.get_data(dev_)) {}
+        hndl_(prog_.get_data(dev_)),controlb(b){}
 
   ~handler() {
     /*
@@ -34,6 +34,9 @@ public:
   template <typename KernelName, typename KernelType, int dimensions>
   void run(range<dimensions> kernelRange, id<dimensions> kernelOffset,
            KernelType kernelFunc) {
+    if (controlb)
+      return;
+
     kernel k = prog_.get_kernel<KernelName>();
     hndl_->set_range(k, kernelRange, kernelOffset);
 
@@ -45,6 +48,9 @@ public:
 
   template <typename KernelName, typename KernelType, int dimensions>
   void run(range<dimensions> kernelRange, KernelType kernelFunc) {
+    if (controlb)
+      return;
+
     kernel k = prog_.get_kernel<KernelName>();
     hndl_->set_range(k, kernelRange);
 
@@ -52,37 +58,16 @@ public:
     // DEBUG_INFO("kernel %s %p %lu", k.get_name(), ptr, sz);
     // hndl_->set_capture(k, ptr, sz);
     hndl_->run(k);
+    return;
   }
 
   template <typename KernelName, typename KernelType>
   void run(KernelType kernelFunc) {
-    cntr_->incr();
-    std::promise<size_t> p;
-    std::shared_future<size_t> sf = p.get_future().share();
-
+    if (controlb)
+      return;
     kernel k = prog_.get_kernel<KernelName>();
     kernelFunc(k);
-    std::vector<std::shared_future<size_t>> futurev;
-    if (InitialTask) {
-      futurev     = ExternalFutures;
-      InitialTask = false;
-    }
-    else {
-      futurev.push_back(InternalFuture);
-    }
-    InternalFuture = sf;
-    std::thread t(
-        [fv = futurev, kn = std::move(k), h = hndl_,
-         cntr__ = cntr_](std::promise<size_t> pr) {
-          for (auto& i : fv) {
-            i.wait();
-          }
-          h->run(kn);
-          pr.set_value(0);
-          cntr__->decr();
-        },
-        std::move(p));
-    t.detach();
+    hndl_->run(k);
     return;
   }
 
@@ -91,8 +76,7 @@ public:
     if (!dev_.is_host())
       return;
 
-    std::thread t([k = kernelFunc]() { detail::single_task(k); });
-    t.detach();
+    detail::single_task(kernelFunc);
     return;
   }
 
@@ -331,11 +315,19 @@ public:
     return;
   }
 
-  void reflesh_buffers() {
+  std::vector<std::shared_future<size_t>> GetFutures() {
+    return ExternalFutures;
+  }
+
+  void reflesh_buffers(std::shared_future<size_t>& sf) {
     for (auto& i : relations) {
-      i.first->reflesh(InternalFuture, i.second);
+      i.first->reflesh(sf, i.second);
     }
     return;
+  }
+
+  bool access_readonly() {
+    return controlb;
   }
   ////RE////
 private:
@@ -346,11 +338,9 @@ private:
   vector_class<detail::accessor_data> acc_;
   ////RE/////
   std::vector<std::pair<detail::Futures*, access::mode>> relations;
-  bool InitialTask = true;
-  std::shared_future<size_t> InternalFuture;
   // TODO(kaneko):vectorだとそれなりに重複するはず、setを使いたいけど比較演算子...
   std::vector<std::shared_future<size_t>> ExternalFutures;
-
+  bool controlb;
   ////RE////
 
   template <typename F, typename retT, typename argT>
