@@ -17,13 +17,11 @@ set(SOURCE_FILES
 )
 
 # add executable file
-
-
 add_executable(kout ${SOURCE_FILES})
 
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-target_link_libraries(kout PRIVATE clang-cpp)
+target_link_libraries(kout PRIVATE clang-cpp LLVM)
 
 configure_file(nsc++.in nsc++)
 
