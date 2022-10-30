@@ -81,7 +81,7 @@ public:
     detail::shared_future_class<size_t> sf(p);
     handler command_group_handler(bind_device, prog, counter);
     cgf(command_group_handler);
-    std::vector<detail::shared_future_class<size_t>> futurev =
+    std::unordered_set<detail::shared_future_class<size_t>> futurev =
         command_group_handler.GetFutures();
     command_group_handler.refresh_buffers(sf);
     counter->incr();

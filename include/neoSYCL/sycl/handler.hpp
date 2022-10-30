@@ -266,8 +266,8 @@ public:
     hndl_->set_capture(k, p, sz);
   }
 
-  void add_futures(std::vector<detail::shared_future_class<size_t>> ft) {
-    ExternalFutures.insert(ExternalFutures.end(), ft.begin(), ft.end());
+  void add_futures(std::unordered_set<detail::shared_future_class<size_t>> ft) {
+    ExternalFutures.merge(ft);
     return;
   }
 
@@ -277,7 +277,7 @@ public:
     return;
   }
 
-  std::vector<detail::shared_future_class<size_t>> GetFutures() {
+  std::unordered_set<detail::shared_future_class<size_t>> GetFutures() {
     return ExternalFutures;
   }
 
@@ -299,7 +299,7 @@ private:
   handler_type hndl_;
   vector_class<detail::accessor_data> acc_;
   std::vector<std::pair<detail::Futures*, access::mode>> relations;
-  std::vector<detail::shared_future_class<size_t>> ExternalFutures;
+  std::unordered_set<detail::shared_future_class<size_t>> ExternalFutures;
   bool controlb;
 
   template <typename F, typename retT, typename argT>
