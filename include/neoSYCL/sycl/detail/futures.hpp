@@ -7,15 +7,17 @@ namespace neosycl::sycl {
 namespace detail {
 static size_t unique_id = 0;
 
-template<typename T>
+template <typename T>
 struct shared_future_class {
-  shared_future_class(std::promise<T>& p){
+  shared_future_class(std::promise<T>& p) {
     id = unique_id;
     unique_id++;
     ft = p.get_future().share();
   }
 
-  bool operator==(const shared_future_class<T> &left) const {return this->id == left.id;}
+  bool operator==(const shared_future_class<T>& left) const {
+    return this->id == left.id;
+  }
 
   T get() const {
     return ft.get();
@@ -38,18 +40,22 @@ struct shared_future_class {
   }
 
   size_t id;
+
 private:
   std::shared_future<T> ft;
 };
-}
-}
-namespace std{
-    template<typename T>
-    class hash<neosycl::sycl::detail::shared_future_class<T>>{
-        public:
-        size_t operator () ( const neosycl::sycl::detail::shared_future_class<T> &p ) const{ return p.id;}
-    };
-}
+} // namespace detail
+} // namespace neosycl::sycl
+namespace std {
+template <typename T>
+class hash<neosycl::sycl::detail::shared_future_class<T>> {
+public:
+  size_t
+  operator()(const neosycl::sycl::detail::shared_future_class<T>& p) const {
+    return p.id;
+  }
+};
+} // namespace std
 namespace neosycl::sycl {
 namespace detail {
 struct Futures {
@@ -93,4 +99,3 @@ private:
 };
 } // namespace detail
 } // namespace neosycl::sycl
-
