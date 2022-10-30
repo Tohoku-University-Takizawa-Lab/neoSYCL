@@ -28,7 +28,7 @@ public:
   ~accessor()                   = default;
 
   accessor& operator=(const accessor& rhs) = default;
-  accessor& operator=(accessor&& rhs)      = default;
+  accessor& operator=(accessor&& rhs) = default;
 
   template <typename T, int D, access::mode M, access::target A,
             access::placeholder P>

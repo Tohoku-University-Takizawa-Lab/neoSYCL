@@ -41,7 +41,7 @@ public:
   ~buffer()                 = default;
 
   buffer& operator=(const buffer& rhs) = default;
-  buffer& operator=(buffer&& rhs)      = default;
+  buffer& operator=(buffer&& rhs) = default;
 
   template <typename Ty, int D, typename A>
   friend bool operator==(const buffer<Ty, D, A>& lhs,
