@@ -14,21 +14,11 @@ class handler {
 
   friend class queue;
 
-  explicit handler(device d, program p, counter_type counter,bool b = true)
+  explicit handler(device d, program p, counter_type counter, bool b = true)
       : dev_(std::move(d)), prog_(std::move(p)), cntr_(std::move(counter)),
-        hndl_(prog_.get_data(dev_)),controlb(b){}
+        hndl_(prog_.get_data(dev_)), controlb(b) {}
 
-  ~handler() {
-    /*
-    for (size_t i(0); i < acc_.size(); i++) {
-      // DEBUG_INFO("memory unlock: %p", acc_[i].data.get());
-      if (acc_[i].mode != access::mode::read)
-        acc_[i].data->unlock_write();
-      else
-        acc_[i].data->unlock_read();
-    }
-    */
-  }
+  ~handler() {}
 
 public:
   template <typename KernelName, typename KernelType, int dimensions>
@@ -58,7 +48,6 @@ public:
     // DEBUG_INFO("kernel %s %p %lu", k.get_name(), ptr, sz);
     // hndl_->set_capture(k, ptr, sz);
     hndl_->run(k);
-    return;
   }
 
   template <typename KernelName, typename KernelType>
@@ -68,20 +57,22 @@ public:
     kernel k = prog_.get_kernel<KernelName>();
     kernelFunc(k);
     hndl_->run(k);
-    return;
   }
 
   template <typename KernelName, typename KernelType>
   void single_task(KernelType kernelFunc) {
+    if (controlb)
+      return;
     if (!dev_.is_host())
       return;
 
     detail::single_task(kernelFunc);
-    return;
   }
 
   template <typename KernelName, typename KernelType, int dimensions>
   void parallel_for(range<dimensions> numWorkItems, KernelType kernelFunc) {
+    if (controlb)
+      return;
     if (!dev_.is_host())
       return;
     detail::parallel_for(numWorkItems, kernelFunc, id<dimensions>{},
@@ -91,6 +82,8 @@ public:
   template <typename KernelName, typename KernelType, int dimensions>
   void parallel_for(range<dimensions> numWorkItems,
                     id<dimensions> workItemOffset, KernelType kernelFunc) {
+    if (controlb)
+      return;
     if (!dev_.is_host())
       return;
     detail::parallel_for(numWorkItems, kernelFunc, workItemOffset,
@@ -255,35 +248,6 @@ public:
       // DEBUG_INFO("device ptr %p", acc.device_ptr);
     }
 
-    // check if the buffer is already locked
-    /*
-    size_t i = 0;
-    if (count > 0) {
-      // (count > 0) does not mean it is already locked by this handler.
-      // so let's check if it has been locked so far.
-      for (i = 0; i < acc_.size(); i++)
-        if (acc_[i].data.get() == acc.data.get()) {
-          if (acc_[i].mode == access::mode::read && m != access::mode::read) {
-            // not sure if this is a thread-safe way...
-            acc_[i].data->unlock_read();
-            acc_[i].data->lock_write();
-            acc_[i].mode            = m; // this is used for unlocking
-            buf->map.at(hndl_).mode = m; // this is used for buffer copy back
-          }
-          break;
-        }
-    }
-    // lock the buffer because it's not locked by this handler
-    if (i == acc_.size()) {
-      // DEBUG_INFO("memory lock: %p", acc.data.get());
-      acc_.push_back(detail::accessor_data(acc.data, m));
-      if (m != access::mode::read)
-        acc.data->lock_write();
-      else
-        acc.data->lock_read();
-    }
-    */
-
     if (dev_.is_host())
       return acc.data->get_raw_ptr();
     return acc.device_ptr;
@@ -303,7 +267,6 @@ public:
     hndl_->set_capture(k, p, sz);
   }
 
-  ////RE////
   void add_futures(std::vector<std::shared_future<size_t>> ft) {
     ExternalFutures.insert(ExternalFutures.end(), ft.begin(), ft.end());
     return;
@@ -319,9 +282,9 @@ public:
     return ExternalFutures;
   }
 
-  void reflesh_buffers(std::shared_future<size_t>& sf) {
+  void refresh_buffers(std::shared_future<size_t>& sf) {
     for (auto& i : relations) {
-      i.first->reflesh(sf, i.second);
+      i.first->refresh(sf, i.second);
     }
     return;
   }
@@ -329,19 +292,16 @@ public:
   bool access_readonly() {
     return controlb;
   }
-  ////RE////
+
 private:
   device dev_;
   program prog_;
   counter_type cntr_;
   handler_type hndl_;
   vector_class<detail::accessor_data> acc_;
-  ////RE/////
   std::vector<std::pair<detail::Futures*, access::mode>> relations;
-  // TODO(kaneko):vectorだとそれなりに重複するはず、setを使いたいけど比較演算子...
   std::vector<std::shared_future<size_t>> ExternalFutures;
   bool controlb;
-  ////RE////
 
   template <typename F, typename retT, typename argT>
   auto index_type_ptr(retT (F::*)(argT)) {

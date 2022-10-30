@@ -208,7 +208,6 @@ public:
     return data;
   }
 
-  ////RE////
   template <access::mode mode>
   void get_futures(handler& commandGroupHandler) {
     commandGroupHandler.add_futures(fs.get_futures<mode>());
@@ -216,11 +215,10 @@ public:
 
   template <access::mode mode>
   void set_future(std::shared_future<size_t> ft) {
-    fs.reflesh(ft, mode);
+    fs.refresh(ft, mode);
   }
 
   neosycl::sycl::detail::Futures fs;
-  ////RE////
 
 private:
   range<dimensions> bufferRange;

@@ -16,7 +16,6 @@ struct Futures {
       return ret;
     }
     else {
-      // TODO(kaneko):Discuss with teachers
       std::cout << "[Warning] access::mode::discard_* or access::mode::atomic "
                    "is not supported"
                 << std::endl;
@@ -24,7 +23,7 @@ struct Futures {
     }
   }
 
-  void reflesh(std::shared_future<size_t>& ft, access::mode mode) {
+  void refresh(std::shared_future<size_t>& ft, access::mode mode) {
     if (mode == access::mode::read) {
       readf.push_back(ft);
     }
@@ -34,7 +33,6 @@ struct Futures {
       writef.push_back(ft);
     }
     else {
-      // TODO(kaneko):Discuss with teachers
       std::cout << "[Warning] access::mode::discard_* or access::mode::atomic "
                    "is not supported"
                 << std::endl;

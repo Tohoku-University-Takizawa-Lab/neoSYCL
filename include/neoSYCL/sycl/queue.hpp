@@ -83,16 +83,16 @@ public:
     cgf(command_group_handler);
     std::vector<std::shared_future<size_t>> futurev =
         command_group_handler.GetFutures();
-    command_group_handler.reflesh_buffers(sf);
+    command_group_handler.refresh_buffers(sf);
     counter->incr();
     std::thread t(
-        [fv = futurev, f = cgf,
-         d = bind_device, p = prog, c = counter](std::promise<size_t> pr) {
+        [fv = futurev, f = cgf, d = bind_device, p = prog,
+         c = counter](std::promise<size_t> pr) {
           for (auto& i : fv) {
             i.wait();
           }
           try {
-            handler command_group_handler(d, p, c,false);
+            handler command_group_handler(d, p, c, false);
             f(command_group_handler);
           }
           catch (std::exception& e) {
