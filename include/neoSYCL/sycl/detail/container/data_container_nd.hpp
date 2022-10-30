@@ -102,9 +102,9 @@ public:
   void set_final_data(T* FinalData) {
     ptr = FinalData;
   }
-  
+
   void set_final_data(std::weak_ptr<T> FinalData) {
-    if(std::shared_ptr<T> p = FinalData.lock())
+    if (std::shared_ptr<T> p = FinalData.lock())
       ptr = p.get();
   }
 

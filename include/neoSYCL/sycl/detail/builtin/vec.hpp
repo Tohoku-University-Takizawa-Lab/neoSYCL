@@ -259,7 +259,7 @@ DEF_VEC_BOOLEAN_OPERATOR(>=);
 DEF_VEC_UNARY_OPERATOR(!);
 DEF_VEC_UNARY_OPERATOR(~);
 
-#define DEF_VECx_CLASS(x)                                                       \
+#define DEF_VECx_CLASS(x)                                                      \
   using x##2  = vec<x, 2>;                                                     \
   using x##3  = vec<x, 3>;                                                     \
   using x##4  = vec<x, 4>;                                                     \
@@ -294,4 +294,3 @@ DEF_VECx_CLASS(cl_float);
 DEF_VECx_CLASS(cl_double);
 DEF_VECx_CLASS(cl_half);
 } // namespace neosycl::sycl
-
