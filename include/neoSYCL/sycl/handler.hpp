@@ -1,6 +1,5 @@
 #pragma once
 #include <future>
-#include <set>
 #include "neoSYCL/sycl/detail/task_counter.hpp"
 #include "neoSYCL/sycl/detail/handler.hpp"
 #include "neoSYCL/sycl/detail/accessor_data.hpp"
@@ -267,7 +266,7 @@ public:
     hndl_->set_capture(k, p, sz);
   }
 
-  void add_futures(std::vector<std::shared_future<size_t>> ft) {
+  void add_futures(std::vector<detail::shared_future_class<size_t>> ft) {
     ExternalFutures.insert(ExternalFutures.end(), ft.begin(), ft.end());
     return;
   }
@@ -278,11 +277,11 @@ public:
     return;
   }
 
-  std::vector<std::shared_future<size_t>> GetFutures() {
+  std::vector<detail::shared_future_class<size_t>> GetFutures() {
     return ExternalFutures;
   }
 
-  void refresh_buffers(std::shared_future<size_t>& sf) {
+  void refresh_buffers(detail::shared_future_class<size_t>& sf) {
     for (auto& i : relations) {
       i.first->refresh(sf, i.second);
     }
@@ -300,7 +299,7 @@ private:
   handler_type hndl_;
   vector_class<detail::accessor_data> acc_;
   std::vector<std::pair<detail::Futures*, access::mode>> relations;
-  std::vector<std::shared_future<size_t>> ExternalFutures;
+  std::vector<detail::shared_future_class<size_t>> ExternalFutures;
   bool controlb;
 
   template <typename F, typename retT, typename argT>

@@ -1,6 +1,5 @@
 #pragma once
 #include <future>
-#include <set>
 #include "neoSYCL/sycl/detail/container/data_container.hpp"
 #include "neoSYCL/sycl/detail/container/data_container_nd.hpp"
 #include "neoSYCL/sycl/detail/futures.hpp"
@@ -214,7 +213,7 @@ public:
   }
 
   template <access::mode mode>
-  void set_future(std::shared_future<size_t> ft) {
+  void set_future(detail::shared_future_class<size_t> ft) {
     fs.refresh(ft, mode);
   }
 

@@ -78,10 +78,10 @@ public:
   template <typename T>
   event submit(T cgf) {
     std::promise<size_t> p;
-    std::shared_future<size_t> sf = p.get_future().share();
+    detail::shared_future_class<size_t> sf(p);
     handler command_group_handler(bind_device, prog, counter);
     cgf(command_group_handler);
-    std::vector<std::shared_future<size_t>> futurev =
+    std::vector<detail::shared_future_class<size_t>> futurev =
         command_group_handler.GetFutures();
     command_group_handler.refresh_buffers(sf);
     counter->incr();
