@@ -76,7 +76,7 @@ struct ArrayND {
 #if 0
   ArrayND() : data{} {}
 #else
-  ArrayND()          {}
+  ArrayND() {}
 #endif
 
   template <int D = dimensions, typename = std::enable_if_t<D == 1>>
