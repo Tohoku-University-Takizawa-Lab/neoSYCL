@@ -166,8 +166,8 @@ public:
       : DataContainerD<T, 2, AllocatorT>(rhs) {}
 
   T* operator[](size_t i) const {
-    size_t x = this->get_range()[0];
-    return this->get_ptr() + (x * i);
+    size_t y = this->get_range()[1];
+    return this->get_ptr() + (y * i);
   }
 };
 
