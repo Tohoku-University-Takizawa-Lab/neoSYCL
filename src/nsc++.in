@@ -33,8 +33,10 @@ HOST_OPT_FLAGS = "-O3 -march=native"
 HOST_DEBUG_FLAGS = "-g -Wall -DDEBUG"
 # Linker options for the host compiler
 HOST_LIBS = "-ldl -lpthread"
-# Optimization flags for device compiler
-DEVICE_OPT_FLAGS = "-O4 -finline-functions"
+# Optimization flags for cpu device compiler
+CPU_DEVICE_OPT_FLAGS = "-O4 -finline-functions"
+# Optimization flags for ve device compiler
+VE_DEVICE_OPT_FLAGS = "-O4 -finline-functions -finline-max-depth=3 -finline-max-times=20"
 # Debug flags for device compiler
 DEVICE_DEBUG_FLAGS = "-g -Wall -DDEBUG"
 # Linker options for the device compiler
@@ -83,6 +85,21 @@ parser.add_argument("-Xassembler", type=str, help=argparse.SUPPRESS)
 parser.add_argument("-Xpreprocessor", type=str, help=argparse.SUPPRESS)
 parser.add_argument("-Xlinker", type=str, help=argparse.SUPPRESS)
 
+parser.add_argument("--deviceargs",
+        nargs=1,
+        type=str,
+        help="specify the option of the device compiler")
+
+parser.add_argument("--cpuargs",
+        nargs=1,
+        type=str,
+        help="specify the option of the host compiler")
+
+parser.add_argument("--neosyclinclude",
+        nargs=1,
+        type=str,
+        help="specify the path of neosycl's include files")
+
 args, unknown = parser.parse_known_args()
 
 name, ext = os.path.splitext(os.path.basename(args.file))
@@ -109,6 +126,10 @@ if args.device =="ve":
 elif args.device == "cpu":
     DEVICE_COMPILER = os.getenv("DEVICE_COMPILER", "g++")
     COMMON_CFLAGS += " -DUSE_CPU"
+
+list_neosyclinclude_args = args.neosyclinclude
+if list_neosyclinclude_args:
+    COMMON_CFLAGS = "-I" + ','.join(list_neosyclinclude_args) + " " + COMMON_CFLAGS
 
 # Run kernel outliner
 kout_command = [
@@ -155,6 +176,10 @@ if args.debug:
 else:
     host_command += [HOST_OPT_FLAGS]
 
+list_host_args = args.cpuargs
+if list_host_args:
+    host_command += list_host_args
+
 host_command = " ".join(host_command)
 
 print(host_command)
@@ -177,8 +202,14 @@ device_command = [
 
 if args.debug:
     device_command += [DEVICE_DEBUG_FLAGS]
+elif args.device =="cpu":
+    device_command += [CPU_DEVICE_OPT_FLAGS]
 else:
-    device_command += [DEVICE_OPT_FLAGS]
+    device_command += [VE_DEVICE_OPT_FLAGS]
+
+list_device_args = args.deviceargs
+if list_device_args:
+    device_command += list_device_args
 
 device_command = " ".join(device_command)
 
