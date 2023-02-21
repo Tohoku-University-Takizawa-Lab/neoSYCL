@@ -73,7 +73,11 @@ namespace neosycl::sycl::detail::container {
 
 template <int dimensions = 1>
 struct ArrayND {
+#if 0
   ArrayND() : data{} {}
+#else
+  ArrayND()          {}
+#endif
 
   template <int D = dimensions, typename = std::enable_if_t<D == 1>>
   ArrayND(size_t dim0) : data{dim0} {}
