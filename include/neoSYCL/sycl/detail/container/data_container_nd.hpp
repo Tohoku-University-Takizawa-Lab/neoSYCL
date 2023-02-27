@@ -166,8 +166,8 @@ public:
       : DataContainerD<T, 2, AllocatorT>(rhs) {}
 
   T* operator[](size_t i) const {
-    size_t x = this->get_range()[0];
-    return this->get_ptr() + (x * i);
+    size_t y = this->get_range()[1];
+    return this->get_ptr() + (y * i);
   }
 };
 
@@ -186,8 +186,8 @@ struct AccessProxyND<T, 3> {
   AccessProxyND(const ArrayND<3>& r, T* ptr) : range(r), base_ptr(ptr) {}
 
   T* operator[](size_t i) const {
-    size_t y = range[1];
-    return base_ptr + i * y;
+    size_t z = range[2];
+    return base_ptr + i * z;
   }
 
   ArrayND<3> range;
@@ -216,8 +216,9 @@ public:
       : DataContainerD<T, 3, AllocatorT>(rhs) {}
 
   AccessProxyND<T, 3> operator[](size_t i) const {
-    size_t x    = this->get_range()[0];
-    T* base_ptr = this->get_ptr() + i * x;
+    size_t y    = this->get_range()[1];
+    size_t z    = this->get_range()[2];
+    T* base_ptr = this->get_ptr() + i * y * z;
     return AccessProxyND<T, 3>(this->get_range(), base_ptr);
   }
 };
