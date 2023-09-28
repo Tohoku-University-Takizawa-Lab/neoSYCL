@@ -1,6 +1,8 @@
 #pragma once
+#include <future>
 #include "neoSYCL/sycl/detail/container/data_container.hpp"
 #include "neoSYCL/sycl/detail/container/data_container_nd.hpp"
+#include "neoSYCL/sycl/detail/futures.hpp"
 
 namespace neosycl::sycl {
 
@@ -133,6 +135,13 @@ public:
             access::target target = access::target::global_buffer>
   accessor<T, dimensions, mode, target>
   get_access(handler& commandGroupHandler) {
+    if (commandGroupHandler.access_readonly()) {
+      get_futures<mode>(commandGroupHandler);
+      commandGroupHandler.GetBufferFutureInfo<mode>(&fs);
+      accessor<T, dimensions, mode, target> acc(*this);
+      return acc;
+    }
+
     accessor<T, dimensions, mode, target> acc(*this);
     commandGroupHandler.alloc_mem_(acc);
     return acc;
@@ -148,6 +157,12 @@ public:
   accessor<T, dimensions, mode, target>
   get_access(handler& commandGroupHandler, range<dimensions> accessRange,
              id<dimensions> accessOffset = {}) {
+    if (commandGroupHandler.access_readonly()) {
+      get_futures<mode>(commandGroupHandler);
+      commandGroupHandler.GetBufferFutureInfo<mode>(&fs);
+      accessor<T, dimensions, mode, target> acc(*this);
+      return acc;
+    }
     accessor<T, dimensions, mode, target> acc(*this, commandGroupHandler,
                                               accessRange, accessOffset);
     commandGroupHandler.alloc_mem_(acc);
@@ -191,6 +206,18 @@ public:
   std::shared_ptr<container_type> get_data() {
     return data;
   }
+
+  template <access::mode mode>
+  void get_futures(handler& commandGroupHandler) {
+    commandGroupHandler.add_futures(fs.get_futures<mode>());
+  }
+
+  template <access::mode mode>
+  void set_future(detail::shared_future_class<size_t> ft) {
+    fs.refresh(ft, mode);
+  }
+
+  neosycl::sycl::detail::Futures fs;
 
 private:
   range<dimensions> bufferRange;

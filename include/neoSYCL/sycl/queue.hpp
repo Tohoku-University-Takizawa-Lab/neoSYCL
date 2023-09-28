@@ -77,22 +77,36 @@ public:
 #ifndef DISABLE_MULTI_THREAD_SUPPORT
   template <typename T>
   event submit(T cgf) {
+    std::promise<size_t> p;
+    detail::shared_future_class<size_t> sf(p);
+    handler command_group_handler(bind_device, prog, counter);
+    cgf(command_group_handler);
+    std::unordered_set<detail::shared_future_class<size_t>> futurev =
+        command_group_handler.GetFutures();
+    command_group_handler.refresh_buffers(sf);
     counter->incr();
-    std::thread t([f = cgf, d = bind_device, p = prog, c = counter]() {
-      try {
-        handler command_group_handler(d, p, c);
-        f(command_group_handler);
-      }
-      catch (std::exception& e) {
-        PRINT_ERR("%s", e.what());
-        throw;
-      }
-      catch (...) {
-        PRINT_ERR("unknown exception");
-        throw;
-      }
-      c->decr();
-    });
+    std::thread t(
+        [fv = futurev, f = cgf, d = bind_device, p = prog,
+         c = counter](std::promise<size_t> pr) {
+          for (auto& i : fv) {
+            i.wait();
+          }
+          try {
+            handler command_group_handler(d, p, c, false);
+            f(command_group_handler);
+          }
+          catch (std::exception& e) {
+            PRINT_ERR("%s", e.what());
+            throw;
+          }
+          catch (...) {
+            PRINT_ERR("unknown exception");
+            throw;
+          }
+          pr.set_value(0);
+          c->decr();
+        },
+        std::move(p));
     t.detach();
     return event();
   }
